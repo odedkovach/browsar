@@ -1,0 +1,1234 @@
+[2025-03-26T12:03:45.135Z] OpenAI client initialized successfully.
+[2025-03-26T12:03:46.539Z] Navigating to https://www.usjticketing.com/expressPass...
+[2025-03-26T12:03:50.572Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T12:03:50.572Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T12:03:50.637Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=796dd57a038c42f99bddc9221087ab3c&traceId=796dd57a038c42f99bddc9221087ab3c
+[2025-03-26T12:03:51.103Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=796dd57a038c42f99bddc9221087ab3c&traceId=796dd57a038c42f99bddc9221087ab3c
+[2025-03-26T12:03:52.004Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T12:03:52.004Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T12:03:54.212Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T12:03:54.212Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T12:03:54.522Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T12:03:54.565Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T12:03:55.577Z] STEP 1: Finding product "Universal Express Pass 4: 4D & Choice"
+[2025-03-26T12:03:55.578Z] Making OpenAI API call #1 for step: Selecting EXPRESS PASSES category
+[2025-03-26T12:03:55.919Z] Captured Request: POST https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T12:03:57.594Z] Captured Response: 200 https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T12:04:01.060Z] AI Response received
+[2025-03-26T12:04:01.061Z] AI Guidance for Selecting EXPRESS PASSES category: CLICK a[href$='10009980']
+[2025-03-26T12:04:01.061Z] Attempting to perform CLICK on a[href$='10009980']
+[2025-03-26T12:04:06.063Z] Selector not found: a[href$='10009980']
+[2025-03-26T12:04:06.069Z] Element not found with selector: a[href$='10009980']
+[2025-03-26T12:04:11.070Z] Selector not found: a:contains('Universal Express Pass 4: 4D & Choice')
+[2025-03-26T12:04:11.072Z] Error with selector a:contains('Universal Express Pass 4: 4D & Choice'): SyntaxError: Failed to execute 'querySelector' on 'Document': 'a:contains('Universal Express Pass 4: 4D & Choice')' is not a valid selector.
+[2025-03-26T12:04:16.073Z] Selector not found: a:contains('View Details')
+[2025-03-26T12:04:16.074Z] Error with selector a:contains('View Details'): SyntaxError: Failed to execute 'querySelector' on 'Document': 'a:contains('View Details')' is not a valid selector.
+[2025-03-26T12:04:16.074Z] Trying text-based approach for finding elements
+[2025-03-26T12:04:16.074Z] All selector approaches failed
+[2025-03-26T12:04:19.075Z] Making OpenAI API call #2 for step: Finding Universal Express Pass 4: 4D & Choice
+[2025-03-26T12:04:25.748Z] AI Response received
+[2025-03-26T12:04:25.748Z] AI Guidance for Finding Universal Express Pass 4: 4D & Choice: CLICK a:contains('Universal Express Pass 4: 4D & Choice') ~ a.font16.el-link.el-link--primary.is-underline
+[2025-03-26T12:04:25.748Z] Attempting to perform CLICK on a:contains('Universal Express Pass 4: 4D & Choice') ~ a.font16.el-link.el-link--primary.is-underline
+[2025-03-26T12:04:30.753Z] Selector not found: a:contains('Universal Express Pass 4: 4D & Choice') ~ a.font16.el-link.el-link--primary.is-underline
+[2025-03-26T12:04:30.755Z] Error with selector a:contains('Universal Express Pass 4: 4D & Choice') ~ a.font16.el-link.el-link--primary.is-underline: SyntaxError: Failed to execute 'querySelector' on 'Document': 'a:contains('Universal Express Pass 4: 4D & Choice') ~ a.font16.el-link.el-link--primary.is-underline' is not a valid selector.
+[2025-03-26T12:04:35.756Z] Selector not found: a.font16.el-link.el-link--primary.is-underline:nth-of-type(10)
+[2025-03-26T12:04:35.757Z] Element not found with selector: a.font16.el-link.el-link--primary.is-underline:nth-of-type(10)
+[2025-03-26T12:04:40.760Z] Selector not found: a.font16.el-link.el-link--primary.is-underline[data-index='9']
+[2025-03-26T12:04:40.762Z] Element not found with selector: a.font16.el-link.el-link--primary.is-underline[data-index='9']
+[2025-03-26T12:04:40.762Z] Trying text-based approach for finding elements
+[2025-03-26T12:04:40.762Z] All selector approaches failed
+[2025-03-26T12:04:40.762Z] Trying direct approach to find the product...
+[2025-03-26T12:04:40.780Z] Clicked a View Details button as fallback
+[2025-03-26T12:04:45.781Z] STEP 2: Setting quantity to 1
+[2025-03-26T12:04:45.781Z] Making OpenAI API call #3 for step: Setting ticket quantity
+[2025-03-26T12:04:53.549Z] AI Response received
+[2025-03-26T12:04:53.551Z] AI Guidance for Setting ticket quantity: CLICK button:contains('+')
+[2025-03-26T12:04:53.551Z] Attempting to perform CLICK on button:contains('+')
+[2025-03-26T12:04:58.553Z] Selector not found: button:contains('+')
+[2025-03-26T12:04:58.554Z] Error with selector button:contains('+'): SyntaxError: Failed to execute 'querySelector' on 'Document': 'button:contains('+')' is not a valid selector.
+[2025-03-26T12:05:03.556Z] Selector not found: button.quantity-increment
+[2025-03-26T12:05:03.557Z] Element not found with selector: button.quantity-increment
+[2025-03-26T12:05:08.557Z] Selector not found: button.increment
+[2025-03-26T12:05:08.559Z] Element not found with selector: button.increment
+[2025-03-26T12:05:08.559Z] Trying text-based approach for finding elements
+[2025-03-26T12:05:08.559Z] All selector approaches failed
+[2025-03-26T12:05:08.559Z] Trying direct approach to set quantity...
+[2025-03-26T12:05:08.564Z] Set quantity using: Used increment button
+[2025-03-26T12:05:11.565Z] STEP 3: Clicking "Select a Date" button
+[2025-03-26T12:05:11.571Z] Making OpenAI API call #4 for step: Clicking Select a Date button
+[2025-03-26T12:05:16.879Z] AI Response received
+[2025-03-26T12:05:16.879Z] AI Guidance for Clicking Select a Date button: CLICK .el-button.el-button--primary
+[2025-03-26T12:05:16.879Z] Attempting to perform CLICK on .el-button.el-button--primary
+[2025-03-26T12:05:17.897Z] Clicked element: .el-button.el-button--primary
+[2025-03-26T12:05:22.904Z] STEP 4: Selecting April 29, 2025 in calendar
+[2025-03-26T12:05:22.904Z] Making OpenAI API call #5 for step: Navigating calendar to April 2025
+[2025-03-26T12:05:27.954Z] AI Response received
+[2025-03-26T12:05:27.954Z] AI Guidance for Navigating calendar to April 2025: CLICK .el-button.el-button--primary:not(.is-disabled):contains('SELECT A DATE')
+[2025-03-26T12:05:27.954Z] Attempting to perform CLICK on .el-button.el-button--primary:not(.is-disabled):contains('SELECT A DATE')
+[2025-03-26T12:05:32.955Z] Selector not found: .el-button.el-button--primary:not(.is-disabled):contains('SELECT A DATE')
+[2025-03-26T12:05:32.957Z] Error with selector .el-button.el-button--primary:not(.is-disabled):contains('SELECT A DATE'): SyntaxError: Failed to execute 'querySelector' on 'Document': '.el-button.el-button--primary:not(.is-disabled):contains('SELECT A DATE')' is not a valid selector.
+[2025-03-26T12:05:33.969Z] Clicked element: .el-button.el-button--primary
+[2025-03-26T12:05:35.970Z] Attempting to select date: 2025-4-29
+[2025-03-26T12:05:35.972Z] Failed to select date: Calendar not found
+[2025-03-26T12:05:35.972Z] Could not select specific date. Will proceed with any available date.
+[2025-03-26T12:05:35.973Z] Could not find any available dates
+[2025-03-26T12:05:38.974Z] STEP 5: Clicking Next and selecting first available session
+[2025-03-26T12:05:38.974Z] Making OpenAI API call #6 for step: Clicking Next button after date selection
+[2025-03-26T12:05:46.248Z] AI Response received
+[2025-03-26T12:05:46.248Z] AI Guidance for Clicking Next button after date selection: CLICK button.el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:05:46.248Z] Attempting to perform CLICK on button.el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:05:51.253Z] Selector not found: button.el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:05:51.254Z] Error with selector button.el-button.el-button--primary:contains('NEXT STEP'): SyntaxError: Failed to execute 'querySelector' on 'Document': 'button.el-button.el-button--primary:contains('NEXT STEP')' is not a valid selector.
+[2025-03-26T12:05:52.264Z] Clicked element: button.el-button.el-button--primary
+[2025-03-26T12:05:57.268Z] Making OpenAI API call #7 for step: Selecting first available session/time slot
+[2025-03-26T12:06:03.703Z] AI Response received
+[2025-03-26T12:06:03.703Z] AI Guidance for Selecting first available session/time slot: CLICK .el-button.el-button--primary:not(.is-disabled)
+[2025-03-26T12:06:03.704Z] Attempting to perform CLICK on .el-button.el-button--primary:not(.is-disabled)
+[2025-03-26T12:06:04.715Z] Clicked element: .el-button.el-button--primary:not(.is-disabled)
+[2025-03-26T12:06:09.720Z] STEP 6: Clicking "Add to Cart" button
+[2025-03-26T12:06:09.720Z] Making OpenAI API call #8 for step: Clicking Add to Cart button
+[2025-03-26T12:06:14.613Z] AI Response received
+[2025-03-26T12:06:14.613Z] AI Guidance for Clicking Add to Cart button: CLICK .el-button.el-button--primary:contains('ADD TO CART')
+[2025-03-26T12:06:14.613Z] Attempting to perform CLICK on .el-button.el-button--primary:contains('ADD TO CART')
+[2025-03-26T12:06:19.614Z] Selector not found: .el-button.el-button--primary:contains('ADD TO CART')
+[2025-03-26T12:06:19.618Z] Error with selector .el-button.el-button--primary:contains('ADD TO CART'): SyntaxError: Failed to execute 'querySelector' on 'Document': '.el-button.el-button--primary:contains('ADD TO CART')' is not a valid selector.
+[2025-03-26T12:06:24.620Z] Selector not found: .el-button:contains('NEXT STEP')
+[2025-03-26T12:06:24.621Z] Error with selector .el-button:contains('NEXT STEP'): SyntaxError: Failed to execute 'querySelector' on 'Document': '.el-button:contains('NEXT STEP')' is not a valid selector.
+[2025-03-26T12:06:25.630Z] Clicked element: .el-button.el-button--primary
+[2025-03-26T12:06:32.636Z] STEP 7: Going to cart and proceeding to checkout
+[2025-03-26T12:06:32.636Z] Making OpenAI API call #9 for step: Going to cart
+[2025-03-26T12:06:37.476Z] AI Response received
+[2025-03-26T12:06:37.476Z] AI Guidance for Going to cart: CLICK .el-button.el-button--primary
+[2025-03-26T12:06:37.476Z] Attempting to perform CLICK on .el-button.el-button--primary
+[2025-03-26T12:06:38.487Z] Clicked element: .el-button.el-button--primary
+[2025-03-26T12:06:45.488Z] Making OpenAI API call #10 for step: Proceeding to checkout
+[2025-03-26T12:06:50.404Z] AI Response received
+[2025-03-26T12:06:50.404Z] AI Guidance for Proceeding to checkout: CLICK .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:06:50.404Z] Attempting to perform CLICK on .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:06:55.406Z] Selector not found: .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:06:55.407Z] Error with selector .el-button.el-button--primary:contains('NEXT STEP'): SyntaxError: Failed to execute 'querySelector' on 'Document': '.el-button.el-button--primary:contains('NEXT STEP')' is not a valid selector.
+[2025-03-26T12:07:00.409Z] Selector not found: button:contains('NEXT STEP')
+[2025-03-26T12:07:00.412Z] Error with selector button:contains('NEXT STEP'): SyntaxError: Failed to execute 'querySelector' on 'Document': 'button:contains('NEXT STEP')' is not a valid selector.
+[2025-03-26T12:07:01.423Z] Clicked element: .el-button.el-button--primary
+[2025-03-26T12:07:08.426Z] API call details saved to usj_api_details.json
+[2025-03-26T12:07:08.427Z] 🎉 Purchase flow completed! Browser will remain open for inspection.
+[2025-03-26T12:07:08.427Z] Total OpenAI API calls made: 10
+[2025-03-26T12:13:09.499Z] OpenAI client initialized successfully.
+[2025-03-26T12:13:10.724Z] Navigating to https://www.usjticketing.com/expressPass...
+[2025-03-26T12:13:17.175Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T12:13:17.175Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T12:13:17.184Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=b4d5ef8dc29e42b4925b32ed4de3efa9&traceId=b4d5ef8dc29e42b4925b32ed4de3efa9
+[2025-03-26T12:13:17.771Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=b4d5ef8dc29e42b4925b32ed4de3efa9&traceId=b4d5ef8dc29e42b4925b32ed4de3efa9
+[2025-03-26T12:13:18.585Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T12:13:18.586Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T12:13:23.419Z] STEP 1: Finding product "Universal Express Pass 4: 4D & Choice"
+[2025-03-26T12:13:23.420Z] Making OpenAI API call #1 for step: Selecting EXPRESS PASSES category
+[2025-03-26T12:13:23.920Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T12:13:23.921Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T12:13:24.229Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T12:13:24.279Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T12:13:25.160Z] Captured Request: POST https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T12:13:26.600Z] AI Response received
+[2025-03-26T12:13:26.600Z] AI Guidance for Selecting EXPRESS PASSES category: CLICK .express-pass-category
+[2025-03-26T12:13:26.600Z] Attempting to perform CLICK on .express-pass-category
+[2025-03-26T12:13:26.910Z] Captured Response: 200 https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T12:13:31.603Z] Selector not found: .express-pass-category
+[2025-03-26T12:13:31.606Z] Element not found with selector: .express-pass-category
+[2025-03-26T12:13:36.608Z] Selector not found: #express-pass-container .category-item
+[2025-03-26T12:13:36.609Z] Element not found with selector: #express-pass-container .category-item
+[2025-03-26T12:13:41.613Z] Selector not found: .category-list-item[data-category='express']
+[2025-03-26T12:13:41.617Z] Element not found with selector: .category-list-item[data-category='express']
+[2025-03-26T12:13:41.617Z] Trying text-based approach for finding elements
+[2025-03-26T12:13:41.617Z] All selector approaches failed
+[2025-03-26T12:13:44.620Z] Making OpenAI API call #2 for step: Finding Universal Express Pass 4: 4D & Choice
+[2025-03-26T12:13:49.295Z] AI Response received
+[2025-03-26T12:13:49.296Z] AI Guidance for Finding Universal Express Pass 4: 4D & Choice: CLICK a:contains('View Details'):eq(8)
+[2025-03-26T12:13:49.296Z] Attempting to perform CLICK on a:contains('View Details'):eq(8)
+[2025-03-26T12:13:54.301Z] Selector not found: a:contains('View Details'):eq(8)
+[2025-03-26T12:13:54.303Z] Error with selector a:contains('View Details'):eq(8): SyntaxError: Failed to execute 'querySelector' on 'Document': 'a:contains('View Details'):eq(8)' is not a valid selector.
+[2025-03-26T12:13:59.306Z] Selector not found: .font16.el-link.el-link--primary.is-underline:eq(8)
+[2025-03-26T12:13:59.307Z] Error with selector .font16.el-link.el-link--primary.is-underline:eq(8): SyntaxError: Failed to execute 'querySelector' on 'Document': '.font16.el-link.el-link--primary.is-underline:eq(8)' is not a valid selector.
+[2025-03-26T12:13:59.307Z] Trying text-based approach for finding elements
+[2025-03-26T12:13:59.307Z] All selector approaches failed
+[2025-03-26T12:13:59.307Z] Trying direct approach to find the product...
+[2025-03-26T12:13:59.323Z] Clicked a View Details button as fallback
+[2025-03-26T12:14:04.323Z] STEP 2: Setting quantity to 1
+[2025-03-26T12:14:04.323Z] Making OpenAI API call #3 for step: Setting ticket quantity
+[2025-03-26T12:14:09.951Z] AI Response received
+[2025-03-26T12:14:09.951Z] AI Guidance for Setting ticket quantity: CLICK button.quantity-increment[data-product-id='10009980']
+[2025-03-26T12:14:09.951Z] Attempting to perform CLICK on button.quantity-increment[data-product-id='10009980']
+[2025-03-26T12:14:14.952Z] Selector not found: button.quantity-increment[data-product-id='10009980']
+[2025-03-26T12:14:14.953Z] Element not found with selector: button.quantity-increment[data-product-id='10009980']
+[2025-03-26T12:14:19.954Z] Selector not found: button[data-action='increment'][data-product='Universal Express Pass 4: 4D & Choice']
+[2025-03-26T12:14:19.956Z] Element not found with selector: button[data-action='increment'][data-product='Universal Express Pass 4: 4D & Choice']
+[2025-03-26T12:14:24.958Z] Selector not found: div#product-234 .quantity-control .increment
+[2025-03-26T12:14:24.961Z] Element not found with selector: div#product-234 .quantity-control .increment
+[2025-03-26T12:14:24.961Z] Trying text-based approach for finding elements
+[2025-03-26T12:14:24.961Z] All selector approaches failed
+[2025-03-26T12:14:24.962Z] Trying direct approach to set quantity...
+[2025-03-26T12:14:24.967Z] Set quantity using: Used increment button
+[2025-03-26T12:14:27.968Z] STEP 3: Clicking "Select a Date" button
+[2025-03-26T12:14:27.968Z] Making OpenAI API call #4 for step: Clicking Select a Date button
+[2025-03-26T12:14:36.039Z] AI Response received
+[2025-03-26T12:14:36.039Z] AI Guidance for Clicking Select a Date button: CLICK button.el-button.el-button--primary:not(.is-disabled)
+[2025-03-26T12:14:36.039Z] Attempting to perform CLICK on button.el-button.el-button--primary:not(.is-disabled)
+[2025-03-26T12:14:37.056Z] Clicked element: button.el-button.el-button--primary:not(.is-disabled)
+[2025-03-26T12:14:42.058Z] STEP 4: Selecting April 29, 2025 in calendar
+[2025-03-26T12:14:42.058Z] Making OpenAI API call #5 for step: Navigating calendar to April 2025
+[2025-03-26T12:14:48.799Z] AI Response received
+[2025-03-26T12:14:48.799Z] AI Guidance for Navigating calendar to April 2025: NAVIGATE .el-button:not(.is-disabled):contains('SELECT A DATE')
+[2025-03-26T12:14:48.799Z] Attempting to perform NAVIGATE on .el-button:not(.is-disabled):contains('SELECT A DATE')
+[2025-03-26T12:14:53.801Z] Selector not found: .el-button:not(.is-disabled):contains('SELECT A DATE')
+[2025-03-26T12:14:53.802Z] Error with selector .el-button:not(.is-disabled):contains('SELECT A DATE'): SyntaxError: Failed to execute 'querySelector' on 'Document': '.el-button:not(.is-disabled):contains('SELECT A DATE')' is not a valid selector.
+[2025-03-26T12:14:58.803Z] Selector not found: .el-button.el-button--primary:contains('SELECT A DATE')
+[2025-03-26T12:14:58.806Z] Error with selector .el-button.el-button--primary:contains('SELECT A DATE'): SyntaxError: Failed to execute 'querySelector' on 'Document': '.el-button.el-button--primary:contains('SELECT A DATE')' is not a valid selector.
+[2025-03-26T12:14:58.806Z] Trying text-based approach for finding elements
+[2025-03-26T12:14:58.806Z] All selector approaches failed
+[2025-03-26T12:14:58.806Z] Attempting to select date: 2025-4-29
+[2025-03-26T12:14:58.807Z] Failed to select date: Calendar not found
+[2025-03-26T12:14:58.807Z] Could not select specific date. Will proceed with any available date.
+[2025-03-26T12:14:58.808Z] Could not find any available dates
+[2025-03-26T12:15:01.809Z] STEP 5: Clicking Next and selecting first available session
+[2025-03-26T12:15:01.809Z] Making OpenAI API call #6 for step: Clicking Next button after date selection
+[2025-03-26T12:15:05.570Z] AI Response received
+[2025-03-26T12:15:05.570Z] AI Guidance for Clicking Next button after date selection: CLICK .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:15:05.570Z] Attempting to perform CLICK on .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:15:10.568Z] Selector not found: .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:15:10.571Z] Error with selector .el-button.el-button--primary:contains('NEXT STEP'): SyntaxError: Failed to execute 'querySelector' on 'Document': '.el-button.el-button--primary:contains('NEXT STEP')' is not a valid selector.
+[2025-03-26T12:15:15.569Z] Selector not found: button:contains('NEXT STEP')
+[2025-03-26T12:15:15.570Z] Error with selector button:contains('NEXT STEP'): SyntaxError: Failed to execute 'querySelector' on 'Document': 'button:contains('NEXT STEP')' is not a valid selector.
+[2025-03-26T12:15:16.581Z] Clicked element: .el-button--primary
+[2025-03-26T12:15:21.580Z] Making OpenAI API call #7 for step: Selecting first available session/time slot
+[2025-03-26T12:15:28.574Z] AI Response received
+[2025-03-26T12:15:28.574Z] AI Guidance for Selecting first available session/time slot: CLICK .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:15:28.574Z] Attempting to perform CLICK on .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:15:33.578Z] Selector not found: .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:15:33.579Z] Error with selector .el-button.el-button--primary:contains('NEXT STEP'): SyntaxError: Failed to execute 'querySelector' on 'Document': '.el-button.el-button--primary:contains('NEXT STEP')' is not a valid selector.
+[2025-03-26T12:15:34.590Z] Clicked element: .el-button.el-button--primary
+[2025-03-26T12:15:39.594Z] STEP 6: Clicking "Add to Cart" button
+[2025-03-26T12:15:39.594Z] Making OpenAI API call #8 for step: Clicking Add to Cart button
+[2025-03-26T12:15:43.985Z] AI Response received
+[2025-03-26T12:15:43.985Z] AI Guidance for Clicking Add to Cart button: NAVIGATE .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:15:43.985Z] Attempting to perform NAVIGATE on .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:15:48.989Z] Selector not found: .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:15:48.990Z] Error with selector .el-button.el-button--primary:contains('NEXT STEP'): SyntaxError: Failed to execute 'querySelector' on 'Document': '.el-button.el-button--primary:contains('NEXT STEP')' is not a valid selector.
+[2025-03-26T12:15:54.997Z] Selector not found: .next_step_button
+[2025-03-26T12:15:54.999Z] Element not found with selector: .next_step_button
+[2025-03-26T12:15:54.999Z] Trying text-based approach for finding elements
+[2025-03-26T12:15:54.999Z] All selector approaches failed
+[2025-03-26T12:15:54.999Z] Trying direct approach to add to cart...
+[2025-03-26T12:15:55.000Z] Could not find Add to Cart button
+[2025-03-26T12:16:00.003Z] STEP 7: Going to cart and proceeding to checkout
+[2025-03-26T12:16:00.004Z] Making OpenAI API call #9 for step: Going to cart
+[2025-03-26T12:16:08.566Z] AI Response received
+[2025-03-26T12:16:08.566Z] AI Guidance for Going to cart: CLICK .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:16:08.566Z] Attempting to perform CLICK on .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:16:13.567Z] Selector not found: .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:16:13.574Z] Error with selector .el-button.el-button--primary:contains('NEXT STEP'): SyntaxError: Failed to execute 'querySelector' on 'Document': '.el-button.el-button--primary:contains('NEXT STEP')' is not a valid selector.
+[2025-03-26T12:16:14.582Z] Clicked element: .el-button.el-button--primary
+[2025-03-26T12:16:21.584Z] Making OpenAI API call #10 for step: Proceeding to checkout
+[2025-03-26T12:16:28.210Z] AI Response received
+[2025-03-26T12:16:28.210Z] AI Guidance for Proceeding to checkout: CLICK .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:16:28.210Z] Attempting to perform CLICK on .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:16:33.210Z] Selector not found: .el-button.el-button--primary:contains('NEXT STEP')
+[2025-03-26T12:16:33.212Z] Error with selector .el-button.el-button--primary:contains('NEXT STEP'): SyntaxError: Failed to execute 'querySelector' on 'Document': '.el-button.el-button--primary:contains('NEXT STEP')' is not a valid selector.
+[2025-03-26T12:16:34.226Z] Clicked element: button.el-button.el-button--primary
+[2025-03-26T12:16:41.232Z] API call details saved to usj_api_details.json
+[2025-03-26T12:16:41.232Z] 🎉 Purchase flow completed! Browser will remain open for inspection.
+[2025-03-26T12:16:41.232Z] Total OpenAI API calls made: 10
+[2025-03-26T13:26:01.037Z] OpenAI client initialized successfully.
+[2025-03-26T13:26:02.466Z] Navigating to https://www.usjticketing.com/expressPass...
+[2025-03-26T13:26:15.761Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:26:15.761Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:26:15.770Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=a69e4e502cfa48cf94f2752f67a9808e&traceId=a69e4e502cfa48cf94f2752f67a9808e
+[2025-03-26T13:26:16.302Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=a69e4e502cfa48cf94f2752f67a9808e&traceId=a69e4e502cfa48cf94f2752f67a9808e
+[2025-03-26T13:26:16.930Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:26:16.930Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:26:20.059Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:26:20.060Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:26:20.395Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:26:20.426Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:26:20.566Z] STEP 1: Finding product "Universal Express Pass 4: 4D & Choice"
+[2025-03-26T13:26:20.566Z] Making OpenAI API call #1 for step: Selecting EXPRESS PASSES category
+[2025-03-26T13:26:21.843Z] Captured Request: POST https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T13:26:23.001Z] Captured Response: 200 https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T13:26:27.766Z] AI Response received
+[2025-03-26T13:26:27.766Z] AI Guidance for Selecting EXPRESS PASSES category: CLICK .font16.el-link.el-link--primary.is-underline:nth-of-type(48)
+[2025-03-26T13:26:27.766Z] Attempting to perform CLICK on .font16.el-link.el-link--primary.is-underline:nth-of-type(48)
+[2025-03-26T13:26:32.771Z] Selector not found: .font16.el-link.el-link--primary.is-underline:nth-of-type(48)
+[2025-03-26T13:26:32.776Z] Element not found with selector: .font16.el-link.el-link--primary.is-underline:nth-of-type(48)
+[2025-03-26T13:26:37.780Z] Selector not found: a:contains('View Details'):nth-of-type(48)
+[2025-03-26T13:26:37.782Z] Error with selector a:contains('View Details'):nth-of-type(48): SyntaxError: Failed to execute 'querySelector' on 'Document': 'a:contains('View Details'):nth-of-type(48)' is not a valid selector.
+[2025-03-26T13:26:37.782Z] Trying text-based approach for finding elements
+[2025-03-26T13:26:37.782Z] All selector approaches failed
+[2025-03-26T13:26:40.784Z] Making OpenAI API call #2 for step: Finding Universal Express Pass 4: 4D & Choice
+[2025-03-26T13:26:48.269Z] AI Response received
+[2025-03-26T13:26:48.269Z] AI Guidance for Finding Universal Express Pass 4: 4D & Choice: CLICK a:nth-of-type(47)
+[2025-03-26T13:26:48.269Z] Attempting to perform CLICK on a:nth-of-type(47)
+[2025-03-26T13:26:53.277Z] Selector not found: a:nth-of-type(47)
+[2025-03-26T13:26:53.279Z] Element not found with selector: a:nth-of-type(47)
+[2025-03-26T13:26:54.310Z] Clicked element: a.font16.el-link.el-link--primary.is-underline
+[2025-03-26T13:27:01.313Z] STEP 2: Setting quantity to 1
+[2025-03-26T13:27:01.313Z] Making OpenAI API call #3 for step: Setting ticket quantity
+[2025-03-26T13:27:11.580Z] AI Response received
+[2025-03-26T13:27:11.580Z] AI Guidance for Setting ticket quantity: CLICK button.increment-quantity[data-product-name='Universal Express Pass 4: 4D & Choice']
+[2025-03-26T13:27:11.580Z] Attempting to perform CLICK on button.increment-quantity[data-product-name='Universal Express Pass 4: 4D & Choice']
+[2025-03-26T13:27:16.584Z] Selector not found: button.increment-quantity[data-product-name='Universal Express Pass 4: 4D & Choice']
+[2025-03-26T13:27:16.587Z] Element not found with selector: button.increment-quantity[data-product-name='Universal Express Pass 4: 4D & Choice']
+[2025-03-26T13:27:21.588Z] Selector not found: button.plus[data-product-name='Universal Express Pass 4: 4D & Choice']
+[2025-03-26T13:27:21.589Z] Element not found with selector: button.plus[data-product-name='Universal Express Pass 4: 4D & Choice']
+[2025-03-26T13:27:26.595Z] Selector not found: button.add-quantity[data-product-id='10009980']
+[2025-03-26T13:27:26.597Z] Element not found with selector: button.add-quantity[data-product-id='10009980']
+[2025-03-26T13:27:26.597Z] Trying text-based approach for finding elements
+[2025-03-26T13:27:26.597Z] All selector approaches failed
+[2025-03-26T13:27:26.597Z] Trying direct approach to set quantity...
+[2025-03-26T13:27:26.604Z] Set quantity using: Used increment button
+[2025-03-26T13:27:29.604Z] STEP 3: Clicking "Select a Date" button
+[2025-03-26T13:27:29.605Z] Making OpenAI API call #4 for step: Clicking Select a Date button
+[2025-03-26T13:27:37.895Z] AI Response received
+[2025-03-26T13:27:37.895Z] AI Guidance for Clicking Select a Date button: CLICK button.el-button.el-button--primary:not(.is-disabled)
+[2025-03-26T13:27:37.895Z] Attempting to perform CLICK on button.el-button.el-button--primary:not(.is-disabled)
+[2025-03-26T13:27:38.907Z] Clicked element: button.el-button.el-button--primary:not(.is-disabled)
+[2025-03-26T13:27:43.913Z] STEP 4: Selecting April 29, 2025 in calendar
+[2025-03-26T13:27:43.913Z] Making OpenAI API call #5 for step: Navigating calendar to April 2025
+[2025-03-26T13:32:56.518Z] OpenAI client initialized successfully.
+[2025-03-26T13:32:57.835Z] Navigating to https://www.usjticketing.com/expressPass...
+[2025-03-26T13:33:02.485Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:33:02.486Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:33:02.540Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=43aa31d6636e46b3a2008c06ced7aabe&traceId=43aa31d6636e46b3a2008c06ced7aabe
+[2025-03-26T13:33:03.042Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=43aa31d6636e46b3a2008c06ced7aabe&traceId=43aa31d6636e46b3a2008c06ced7aabe
+[2025-03-26T13:33:04.021Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:33:04.021Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:33:09.681Z] STEP 1: Finding product "Universal Express Pass 4: 4D & Choice"
+[2025-03-26T13:33:09.683Z] Finding specific product: Universal Express Pass 4: 4D & Choice (ID: 10009980)
+[2025-03-26T13:33:09.683Z] Checking if we need to click EXPRESS PASSES category...
+[2025-03-26T13:33:09.686Z] Clicked EXPRESS PASSES category, waiting for page to load...
+[2025-03-26T13:33:10.779Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:33:10.779Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:33:11.098Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:33:11.100Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:33:12.165Z] Captured Request: POST https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T13:33:13.410Z] Captured Response: 200 https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T13:33:14.688Z] Looking for product: Universal Express Pass 4: 4D & Choice
+[2025-03-26T13:33:14.776Z] Product found and clicked: Clicked first View Details link (fallback)
+[2025-03-26T13:33:22.778Z] STEP 2: Setting quantity to 1
+[2025-03-26T13:33:22.778Z] Setting ticket quantity to 1
+[2025-03-26T13:33:22.871Z] Failed to set quantity with any strategy
+[2025-03-26T13:33:22.871Z] Direct quantity setting failed. Trying AI-guided approach...
+[2025-03-26T13:33:22.871Z] Making OpenAI API call #1 for step: Setting ticket quantity
+[2025-03-26T13:33:28.311Z] AI Response received
+[2025-03-26T13:33:28.311Z] AI Guidance for Setting ticket quantity: CLICK button.el-button.el-button--primary
+[2025-03-26T13:33:28.311Z] Attempting to perform CLICK on button.el-button.el-button--primary
+[2025-03-26T13:33:29.334Z] Clicked element: button.el-button.el-button--primary
+[2025-03-26T13:33:34.338Z] STEP 3: Clicking "Select a Date" button
+[2025-03-26T13:33:34.340Z] Direct date button click failed. Trying AI-guided approach...
+[2025-03-26T13:33:34.340Z] Making OpenAI API call #2 for step: Clicking Select a Date button
+[2025-03-26T13:33:39.205Z] AI Response received
+[2025-03-26T13:33:39.206Z] AI Guidance for Clicking Select a Date button: NAVIGATE 
+[2025-03-26T13:33:39.206Z] Attempting to perform NAVIGATE on 
+[2025-03-26T13:33:44.206Z] Selector not found: 
+[2025-03-26T13:33:44.208Z] Error with selector : SyntaxError: Failed to execute 'querySelector' on 'Document': The provided selector is empty.
+[2025-03-26T13:33:44.208Z] Trying text-based approach for finding elements
+[2025-03-26T13:33:44.208Z] All selector approaches failed
+[2025-03-26T13:33:44.208Z] Error during purchase process: Failed to click the date selection button
+[2025-03-26T13:33:44.211Z] API call details saved despite error
+[2025-03-26T13:33:44.282Z] Error state screenshot saved to error_state.png
+[2025-03-26T13:54:32.822Z] OpenAI client initialized successfully.
+[2025-03-26T13:54:32.823Z] Starting purchase flow for Universal Express Pass 4: 4D & Choice (quantity: 1, date: 2025-04-29)
+[2025-03-26T13:54:34.109Z] Navigating to https://www.usjticketing.com/expressPass
+[2025-03-26T13:54:37.512Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:54:37.512Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:54:37.520Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=1a599d931f10443fa9028c6ffe4d6061&traceId=1a599d931f10443fa9028c6ffe4d6061
+[2025-03-26T13:54:38.474Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=1a599d931f10443fa9028c6ffe4d6061&traceId=1a599d931f10443fa9028c6ffe4d6061
+[2025-03-26T13:54:38.758Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:54:38.759Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:54:41.159Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:54:41.159Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:54:41.473Z] Captured Request: POST https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T13:54:41.475Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:54:41.485Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:54:42.376Z] Screenshot saved: ./screenshots/1742997282302_initial_page.png
+[2025-03-26T13:54:42.376Z] Setting quantity to 1
+[2025-03-26T13:54:42.376Z] Looking for product section: Universal Express Pass 4: 4D & Choice
+[2025-03-26T13:54:42.403Z] Found 19 potential product sections by heading
+[2025-03-26T13:54:42.404Z] Current quantity: 1, Target: 1
+[2025-03-26T13:54:42.404Z] Quantity already set correctly
+[2025-03-26T13:54:42.469Z] Screenshot saved: ./screenshots/1742997282404_after_quantity_set.png
+[2025-03-26T13:54:42.470Z] Clicking SELECT A DATE button
+[2025-03-26T13:54:42.487Z] Clicked SELECT A DATE button with recorded selector
+[2025-03-26T13:54:43.234Z] Captured Response: 200 https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T13:54:44.553Z] Screenshot saved: ./screenshots/1742997284488_date_picker_opened.png
+[2025-03-26T13:54:44.553Z] Selecting date: 2025-04-29
+[2025-03-26T13:54:44.553Z] Parsed date: Year=2025, Month=4, Day=29
+[2025-03-26T13:54:44.554Z] Current date picker view: 
+[2025-03-26T13:54:44.555Z] Error selecting date: No element found for selector: .el-date-picker__header-label
+[2025-03-26T13:54:44.556Z] Date selection fallback also failed: No element found for selector: tr:nth-of-type(3) > td:nth-of-type(6) > div > div
+[2025-03-26T13:54:44.556Z] ERROR: No element found for selector: .el-date-picker__header-label
+[2025-03-26T13:54:44.616Z] Screenshot saved: ./screenshots/1742997284556_error_state.png
+[2025-03-26T13:54:44.617Z] API details saved despite error
+[2025-03-26T13:55:17.350Z] OpenAI client initialized successfully.
+[2025-03-26T13:55:17.351Z] Starting purchase flow for Universal Express Pass 4: 4D & Choice (quantity: 1, date: 2025-04-29)
+[2025-03-26T13:55:18.683Z] Navigating to https://www.usjticketing.com/expressPass
+[2025-03-26T13:55:26.509Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:55:26.509Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:55:26.518Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=98fb7e8e09f64f85bd686bd933de3c6d&traceId=98fb7e8e09f64f85bd686bd933de3c6d
+[2025-03-26T13:55:27.311Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=98fb7e8e09f64f85bd686bd933de3c6d&traceId=98fb7e8e09f64f85bd686bd933de3c6d
+[2025-03-26T13:55:27.433Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:55:27.434Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:55:31.061Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:55:31.061Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:55:31.371Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:55:31.389Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:55:31.589Z] Screenshot saved: ./screenshots/1742997331496_initial_page.png
+[2025-03-26T13:55:31.590Z] Setting quantity to 1
+[2025-03-26T13:55:31.590Z] Looking for product section: Universal Express Pass 4: 4D & Choice
+[2025-03-26T13:55:31.608Z] Found 19 potential product sections by heading
+[2025-03-26T13:55:31.608Z] Current quantity: 1, Target: 1
+[2025-03-26T13:55:31.608Z] Quantity already set correctly
+[2025-03-26T13:55:31.668Z] Screenshot saved: ./screenshots/1742997331608_after_quantity_set.png
+[2025-03-26T13:55:31.668Z] Clicking SELECT A DATE button
+[2025-03-26T13:55:31.685Z] Clicked SELECT A DATE button with recorded selector
+[2025-03-26T13:55:32.323Z] Captured Request: POST https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T13:55:33.753Z] Screenshot saved: ./screenshots/1742997333686_date_picker_opened.png
+[2025-03-26T13:55:33.753Z] Selecting date: 2025-04-29
+[2025-03-26T13:55:33.754Z] Parsed date: Year=2025, Month=4, Day=29
+[2025-03-26T13:55:33.999Z] Captured Response: 200 https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T13:55:34.754Z] Error selecting date: screenshot is not defined
+[2025-03-26T13:55:34.754Z] ERROR: screenshot is not defined
+[2025-03-26T13:55:34.835Z] Screenshot saved: ./screenshots/1742997334754_error_state.png
+[2025-03-26T13:55:34.837Z] API details saved despite error
+[2025-03-26T13:56:08.770Z] OpenAI client initialized successfully.
+[2025-03-26T13:56:08.772Z] Starting purchase flow for Universal Express Pass 4: 4D & Choice (quantity: 1, date: 2025-04-29)
+[2025-03-26T13:56:09.927Z] Navigating to https://www.usjticketing.com/expressPass
+[2025-03-26T13:56:13.180Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:56:13.180Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:56:13.189Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=e421e7b48c754d868abd767d0055846d&traceId=e421e7b48c754d868abd767d0055846d
+[2025-03-26T13:56:13.747Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=e421e7b48c754d868abd767d0055846d&traceId=e421e7b48c754d868abd767d0055846d
+[2025-03-26T13:56:14.106Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:56:14.107Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:56:15.962Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:56:15.962Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:56:16.276Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:56:16.281Z] Captured Request: POST https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T13:56:16.284Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:56:17.449Z] Captured Response: 200 https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T13:56:18.192Z] Screenshot saved: ./screenshots/1742997378098_initial_page.png
+[2025-03-26T13:56:18.192Z] Setting quantity to 1
+[2025-03-26T13:56:18.192Z] Looking for product section: Universal Express Pass 4: 4D & Choice
+[2025-03-26T13:56:18.214Z] Found 19 potential product sections by heading
+[2025-03-26T13:56:18.215Z] Current quantity: 1, Target: 1
+[2025-03-26T13:56:18.215Z] Quantity already set correctly
+[2025-03-26T13:56:18.286Z] Screenshot saved: ./screenshots/1742997378215_after_quantity_set.png
+[2025-03-26T13:56:18.286Z] Clicking SELECT A DATE button
+[2025-03-26T13:56:18.298Z] Clicked SELECT A DATE button with recorded selector
+[2025-03-26T13:56:20.363Z] Screenshot saved: ./screenshots/1742997380299_date_picker_opened.png
+[2025-03-26T13:56:20.363Z] Selecting date: 2025-04-29
+[2025-03-26T13:56:20.363Z] Parsed date: Year=2025, Month=4, Day=29
+[2025-03-26T13:56:21.480Z] Screenshot saved: ./screenshots/1742997381364_calendar_before_navigation.png
+[2025-03-26T13:56:21.480Z] Navigating months forward to reach target date...
+[2025-03-26T13:56:21.482Z] Error clicking next month arrow on attempt 1: No element found for selector: img:nth-of-type(2)
+[2025-03-26T13:56:22.566Z] Screenshot saved: ./screenshots/1742997382484_calendar_after_navigation.png
+[2025-03-26T13:56:22.567Z] Error clicking day cell: No element found for selector: tr:nth-of-type(3) > td:nth-of-type(6) > div > div
+[2025-03-26T13:56:22.567Z] Trying to click any available day cell...
+[2025-03-26T13:56:22.568Z] Error selecting date: Failed to select any date
+[2025-03-26T13:56:22.631Z] Screenshot saved: ./screenshots/1742997382568_date_selection_error.png
+[2025-03-26T13:56:22.631Z] ERROR: Failed to select any date
+[2025-03-26T13:56:22.696Z] Screenshot saved: ./screenshots/1742997382631_error_state.png
+[2025-03-26T13:56:22.698Z] API details saved despite error
+[2025-03-26T13:57:12.637Z] OpenAI client initialized successfully.
+[2025-03-26T13:57:12.638Z] Starting purchase flow for Universal Express Pass 4: 4D & Choice (quantity: 1, date: 2025-04-29)
+[2025-03-26T13:57:13.971Z] Navigating to https://www.usjticketing.com/expressPass
+[2025-03-26T13:57:17.153Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:57:17.153Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:57:17.162Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=d8279ac55b9341008af070f70058b765&traceId=d8279ac55b9341008af070f70058b765
+[2025-03-26T13:57:17.697Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=d8279ac55b9341008af070f70058b765&traceId=d8279ac55b9341008af070f70058b765
+[2025-03-26T13:57:18.084Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:57:18.088Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:57:21.519Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:57:21.525Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:57:21.823Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:57:21.833Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:57:22.241Z] Screenshot saved: ./screenshots/1742997442158_initial_page.png
+[2025-03-26T13:57:22.241Z] Setting quantity to 1
+[2025-03-26T13:57:22.241Z] Looking for product section: Universal Express Pass 4: 4D & Choice
+[2025-03-26T13:57:22.259Z] Found 19 potential product sections by heading
+[2025-03-26T13:57:22.259Z] Current quantity: 1, Target: 1
+[2025-03-26T13:57:22.259Z] Quantity already set correctly
+[2025-03-26T13:57:22.334Z] Screenshot saved: ./screenshots/1742997442259_after_quantity_set.png
+[2025-03-26T13:57:22.334Z] Clicking SELECT A DATE button
+[2025-03-26T13:57:22.347Z] Clicked SELECT A DATE button with recorded selector
+[2025-03-26T13:57:22.867Z] Captured Request: POST https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T13:57:24.418Z] Screenshot saved: ./screenshots/1742997444347_date_picker_opened.png
+[2025-03-26T13:57:24.419Z] Selecting date: 2025-04-29
+[2025-03-26T13:57:24.419Z] Parsed date: Year=2025, Month=4, Day=29
+[2025-03-26T13:57:24.581Z] Captured Response: 200 https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T13:57:25.485Z] Screenshot saved: ./screenshots/1742997445419_calendar_before_navigation.png
+[2025-03-26T13:57:25.543Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T13:57:25.543Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T13:57:25.815Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T13:57:25.817Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T13:57:27.237Z] Screenshot saved: ./screenshots/1742997447160_calendar_after_navigation.png
+[2025-03-26T13:57:27.237Z] In-page date selection failed: No date cells found
+[2025-03-26T13:57:27.245Z] Tried fallback method to click any date cell
+[2025-03-26T13:57:28.318Z] Screenshot saved: ./screenshots/1742997448248_date_selected.png
+[2025-03-26T13:57:28.318Z] Clicking NEXT button after date selection
+[2025-03-26T13:57:28.319Z] Error clicking NEXT button: No element found for selector: div.el-dialog__wrapper button.el-button--primary > span
+[2025-03-26T13:57:28.327Z] Clicked NEXT button using in-page evaluation
+[2025-03-26T13:57:30.396Z] Screenshot saved: ./screenshots/1742997450331_after_next_button.png
+[2025-03-26T13:57:30.396Z] Selecting first available session
+[2025-03-26T13:57:30.397Z] Error selecting session with recorded selector: No element found for selector: div.el-dialog__wrapper p:nth-of-type(2)
+[2025-03-26T13:57:30.397Z] Session selection fallback also failed: Could not select any session
+[2025-03-26T13:57:30.397Z] ERROR: Could not select any session
+[2025-03-26T13:57:30.459Z] Screenshot saved: ./screenshots/1742997450397_error_state.png
+[2025-03-26T13:57:30.460Z] API details saved despite error
+[2025-03-26T13:58:31.118Z] OpenAI client initialized successfully.
+[2025-03-26T13:58:31.119Z] Starting purchase flow for Universal Express Pass 4: 4D & Choice (quantity: 1, date: 2025-04-29)
+[2025-03-26T13:58:32.584Z] Navigating to https://www.usjticketing.com/expressPass
+[2025-03-26T13:58:36.716Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:58:36.716Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:58:36.776Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=61fec35fff4f4bff9dce242ff2b8bdbc&traceId=61fec35fff4f4bff9dce242ff2b8bdbc
+[2025-03-26T13:58:37.239Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=61fec35fff4f4bff9dce242ff2b8bdbc&traceId=61fec35fff4f4bff9dce242ff2b8bdbc
+[2025-03-26T13:58:37.876Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:58:37.877Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:58:41.774Z] Screenshot saved: ./screenshots/1742997521722_initial_page.png
+[2025-03-26T13:58:41.774Z] Setting quantity to 1
+[2025-03-26T13:58:41.774Z] Looking for product section: Universal Express Pass 4: 4D & Choice
+[2025-03-26T13:58:41.785Z] Using recorded product section index
+[2025-03-26T13:58:41.786Z] Current quantity: 1, Target: 1
+[2025-03-26T13:58:41.786Z] Quantity already set correctly
+[2025-03-26T13:58:41.838Z] Screenshot saved: ./screenshots/1742997521786_after_quantity_set.png
+[2025-03-26T13:58:41.838Z] Clicking SELECT A DATE button
+[2025-03-26T13:58:41.839Z] Error clicking date button with recorded selector: No element found for selector: div:nth-of-type(5) button > span
+[2025-03-26T13:58:41.842Z] All methods to click date button failed: Could not find or click SELECT A DATE button with any method
+[2025-03-26T13:58:41.842Z] ERROR: Could not find or click SELECT A DATE button with any method
+[2025-03-26T13:58:41.903Z] Screenshot saved: ./screenshots/1742997521842_error_state.png
+[2025-03-26T13:58:41.904Z] API details saved despite error
+[2025-03-26T13:59:22.465Z] OpenAI client initialized successfully.
+[2025-03-26T13:59:22.466Z] Starting purchase flow for Universal Express Pass 4: 4D & Choice (quantity: 1, date: 2025-04-29)
+[2025-03-26T13:59:23.914Z] Navigating to https://www.usjticketing.com/expressPass
+[2025-03-26T13:59:28.318Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:59:28.318Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:59:28.379Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=df0615f5f09448fa850a945bb9043cc4&traceId=df0615f5f09448fa850a945bb9043cc4
+[2025-03-26T13:59:28.933Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=df0615f5f09448fa850a945bb9043cc4&traceId=df0615f5f09448fa850a945bb9043cc4
+[2025-03-26T13:59:29.255Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T13:59:29.256Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:59:29.845Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:59:29.845Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:59:30.163Z] Captured Request: POST https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T13:59:30.164Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:59:30.172Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:59:30.809Z] Captured Response: 200 https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T13:59:34.407Z] Screenshot saved: ./screenshots/1742997574331_initial_page.png
+[2025-03-26T13:59:34.407Z] Setting quantity to 1
+[2025-03-26T13:59:34.407Z] Looking for product section: Universal Express Pass 4: 4D & Choice
+[2025-03-26T13:59:34.426Z] Found 19 potential product sections by heading
+[2025-03-26T13:59:34.426Z] Current quantity: 1, Target: 1
+[2025-03-26T13:59:34.426Z] Quantity already set correctly
+[2025-03-26T13:59:34.500Z] Screenshot saved: ./screenshots/1742997574426_after_quantity_set.png
+[2025-03-26T13:59:34.500Z] Clicking SELECT A DATE button
+[2025-03-26T13:59:34.503Z] Error clicking date button with recorded selector: SyntaxError: Failed to execute 'querySelector' on 'Document': 'div:nth-of-type(undefined) button > span' is not a valid selector.
+[2025-03-26T13:59:34.515Z] Clicked SELECT A DATE button with alternate selector: button.el-button:not(.is-disabled)
+[2025-03-26T13:59:34.568Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/ticket_kinds
+[2025-03-26T13:59:34.568Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=6
+[2025-03-26T13:59:34.568Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:59:34.852Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T13:59:34.853Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/ticket_kinds
+[2025-03-26T13:59:34.863Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=6
+[2025-03-26T13:59:36.600Z] Screenshot saved: ./screenshots/1742997576517_date_picker_opened.png
+[2025-03-26T13:59:36.601Z] Selecting date: 2025-04-29
+[2025-03-26T13:59:36.601Z] Parsed date: Year=2025, Month=4, Day=29
+[2025-03-26T13:59:37.672Z] Screenshot saved: ./screenshots/1742997577603_calendar_before_navigation.png
+[2025-03-26T13:59:37.724Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:59:37.724Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:59:37.997Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T13:59:38.002Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T13:59:39.291Z] Screenshot saved: ./screenshots/1742997579202_calendar_after_navigation.png
+[2025-03-26T13:59:39.291Z] In-page date selection failed: No date cells found
+[2025-03-26T13:59:39.292Z] Tried fallback method to click any date cell
+[2025-03-26T13:59:40.349Z] Screenshot saved: ./screenshots/1742997580293_date_selected.png
+[2025-03-26T13:59:40.349Z] Clicking NEXT button after date selection
+[2025-03-26T13:59:40.350Z] Error clicking NEXT button: No element found for selector: div.el-dialog__wrapper button.el-button--primary > span
+[2025-03-26T13:59:40.357Z] Clicked NEXT button with alternate selector: button.el-button--primary
+[2025-03-26T13:59:40.413Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T13:59:40.414Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T13:59:40.688Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T13:59:40.690Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T13:59:42.435Z] Screenshot saved: ./screenshots/1742997582359_after_next_button.png
+[2025-03-26T13:59:42.435Z] Selecting first available session
+[2025-03-26T13:59:42.502Z] Saved screenshot of session selection page
+[2025-03-26T13:59:42.502Z] Current page info - Title: USJ, Has session text: false, Has radio buttons: false
+[2025-03-26T13:59:42.503Z] Not on session selection page, skipping session selection
+[2025-03-26T13:59:42.567Z] Screenshot saved: ./screenshots/1742997582503_session_selected.png
+[2025-03-26T13:59:42.567Z] Clicking ADD TO CART button
+[2025-03-26T13:59:42.568Z] Error clicking ADD TO CART button: No element found for selector: button.el-button--success > span
+[2025-03-26T13:59:42.570Z] All methods to click ADD TO CART button failed: Could not find or click ADD TO CART button with any method
+[2025-03-26T13:59:42.570Z] ERROR: Could not find or click ADD TO CART button with any method
+[2025-03-26T13:59:42.630Z] Screenshot saved: ./screenshots/1742997582570_error_state.png
+[2025-03-26T13:59:42.632Z] API details saved despite error
+[2025-03-26T14:01:10.319Z] OpenAI client initialized successfully.
+[2025-03-26T14:01:10.321Z] Starting purchase flow for Universal Express Pass 4: 4D & Choice (quantity: 1, date: 2025-04-29)
+[2025-03-26T14:01:11.586Z] Navigating to https://www.usjticketing.com/expressPass
+[2025-03-26T14:01:14.754Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T14:01:14.754Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:01:14.764Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=2d3d0424dbdf4194a3cb4cf90f0a54c5&traceId=2d3d0424dbdf4194a3cb4cf90f0a54c5
+[2025-03-26T14:01:15.511Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=2d3d0424dbdf4194a3cb4cf90f0a54c5&traceId=2d3d0424dbdf4194a3cb4cf90f0a54c5
+[2025-03-26T14:01:16.565Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:01:16.566Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T14:01:17.724Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:01:17.724Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:01:18.411Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:01:18.423Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:01:19.886Z] Captured Request: POST https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T14:01:20.388Z] Screenshot saved: ./screenshots/1742997680314_initial_page.png
+[2025-03-26T14:01:20.388Z] Setting quantity to 1
+[2025-03-26T14:01:20.388Z] Looking for product section: Universal Express Pass 4: 4D & Choice
+[2025-03-26T14:01:20.415Z] Found 19 potential product sections by heading
+[2025-03-26T14:01:20.415Z] Current quantity: 1, Target: 1
+[2025-03-26T14:01:20.415Z] Quantity already set correctly
+[2025-03-26T14:01:20.468Z] Screenshot saved: ./screenshots/1742997680415_after_quantity_set.png
+[2025-03-26T14:01:20.468Z] Clicking SELECT A DATE button
+[2025-03-26T14:01:20.470Z] Error clicking date button with recorded selector: SyntaxError: Failed to execute 'querySelector' on 'Document': 'div:nth-of-type(undefined) button > span' is not a valid selector.
+[2025-03-26T14:01:20.481Z] Clicked SELECT A DATE button with alternate selector: button.el-button:not(.is-disabled)
+[2025-03-26T14:01:20.534Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/ticket_kinds
+[2025-03-26T14:01:20.534Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=6
+[2025-03-26T14:01:20.534Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:01:20.804Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/ticket_kinds
+[2025-03-26T14:01:20.812Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:01:20.813Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=6
+[2025-03-26T14:01:21.028Z] Captured Response: 200 https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T14:01:22.592Z] Screenshot saved: ./screenshots/1742997682482_date_picker_opened.png
+[2025-03-26T14:01:22.592Z] Selecting date: 2025-04-29
+[2025-03-26T14:01:22.592Z] Parsed date: Year=2025, Month=4, Day=29
+[2025-03-26T14:01:23.671Z] Screenshot saved: ./screenshots/1742997683594_calendar_before_navigation.png
+[2025-03-26T14:01:23.728Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:01:23.729Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:01:23.994Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:01:24.291Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:01:25.288Z] Screenshot saved: ./screenshots/1742997685220_calendar_after_navigation.png
+[2025-03-26T14:01:25.288Z] In-page date selection failed: No date cells found
+[2025-03-26T14:01:25.288Z] Tried fallback method to click any date cell
+[2025-03-26T14:01:26.349Z] Screenshot saved: ./screenshots/1742997686291_date_selected.png
+[2025-03-26T14:01:26.350Z] Clicking NEXT button after date selection
+[2025-03-26T14:01:26.350Z] Error clicking NEXT button: No element found for selector: div.el-dialog__wrapper button.el-button--primary > span
+[2025-03-26T14:01:26.357Z] Clicked NEXT button with alternate selector: button.el-button--primary
+[2025-03-26T14:01:26.415Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T14:01:26.415Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T14:01:26.678Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T14:01:26.680Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T14:01:28.438Z] Screenshot saved: ./screenshots/1742997688360_after_next_button.png
+[2025-03-26T14:01:28.438Z] Selecting first available session
+[2025-03-26T14:01:28.481Z] Saved screenshot of session selection page
+[2025-03-26T14:01:28.482Z] Current page info - Title: USJ, Has session text: false, Has radio buttons: false
+[2025-03-26T14:01:28.482Z] Not on session selection page, skipping session selection
+[2025-03-26T14:01:28.546Z] Screenshot saved: ./screenshots/1742997688482_session_selected.png
+[2025-03-26T14:01:28.546Z] Clicking ADD TO CART button
+[2025-03-26T14:01:28.546Z] Clicking ADD TO CART button
+[2025-03-26T14:01:28.645Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:01:28.645Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:01:28.645Z] Clicked ADD TO CART button by any action button BACK
+[2025-03-26T14:01:28.914Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:01:28.920Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:01:34.799Z] Screenshot saved: ./screenshots/1742997694725_item_added_to_cart.png
+[2025-03-26T14:01:34.799Z] Going to cart
+[2025-03-26T14:01:34.809Z] Clicked cart icon using recorded selector
+[2025-03-26T14:01:36.891Z] Screenshot saved: ./screenshots/1742997696815_cart_page.png
+[2025-03-26T14:01:36.891Z] Clicking NEXT STEP in cart
+[2025-03-26T14:01:36.948Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T14:01:36.948Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T14:01:36.949Z] Clicked NEXT STEP button using recorded selector
+[2025-03-26T14:01:37.215Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T14:01:37.218Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T14:01:39.015Z] Screenshot saved: ./screenshots/1742997698951_after_next_step.png
+[2025-03-26T14:01:39.015Z] Clicking CHECKOUT button
+[2025-03-26T14:01:39.027Z] Clicked CHECKOUT button using recorded selector
+[2025-03-26T14:01:41.097Z] Screenshot saved: ./screenshots/1742997701030_checkout_page.png
+[2025-03-26T14:01:41.097Z] Accepting terms and conditions if present
+[2025-03-26T14:01:41.101Z] Accepted terms and conditions using recorded selector
+[2025-03-26T14:01:41.206Z] Screenshot saved: ./screenshots/1742997701101_after_accepting_terms.png
+[2025-03-26T14:01:41.209Z] Purchase flow completed successfully! API details saved to usj_api_details.json
+[2025-03-26T14:01:41.211Z] Keeping browser open for inspection. Close it manually when done.
+[2025-03-26T14:13:27.797Z] OpenAI client initialized successfully.
+[2025-03-26T14:13:27.798Z] Starting purchase flow for Universal Express Pass 4: 4D & Choice (quantity: 1, date: 2025-04-29)
+[2025-03-26T14:13:29.070Z] Navigating to https://www.usjticketing.com/expressPass
+[2025-03-26T14:13:41.413Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T14:13:41.413Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:13:41.469Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=7854f5f25d534db29ed64c3244c034d9&traceId=7854f5f25d534db29ed64c3244c034d9
+[2025-03-26T14:13:41.974Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=7854f5f25d534db29ed64c3244c034d9&traceId=7854f5f25d534db29ed64c3244c034d9
+[2025-03-26T14:13:43.657Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:13:43.658Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T14:13:47.418Z] Screenshot saved: ./screenshots/1742998427356_initial_page.png
+[2025-03-26T14:13:47.418Z] Setting quantity to 1
+[2025-03-26T14:13:47.418Z] Looking for product section: Universal Express Pass 4: 4D & Choice
+[2025-03-26T14:13:47.431Z] Using recorded product section index
+[2025-03-26T14:13:47.432Z] Current quantity: 1, Target: 1
+[2025-03-26T14:13:47.432Z] Quantity already set correctly
+[2025-03-26T14:13:47.463Z] Screenshot saved: ./screenshots/1742998427432_after_quantity_set.png
+[2025-03-26T14:13:47.463Z] Clicking SELECT A DATE button
+[2025-03-26T14:13:47.466Z] Error clicking date button with recorded selector: SyntaxError: Failed to execute 'querySelector' on 'Document': 'div:nth-of-type(undefined) button > span' is not a valid selector.
+[2025-03-26T14:13:47.469Z] All methods to click date button failed: Could not find or click SELECT A DATE button with any method
+[2025-03-26T14:13:47.469Z] ERROR: Could not find or click SELECT A DATE button with any method
+[2025-03-26T14:13:47.526Z] Screenshot saved: ./screenshots/1742998427469_error_state.png
+[2025-03-26T14:13:47.528Z] API details saved despite error
+[2025-03-26T14:14:14.563Z] OpenAI client initialized successfully.
+[2025-03-26T14:14:14.564Z] Starting purchase flow for Universal Express Pass 4: 4D & Choice (quantity: 1, date: 2025-04-29)
+[2025-03-26T14:14:15.880Z] Navigating to https://www.usjticketing.com/expressPass
+[2025-03-26T14:14:27.240Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T14:14:27.241Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:14:27.308Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=9c623001f5044982bc7bff1c1d09c808&traceId=9c623001f5044982bc7bff1c1d09c808
+[2025-03-26T14:14:27.839Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=9c623001f5044982bc7bff1c1d09c808&traceId=9c623001f5044982bc7bff1c1d09c808
+[2025-03-26T14:14:28.174Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:14:28.175Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T14:14:32.989Z] Screenshot saved: ./screenshots/1742998472905_initial_page.png
+[2025-03-26T14:14:32.990Z] Setting quantity to 1
+[2025-03-26T14:14:32.990Z] Looking for product section: Universal Express Pass 4: 4D & Choice
+[2025-03-26T14:14:32.994Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:14:32.994Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:14:33.020Z] Using recorded product section index
+[2025-03-26T14:14:33.021Z] Current quantity: 1, Target: 1
+[2025-03-26T14:14:33.021Z] Quantity already set correctly
+[2025-03-26T14:14:33.126Z] Screenshot saved: ./screenshots/1742998473021_after_quantity_set.png
+[2025-03-26T14:14:33.126Z] Clicking SELECT A DATE button
+[2025-03-26T14:14:33.128Z] Error clicking date button with recorded selector: No element found for selector: div:nth-of-type(5) button > span
+[2025-03-26T14:14:33.151Z] Clicked SELECT A DATE button with alternate selector: button.el-button:not(.is-disabled)
+[2025-03-26T14:14:33.207Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/ticket_kinds
+[2025-03-26T14:14:33.207Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=6
+[2025-03-26T14:14:33.207Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:14:33.302Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:14:33.306Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:14:33.484Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/ticket_kinds
+[2025-03-26T14:14:33.516Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=6
+[2025-03-26T14:14:33.517Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:14:34.869Z] Captured Request: POST https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T14:14:35.226Z] Screenshot saved: ./screenshots/1742998475152_date_picker_opened.png
+[2025-03-26T14:14:35.226Z] Selecting date: 2025-04-29
+[2025-03-26T14:14:35.226Z] Parsed date: Year=2025, Month=4, Day=29
+[2025-03-26T14:14:36.291Z] Screenshot saved: ./screenshots/1742998476228_calendar_before_navigation.png
+[2025-03-26T14:14:36.359Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:14:36.360Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:14:36.611Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:14:36.614Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:14:36.642Z] Captured Response: 200 https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T14:14:37.876Z] Screenshot saved: ./screenshots/1742998477809_calendar_after_navigation.png
+[2025-03-26T14:14:37.876Z] In-page date selection failed: No date cells found
+[2025-03-26T14:14:37.877Z] Tried fallback method to click any date cell
+[2025-03-26T14:14:38.964Z] Screenshot saved: ./screenshots/1742998478878_date_selected.png
+[2025-03-26T14:14:38.964Z] Clicking NEXT button after date selection
+[2025-03-26T14:14:38.971Z] Error clicking NEXT button: No element found for selector: div.el-dialog__wrapper button.el-button--primary > span
+[2025-03-26T14:14:38.990Z] Clicked NEXT button with alternate selector: button.el-button--primary
+[2025-03-26T14:14:39.063Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T14:14:39.063Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T14:14:39.328Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T14:14:39.340Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T14:14:41.072Z] Screenshot saved: ./screenshots/1742998480991_after_next_button.png
+[2025-03-26T14:14:41.072Z] Selecting first available session
+[2025-03-26T14:14:41.152Z] Saved screenshot of session selection page
+[2025-03-26T14:14:41.153Z] Current page info - Title: USJ, Has session text: false, Has radio buttons: false
+[2025-03-26T14:14:41.153Z] Not on session selection page, skipping session selection
+[2025-03-26T14:14:41.237Z] Screenshot saved: ./screenshots/1742998481153_session_selected.png
+[2025-03-26T14:14:41.237Z] Clicking ADD TO CART button
+[2025-03-26T14:14:41.237Z] Clicking ADD TO CART button
+[2025-03-26T14:14:41.354Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:14:41.354Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:14:41.354Z] Clicked ADD TO CART button by any action button BACK
+[2025-03-26T14:14:41.619Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:14:41.629Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:14:47.510Z] Screenshot saved: ./screenshots/1742998487426_item_added_to_cart.png
+[2025-03-26T14:14:47.510Z] Going to cart
+[2025-03-26T14:14:47.520Z] Clicked cart icon using recorded selector
+[2025-03-26T14:14:49.592Z] Screenshot saved: ./screenshots/1742998489522_cart_page.png
+[2025-03-26T14:14:49.592Z] Clicking NEXT STEP in cart
+[2025-03-26T14:14:49.654Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T14:14:49.655Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T14:14:49.655Z] Clicked NEXT STEP button using recorded selector
+[2025-03-26T14:14:49.914Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T14:14:49.916Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T14:14:51.718Z] Screenshot saved: ./screenshots/1742998491656_after_next_step.png
+[2025-03-26T14:14:51.719Z] Clicking CHECKOUT button
+[2025-03-26T14:14:51.724Z] Clicked CHECKOUT button using recorded selector
+[2025-03-26T14:14:53.807Z] Screenshot saved: ./screenshots/1742998493725_checkout_page.png
+[2025-03-26T14:14:53.807Z] Accepting terms and conditions if present
+[2025-03-26T14:14:53.811Z] Accepted terms and conditions using recorded selector
+[2025-03-26T14:14:53.884Z] Screenshot saved: ./screenshots/1742998493811_after_accepting_terms.png
+[2025-03-26T14:14:53.888Z] Purchase flow completed successfully! API details saved to usj_api_details.json
+[2025-03-26T14:14:53.888Z] Keeping browser open for inspection. Close it manually when done.
+[2025-03-26T14:20:17.538Z] OpenAI client initialized successfully.
+[2025-03-26T14:20:17.539Z] Starting purchase flow for Universal Express Pass 4: 4D & Choice (quantity: 1, date: 2025-04-29)
+[2025-03-26T14:20:19.224Z] Navigating to https://www.usjticketing.com/expressPass
+[2025-03-26T14:20:36.676Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T14:20:36.677Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:20:36.684Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=c90d5c5691194cc08866194efd665008&traceId=c90d5c5691194cc08866194efd665008
+[2025-03-26T14:20:37.226Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=c90d5c5691194cc08866194efd665008&traceId=c90d5c5691194cc08866194efd665008
+[2025-03-26T14:20:37.618Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:20:37.619Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T14:20:45.917Z] Screenshot saved: ./screenshots/1742998845848_initial_page.png
+[2025-03-26T14:20:45.917Z] Setting quantity to 1
+[2025-03-26T14:20:45.917Z] Looking for product section: Universal Express Pass 4: 4D & Choice
+[2025-03-26T14:20:45.929Z] Using recorded product section index
+[2025-03-26T14:20:45.929Z] Performing step: Set Quantity
+[2025-03-26T14:20:45.976Z] Screenshot saved: ./screenshots/1742998845929_before_set_quantity.png
+[2025-03-26T14:20:45.976Z] Getting AI guidance for: Set Quantity
+[2025-03-26T14:20:45.976Z] Making OpenAI API call #1 for step: Set Quantity
+[2025-03-26T14:20:48.137Z] AI Response received
+[2025-03-26T14:20:48.137Z] AI Guidance for Set Quantity: REVIEW 
+[2025-03-26T14:20:48.137Z] Applying AI guidance for Set Quantity
+[2025-03-26T14:20:48.137Z] Attempting to perform REVIEW on 
+[2025-03-26T14:20:49.393Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:20:49.393Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:20:49.707Z] Captured Request: POST https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T14:20:49.710Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:20:49.727Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:20:51.382Z] Captured Response: 200 https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T14:20:53.139Z] Selector not found: 
+[2025-03-26T14:20:53.140Z] Error with selector : SyntaxError: Failed to execute 'querySelector' on 'Document': The provided selector is empty.
+[2025-03-26T14:20:53.140Z] Trying text-based approach for finding elements
+[2025-03-26T14:20:53.140Z] Using advanced in-page evaluation for USJ-specific elements
+[2025-03-26T14:20:53.154Z] Last resort: clicked First available button
+[2025-03-26T14:20:53.221Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/ticket_kinds
+[2025-03-26T14:20:53.221Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=6
+[2025-03-26T14:20:53.221Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:20:53.496Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:20:53.497Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/ticket_kinds
+[2025-03-26T14:20:53.502Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=6
+[2025-03-26T14:20:55.156Z] Successfully completed step Set Quantity with AI guidance
+[2025-03-26T14:20:57.240Z] Screenshot saved: ./screenshots/1742998857157_after_set_quantity_ai.png
+[2025-03-26T14:20:57.240Z] Performing step: Click SELECT A DATE Button
+[2025-03-26T14:20:57.304Z] Screenshot saved: ./screenshots/1742998857240_before_click_select_a_date_button.png
+[2025-03-26T14:20:57.304Z] Getting AI guidance for: Click SELECT A DATE Button
+[2025-03-26T14:20:57.304Z] Making OpenAI API call #2 for step: Click SELECT A DATE Button
+[2025-03-26T14:21:01.635Z] AI Response received
+[2025-03-26T14:21:01.635Z] AI Guidance for Click SELECT A DATE Button: N/A 
+[2025-03-26T14:21:01.635Z] Applying AI guidance for Click SELECT A DATE Button
+[2025-03-26T14:21:01.635Z] Attempting to perform N/A on 
+[2025-03-26T14:21:06.637Z] Selector not found: 
+[2025-03-26T14:21:06.638Z] Error with selector : SyntaxError: Failed to execute 'querySelector' on 'Document': The provided selector is empty.
+[2025-03-26T14:21:06.638Z] Trying text-based approach for finding elements
+[2025-03-26T14:21:06.638Z] Using advanced in-page evaluation for USJ-specific elements
+[2025-03-26T14:21:06.640Z] Last resort: clicked First available button
+[2025-03-26T14:21:08.641Z] Successfully completed step Click SELECT A DATE Button with AI guidance
+[2025-03-26T14:21:10.721Z] Screenshot saved: ./screenshots/1742998870642_after_click_select_a_date_button_ai.png
+[2025-03-26T14:21:10.721Z] Performing step: Select Date
+[2025-03-26T14:21:10.788Z] Screenshot saved: ./screenshots/1742998870721_before_select_date.png
+[2025-03-26T14:21:10.788Z] Getting AI guidance for: Select Date
+[2025-03-26T14:21:10.788Z] Making OpenAI API call #3 for step: Select Date
+[2025-03-26T14:21:14.515Z] AI Response received
+[2025-03-26T14:21:14.515Z] AI Guidance for Select Date: NAVIGATE .productElements .name:contains('Universal Express Pass 4: 4D & Choice')
+[2025-03-26T14:21:14.515Z] Applying AI guidance for Select Date
+[2025-03-26T14:21:14.515Z] Attempting to perform NAVIGATE on .productElements .name:contains('Universal Express Pass 4: 4D & Choice')
+[2025-03-26T14:21:19.517Z] Selector not found: .productElements .name:contains('Universal Express Pass 4: 4D & Choice')
+[2025-03-26T14:21:19.518Z] Error with selector .productElements .name:contains('Universal Express Pass 4: 4D & Choice'): SyntaxError: Failed to execute 'querySelector' on 'Document': '.productElements .name:contains('Universal Express Pass 4: 4D & Choice')' is not a valid selector.
+[2025-03-26T14:21:24.521Z] Selector not found: .el-link:contains('View Details')
+[2025-03-26T14:21:24.522Z] Error with selector .el-link:contains('View Details'): SyntaxError: Failed to execute 'querySelector' on 'Document': '.el-link:contains('View Details')' is not a valid selector.
+[2025-03-26T14:21:24.522Z] Trying text-based approach for finding elements
+[2025-03-26T14:21:24.522Z] Using advanced in-page evaluation for USJ-specific elements
+[2025-03-26T14:21:24.523Z] Last resort: clicked First available button
+[2025-03-26T14:21:26.524Z] Successfully completed step Select Date with AI guidance
+[2025-03-26T14:21:28.607Z] Screenshot saved: ./screenshots/1742998888524_after_select_date_ai.png
+[2025-03-26T14:21:28.607Z] Performing step: Click NEXT After Date Selection
+[2025-03-26T14:21:28.672Z] Screenshot saved: ./screenshots/1742998888607_before_click_next_after_date_selection.png
+[2025-03-26T14:21:28.672Z] Getting AI guidance for: Click NEXT After Date Selection
+[2025-03-26T14:21:28.672Z] Making OpenAI API call #4 for step: Click NEXT After Date Selection
+[2025-03-26T14:21:32.758Z] AI Response received
+[2025-03-26T14:21:32.758Z] AI Guidance for Click NEXT After Date Selection: CLICK button.el-button.el-button--primary
+[2025-03-26T14:21:32.758Z] Applying AI guidance for Click NEXT After Date Selection
+[2025-03-26T14:21:32.758Z] Attempting to perform CLICK on button.el-button.el-button--primary
+[2025-03-26T14:21:33.829Z] Clicked element: button.el-button.el-button--primary
+[2025-03-26T14:21:33.879Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:21:33.879Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:21:34.716Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:21:34.726Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:21:35.831Z] Successfully completed step Click NEXT After Date Selection with AI guidance
+[2025-03-26T14:21:37.905Z] Screenshot saved: ./screenshots/1742998897833_after_click_next_after_date_selection_ai.png
+[2025-03-26T14:21:37.906Z] Performing step: Select First Available Session
+[2025-03-26T14:21:37.954Z] Screenshot saved: ./screenshots/1742998897906_before_select_first_available_session.png
+[2025-03-26T14:21:37.954Z] Getting AI guidance for: Select First Available Session
+[2025-03-26T14:21:37.954Z] Making OpenAI API call #5 for step: Select First Available Session
+[2025-03-26T14:21:47.220Z] AI Response received
+[2025-03-26T14:21:47.220Z] AI Guidance for Select First Available Session: NAVIGATE button.el-button.el-button--primary
+[2025-03-26T14:21:47.221Z] Applying AI guidance for Select First Available Session
+[2025-03-26T14:21:47.221Z] Attempting to perform NAVIGATE on button.el-button.el-button--primary
+[2025-03-26T14:21:53.228Z] Selector not found: button.el-button.blueFont.font_weight_700.next_step_btn
+[2025-03-26T14:21:53.229Z] Element not found with selector: button.el-button.blueFont.font_weight_700.next_step_btn
+[2025-03-26T14:21:53.229Z] Trying text-based approach for finding elements
+[2025-03-26T14:21:53.230Z] Using advanced in-page evaluation for USJ-specific elements
+[2025-03-26T14:21:53.289Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/ticket_kinds
+[2025-03-26T14:21:53.290Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=6
+[2025-03-26T14:21:53.290Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:21:53.290Z] Last resort: clicked First available button
+[2025-03-26T14:21:53.553Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:21:53.553Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/ticket_kinds
+[2025-03-26T14:21:53.558Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=6
+[2025-03-26T14:21:55.291Z] Successfully completed step Select First Available Session with AI guidance
+[2025-03-26T14:21:57.376Z] Screenshot saved: ./screenshots/1742998917292_after_select_first_available_session_ai.png
+[2025-03-26T14:21:57.376Z] Performing step: Add To Cart
+[2025-03-26T14:21:57.438Z] Screenshot saved: ./screenshots/1742998917376_before_add_to_cart.png
+[2025-03-26T14:21:57.438Z] Getting AI guidance for: Add To Cart
+[2025-03-26T14:21:57.438Z] Making OpenAI API call #6 for step: Add To Cart
+[2025-03-26T14:22:02.757Z] AI Response received
+[2025-03-26T14:22:02.757Z] AI Guidance for Add To Cart: CLICK .el-button--primary
+[2025-03-26T14:22:02.757Z] Applying AI guidance for Add To Cart
+[2025-03-26T14:22:02.757Z] Attempting to perform CLICK on .el-button--primary
+[2025-03-26T14:22:03.821Z] Clicked element: .el-button--primary
+[2025-03-26T14:22:03.822Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:22:03.822Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:22:04.085Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:22:04.093Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:22:05.821Z] Successfully completed step Add To Cart with AI guidance
+[2025-03-26T14:22:07.907Z] Screenshot saved: ./screenshots/1742998927823_after_add_to_cart_ai.png
+[2025-03-26T14:22:07.907Z] Performing step: Go To Cart
+[2025-03-26T14:22:07.987Z] Screenshot saved: ./screenshots/1742998927907_before_go_to_cart.png
+[2025-03-26T14:22:07.987Z] Getting AI guidance for: Go To Cart
+[2025-03-26T14:22:07.987Z] Making OpenAI API call #7 for step: Go To Cart
+[2025-03-26T14:22:19.825Z] AI Response received
+[2025-03-26T14:22:19.825Z] AI Guidance for Go To Cart: CLICK button.el-button.el-button--primary
+[2025-03-26T14:22:19.825Z] Applying AI guidance for Go To Cart
+[2025-03-26T14:22:19.825Z] Attempting to perform CLICK on button.el-button.el-button--primary
+[2025-03-26T14:22:20.835Z] Clicked element: button.el-button.el-button--primary
+[2025-03-26T14:22:20.908Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T14:22:20.908Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T14:22:21.191Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T14:22:21.192Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T14:22:22.836Z] Successfully completed step Go To Cart with AI guidance
+[2025-03-26T14:22:24.904Z] Screenshot saved: ./screenshots/1742998944838_after_go_to_cart_ai.png
+[2025-03-26T14:22:24.904Z] Performing step: Click NEXT STEP In Cart
+[2025-03-26T14:22:24.971Z] Screenshot saved: ./screenshots/1742998944904_before_click_next_step_in_cart.png
+[2025-03-26T14:22:24.971Z] Getting AI guidance for: Click NEXT STEP In Cart
+[2025-03-26T14:22:24.971Z] Making OpenAI API call #8 for step: Click NEXT STEP In Cart
+[2025-03-26T14:22:32.931Z] AI Response received
+[2025-03-26T14:22:32.931Z] AI Guidance for Click NEXT STEP In Cart: CLICK .el-button.el-button--primary
+[2025-03-26T14:22:32.931Z] Applying AI guidance for Click NEXT STEP In Cart
+[2025-03-26T14:22:32.931Z] Attempting to perform CLICK on .el-button.el-button--primary
+[2025-03-26T14:22:33.941Z] Error with selector .el-button.el-button--primary: Node is either not clickable or not an Element
+[2025-03-26T14:22:38.943Z] Selector not found: .el-button-primary
+[2025-03-26T14:22:38.944Z] Element not found with selector: .el-button-primary
+[2025-03-26T14:22:39.955Z] Clicked element: .el-button
+[2025-03-26T14:22:41.957Z] Successfully completed step Click NEXT STEP In Cart with AI guidance
+[2025-03-26T14:22:44.039Z] Screenshot saved: ./screenshots/1742998963958_after_click_next_step_in_cart_ai.png
+[2025-03-26T14:22:44.039Z] Performing step: Click CHECKOUT
+[2025-03-26T14:22:44.102Z] Screenshot saved: ./screenshots/1742998964039_before_click_checkout.png
+[2025-03-26T14:22:44.102Z] Getting AI guidance for: Click CHECKOUT
+[2025-03-26T14:22:44.102Z] Making OpenAI API call #9 for step: Click CHECKOUT
+[2025-03-26T14:22:50.288Z] AI Response received
+[2025-03-26T14:22:50.288Z] AI Guidance for Click CHECKOUT: CLICK .el-button.el-button--primary
+[2025-03-26T14:22:50.288Z] Applying AI guidance for Click CHECKOUT
+[2025-03-26T14:22:50.288Z] Attempting to perform CLICK on .el-button.el-button--primary
+[2025-03-26T14:22:51.296Z] Error with selector .el-button.el-button--primary: Node is either not clickable or not an Element
+[2025-03-26T14:22:56.298Z] Selector not found: .el-button.primary
+[2025-03-26T14:22:56.299Z] Element not found with selector: .el-button.primary
+[2025-03-26T14:23:01.302Z] Selector not found: .el-button.font_weight_700
+[2025-03-26T14:23:01.303Z] Element not found with selector: .el-button.font_weight_700
+[2025-03-26T14:23:01.303Z] Trying text-based approach for finding elements
+[2025-03-26T14:23:01.303Z] Using advanced in-page evaluation for USJ-specific elements
+[2025-03-26T14:23:01.305Z] All selector approaches failed
+[2025-03-26T14:23:01.305Z] AI guidance failed for Click CHECKOUT, falling back to manual approach
+[2025-03-26T14:23:01.305Z] Using manual approach for: Click CHECKOUT
+[2025-03-26T14:23:01.310Z] Error clicking CHECKOUT button: Node is either not clickable or not an Element
+[2025-03-26T14:23:01.336Z] All methods to click CHECKOUT button failed: Could not find or click CHECKOUT button with any method
+[2025-03-26T14:23:01.336Z] Error in manual approach for Click CHECKOUT: Could not find or click CHECKOUT button with any method
+[2025-03-26T14:23:01.336Z] ERROR: Failed to click checkout
+[2025-03-26T14:23:01.411Z] Screenshot saved: ./screenshots/1742998981336_error_state.png
+[2025-03-26T14:23:01.416Z] API details saved despite error
+[2025-03-26T14:27:04.304Z] OpenAI client initialized successfully.
+[2025-03-26T14:27:04.305Z] Starting purchase flow for Universal Express Pass 4: 4D & Choice (quantity: 1, date: 2025-04-29)
+[2025-03-26T14:27:05.737Z] Navigating to https://www.usjticketing.com/expressPass
+[2025-03-26T14:27:19.523Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T14:27:19.523Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:27:19.590Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=bb78d70b60404fc5bb66fa4b9e922c03&traceId=bb78d70b60404fc5bb66fa4b9e922c03
+[2025-03-26T14:27:20.054Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=bb78d70b60404fc5bb66fa4b9e922c03&traceId=bb78d70b60404fc5bb66fa4b9e922c03
+[2025-03-26T14:27:20.952Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:27:20.952Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T14:27:26.233Z] Screenshot saved: ./screenshots/1742999246172_initial_page.png
+[2025-03-26T14:27:26.233Z] Setting quantity to 1
+[2025-03-26T14:27:26.233Z] Looking for product section: Universal Express Pass 4: 4D & Choice
+[2025-03-26T14:27:26.247Z] Using recorded product section index
+[2025-03-26T14:27:26.247Z] Performing step: Set Quantity
+[2025-03-26T14:27:26.293Z] Screenshot saved: ./screenshots/1742999246247_before_set_quantity.png
+[2025-03-26T14:27:26.293Z] Getting AI guidance for: Set Quantity
+[2025-03-26T14:27:26.293Z] Making OpenAI API call #1 for step: Set Quantity
+[2025-03-26T14:27:30.176Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:27:30.177Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:27:31.112Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:27:31.123Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:27:31.260Z] AI Response received
+[2025-03-26T14:27:31.260Z] AI Guidance for Set Quantity: CHECK FOR VISIBILITY .el-input-number .el-input-number__increase, .el-input-number .el-input-number__decrease
+[2025-03-26T14:27:31.260Z] Applying AI guidance for Set Quantity
+[2025-03-26T14:27:31.260Z] Performing action: CHECK FOR VISIBILITY on .el-input-number .el-input-number__increase, .el-input-number .el-input-number__decrease with value n/a
+[2025-03-26T14:27:31.261Z] AI guidance failed for Set Quantity, falling back to manual approach
+[2025-03-26T14:27:31.261Z] AI guidance failed for Set Quantity, falling back to manual approach
+[2025-03-26T14:27:31.261Z] Using manual approach for: Set Quantity
+[2025-03-26T14:27:31.262Z] Current quantity: 1, Target: 1
+[2025-03-26T14:27:31.262Z] Quantity already set correctly
+[2025-03-26T14:27:31.262Z] Successfully completed step Set Quantity with manual approach
+[2025-03-26T14:27:32.353Z] Captured Request: POST https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T14:27:33.344Z] Screenshot saved: ./screenshots/1742999253263_after_set_quantity_manual.png
+[2025-03-26T14:27:33.344Z] Performing step: Click SELECT A DATE Button
+[2025-03-26T14:27:33.410Z] Screenshot saved: ./screenshots/1742999253344_before_click_select_a_date_button.png
+[2025-03-26T14:27:33.410Z] Getting AI guidance for: Click SELECT A DATE Button
+[2025-03-26T14:27:33.410Z] Making OpenAI API call #2 for step: Click SELECT A DATE Button
+[2025-03-26T14:27:34.082Z] Captured Response: 200 https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T14:27:44.305Z] AI Response received
+[2025-03-26T14:27:44.305Z] AI Guidance for Click SELECT A DATE Button: CLICK .productElements .el-button--info.is-disabled + .el-button--info.is-underline
+[2025-03-26T14:27:44.305Z] Applying AI guidance for Click SELECT A DATE Button
+[2025-03-26T14:27:44.305Z] Performing action: CLICK on .productElements .el-button--info.is-disabled + .el-button--info.is-underline with value none
+[2025-03-26T14:27:44.308Z] Failed to use selector directly: No element found for selector: .productElements .el-button--info.is-disabled + .el-button--info.is-underline
+[2025-03-26T14:27:44.309Z] Error in manual approach for Click SELECT A DATE Button: Cannot read properties of undefined (reading 'includes')
+pptr:evaluate;performAction%20(%2FUsers%2Foded%2FDocuments%2FWorkspace%2FBrowsar%2Fusj_ticket_purchaser.js%3A271%3A40):22:47
+[2025-03-26T14:27:44.309Z] AI guidance failed for Click SELECT A DATE Button, falling back to manual approach
+[2025-03-26T14:27:44.309Z] Using manual approach for: Click SELECT A DATE Button
+[2025-03-26T14:27:44.322Z] Clicked SELECT A DATE button with recorded selector
+[2025-03-26T14:27:44.322Z] Successfully completed step Click SELECT A DATE Button with manual approach
+[2025-03-26T14:27:46.408Z] Screenshot saved: ./screenshots/1742999266324_after_click_select_a_date_button_manual.png
+[2025-03-26T14:27:46.408Z] Performing step: Select Date
+[2025-03-26T14:27:46.469Z] Screenshot saved: ./screenshots/1742999266408_before_select_date.png
+[2025-03-26T14:27:46.469Z] Getting AI guidance for: Select Date
+[2025-03-26T14:27:46.469Z] Making OpenAI API call #3 for step: Select Date
+[2025-03-26T14:27:53.203Z] AI Response received
+[2025-03-26T14:27:53.204Z] AI Guidance for Select Date: SELECT .product-card:nth-child(14) .el-button
+[2025-03-26T14:27:53.204Z] Applying AI guidance for Select Date
+[2025-03-26T14:27:53.204Z] Performing action: SELECT on .product-card:nth-child(14) .el-button with value none
+[2025-03-26T14:27:53.205Z] AI guidance failed for Select Date, falling back to manual approach
+[2025-03-26T14:27:53.205Z] AI guidance failed for Select Date, falling back to manual approach
+[2025-03-26T14:27:53.205Z] Using manual approach for: Select Date
+[2025-03-26T14:27:53.205Z] Parsed date: Year=2025, Month=4, Day=29
+[2025-03-26T14:27:54.297Z] Screenshot saved: ./screenshots/1742999274207_calendar_before_navigation.png
+[2025-03-26T14:27:54.358Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T14:27:54.358Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T14:27:55.248Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T14:27:55.252Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T14:27:55.892Z] Screenshot saved: ./screenshots/1742999275820_calendar_after_navigation.png
+[2025-03-26T14:27:55.892Z] In-page date selection failed: No date cells found
+[2025-03-26T14:27:55.893Z] Tried fallback method to click any date cell
+[2025-03-26T14:27:56.894Z] Successfully completed step Select Date with manual approach
+[2025-03-26T14:27:58.972Z] Screenshot saved: ./screenshots/1742999278896_after_select_date_manual.png
+[2025-03-26T14:27:58.972Z] Performing step: Click NEXT After Date Selection
+[2025-03-26T14:27:59.037Z] Screenshot saved: ./screenshots/1742999278972_before_click_next_after_date_selection.png
+[2025-03-26T14:27:59.037Z] Getting AI guidance for: Click NEXT After Date Selection
+[2025-03-26T14:27:59.037Z] Making OpenAI API call #4 for step: Click NEXT After Date Selection
+[2025-03-26T14:28:02.686Z] AI Response received
+[2025-03-26T14:28:02.686Z] AI Guidance for Click NEXT After Date Selection: CLICK .el-button.el-button--primary
+[2025-03-26T14:28:02.686Z] Applying AI guidance for Click NEXT After Date Selection
+[2025-03-26T14:28:02.686Z] Performing action: CLICK on .el-button.el-button--primary with value none
+[2025-03-26T14:28:02.692Z] Failed to use selector directly: Node is either not clickable or not an Element
+[2025-03-26T14:28:02.693Z] Error in manual approach for Click NEXT After Date Selection: Cannot read properties of undefined (reading 'includes')
+pptr:evaluate;performAction%20(%2FUsers%2Foded%2FDocuments%2FWorkspace%2FBrowsar%2Fusj_ticket_purchaser.js%3A271%3A40):22:47
+[2025-03-26T14:28:02.693Z] AI guidance failed for Click NEXT After Date Selection, falling back to manual approach
+[2025-03-26T14:28:02.693Z] Using manual approach for: Click NEXT After Date Selection
+[2025-03-26T14:28:02.694Z] Error clicking NEXT button: No element found for selector: div.el-dialog__wrapper button.el-button--primary > span
+[2025-03-26T14:28:02.705Z] Clicked NEXT button using in-page evaluation
+[2025-03-26T14:28:02.705Z] Successfully completed step Click NEXT After Date Selection with manual approach
+[2025-03-26T14:28:04.780Z] Screenshot saved: ./screenshots/1742999284706_after_click_next_after_date_selection_manual.png
+[2025-03-26T14:28:04.781Z] Performing step: Select First Available Session
+[2025-03-26T14:28:04.828Z] Screenshot saved: ./screenshots/1742999284781_before_select_first_available_session.png
+[2025-03-26T14:28:04.828Z] Getting AI guidance for: Select First Available Session
+[2025-03-26T14:28:04.828Z] Making OpenAI API call #5 for step: Select First Available Session
+[2025-03-26T14:28:14.106Z] AI Response received
+[2025-03-26T14:28:14.106Z] AI Guidance for Select First Available Session: NAVIGATE .session-selection .el-radio__input
+[2025-03-26T14:28:14.106Z] Applying AI guidance for Select First Available Session
+[2025-03-26T14:28:14.106Z] Performing action: NAVIGATE on .session-selection .el-radio__input with value none
+[2025-03-26T14:28:14.108Z] AI guidance failed for Select First Available Session, falling back to manual approach
+[2025-03-26T14:28:14.108Z] AI guidance failed for Select First Available Session, falling back to manual approach
+[2025-03-26T14:28:14.108Z] Using manual approach for: Select First Available Session
+[2025-03-26T14:28:14.181Z] Saved screenshot of session selection page
+[2025-03-26T14:28:14.182Z] Current page info - Title: USJ, Has session text: false, Has radio buttons: false
+[2025-03-26T14:28:14.182Z] Not on session selection page, skipping session selection
+[2025-03-26T14:28:14.182Z] Successfully completed step Select First Available Session with manual approach
+[2025-03-26T14:28:16.256Z] Screenshot saved: ./screenshots/1742999296184_after_select_first_available_session_manual.png
+[2025-03-26T14:28:16.257Z] Performing step: Add To Cart
+[2025-03-26T14:28:16.337Z] Screenshot saved: ./screenshots/1742999296257_before_add_to_cart.png
+[2025-03-26T14:28:16.337Z] Getting AI guidance for: Add To Cart
+[2025-03-26T14:28:16.337Z] Making OpenAI API call #6 for step: Add To Cart
+[2025-03-26T14:28:26.215Z] AI Response received
+[2025-03-26T14:28:26.215Z] AI Guidance for Add To Cart: REVIEW null
+[2025-03-26T14:28:26.215Z] Applying AI guidance for Add To Cart
+[2025-03-26T14:28:26.215Z] Performing action: REVIEW on null with value none
+[2025-03-26T14:28:26.219Z] AI guidance failed for Add To Cart, falling back to manual approach
+[2025-03-26T14:28:26.219Z] AI guidance failed for Add To Cart, falling back to manual approach
+[2025-03-26T14:28:26.219Z] Using manual approach for: Add To Cart
+[2025-03-26T14:28:26.219Z] Clicking ADD TO CART button
+[2025-03-26T14:28:26.269Z] Error clicking ADD TO CART button with recorded selector: No element found for selector: button.el-button--success > span
+[2025-03-26T14:28:26.331Z] All methods to click ADD TO CART button failed: Could not find or click ADD TO CART button with any method
+[2025-03-26T14:28:26.331Z] Error in manual approach for Add To Cart: Could not find or click ADD TO CART button with any method
+[2025-03-26T14:28:26.331Z] ERROR: Failed to add to cart
+[2025-03-26T14:28:26.380Z] Screenshot saved: ./screenshots/1742999306331_error_state.png
+[2025-03-26T14:28:26.381Z] API details saved despite error
+[2025-03-26T14:30:59.338Z] OpenAI client initialized successfully.
+[2025-03-26T14:30:59.340Z] Starting purchase flow for Universal Express Pass 4: 4D & Choice (quantity: 1, date: 2025-04-29)
+[2025-03-26T14:31:00.582Z] Navigating to https://www.usjticketing.com/expressPass
+[2025-03-26T14:31:06.735Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T14:31:06.735Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:31:06.743Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=5cb970d6de394123b8e94d69c2a02f68&traceId=5cb970d6de394123b8e94d69c2a02f68
+[2025-03-26T14:31:07.347Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=5cb970d6de394123b8e94d69c2a02f68&traceId=5cb970d6de394123b8e94d69c2a02f68
+[2025-03-26T14:31:07.669Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T14:31:07.670Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:31:11.685Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:31:11.685Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:31:11.991Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:31:12.002Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:31:12.158Z] Screenshot saved: ./screenshots/1742999472066_initial_page.png
+[2025-03-26T14:31:12.158Z] Setting quantity to 1
+[2025-03-26T14:31:12.158Z] Looking for product section: Universal Express Pass 4: 4D & Choice
+[2025-03-26T14:31:12.190Z] Found 19 potential product sections by heading
+[2025-03-26T14:31:12.190Z] Performing step: Set Quantity
+[2025-03-26T14:31:12.254Z] Screenshot saved: ./screenshots/1742999472190_before_set_quantity.png
+[2025-03-26T14:31:12.254Z] Getting AI guidance for: Set Quantity
+[2025-03-26T14:31:12.254Z] Making OpenAI API call #1 for step: Set Quantity
+[2025-03-26T14:31:13.376Z] Captured Request: POST https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T14:31:15.071Z] Captured Response: 200 https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T14:31:16.930Z] AI Response received
+[2025-03-26T14:31:16.930Z] AI Guidance for Set Quantity: CLICK button[aria-label='increment']
+[2025-03-26T14:31:16.930Z] Applying AI guidance for Set Quantity
+[2025-03-26T14:31:16.930Z] Performing action: CLICK on button[aria-label='increment'] with value none
+[2025-03-26T14:31:16.931Z] Failed to use selector directly: No element found for selector: button[aria-label='increment']
+[2025-03-26T14:31:16.934Z] Error in manual approach for Set Quantity: Cannot read properties of undefined (reading 'includes')
+pptr:evaluate;performAction%20(%2FUsers%2Foded%2FDocuments%2FWorkspace%2FBrowsar%2Fusj_ticket_purchaser.js%3A271%3A40):22:47
+[2025-03-26T14:31:16.934Z] AI guidance failed for Set Quantity, falling back to manual approach
+[2025-03-26T14:31:16.934Z] Using manual approach for: Set Quantity
+[2025-03-26T14:31:16.934Z] Current quantity: 1, Target: 1
+[2025-03-26T14:31:16.934Z] Quantity already set correctly
+[2025-03-26T14:31:16.934Z] Successfully completed step Set Quantity with manual approach
+[2025-03-26T14:31:19.012Z] Screenshot saved: ./screenshots/1742999478936_after_set_quantity_manual.png
+[2025-03-26T14:31:19.012Z] Performing step: Click SELECT A DATE Button
+[2025-03-26T14:31:19.069Z] Screenshot saved: ./screenshots/1742999479012_before_click_select_a_date_button.png
+[2025-03-26T14:31:19.069Z] Getting AI guidance for: Click SELECT A DATE Button
+[2025-03-26T14:31:19.069Z] Making OpenAI API call #2 for step: Click SELECT A DATE Button
+[2025-03-26T14:31:24.506Z] AI Response received
+[2025-03-26T14:31:24.506Z] AI Guidance for Click SELECT A DATE Button: INTERACTION NEEDED BEFORE CLICK button:contains('SELECT A DATE')
+[2025-03-26T14:31:24.506Z] Applying AI guidance for Click SELECT A DATE Button
+[2025-03-26T14:31:24.506Z] Performing action: INTERACTION NEEDED BEFORE CLICK on button:contains('SELECT A DATE') with value none
+[2025-03-26T14:31:24.508Z] AI guidance failed for Click SELECT A DATE Button, falling back to manual approach
+[2025-03-26T14:31:24.508Z] AI guidance failed for Click SELECT A DATE Button, falling back to manual approach
+[2025-03-26T14:31:24.508Z] Using manual approach for: Click SELECT A DATE Button
+[2025-03-26T14:31:24.523Z] Clicked SELECT A DATE button with recorded selector
+[2025-03-26T14:31:24.523Z] Successfully completed step Click SELECT A DATE Button with manual approach
+[2025-03-26T14:31:26.605Z] Screenshot saved: ./screenshots/1742999486524_after_click_select_a_date_button_manual.png
+[2025-03-26T14:31:26.606Z] Performing step: Select Date
+[2025-03-26T14:31:26.672Z] Screenshot saved: ./screenshots/1742999486606_before_select_date.png
+[2025-03-26T14:31:26.672Z] Getting AI guidance for: Select Date
+[2025-03-26T14:31:26.672Z] Making OpenAI API call #3 for step: Select Date
+[2025-03-26T14:31:34.255Z] AI Response received
+[2025-03-26T14:31:34.255Z] AI Guidance for Select Date: CLICK .el-button.el-button--info:not(.is-disabled)
+[2025-03-26T14:31:34.255Z] Applying AI guidance for Select Date
+[2025-03-26T14:31:34.255Z] Performing action: CLICK on .el-button.el-button--info:not(.is-disabled) with value none
+[2025-03-26T14:31:34.256Z] Failed to use selector directly: No element found for selector: .el-button.el-button--info:not(.is-disabled)
+[2025-03-26T14:31:34.257Z] Error in manual approach for Select Date: Cannot read properties of undefined (reading 'includes')
+pptr:evaluate;performAction%20(%2FUsers%2Foded%2FDocuments%2FWorkspace%2FBrowsar%2Fusj_ticket_purchaser.js%3A271%3A40):22:47
+[2025-03-26T14:31:34.257Z] AI guidance failed for Select Date, falling back to manual approach
+[2025-03-26T14:31:34.257Z] Using manual approach for: Select Date
+[2025-03-26T14:31:34.257Z] Parsed date: Year=2025, Month=4, Day=29
+[2025-03-26T14:31:35.336Z] Screenshot saved: ./screenshots/1742999495258_calendar_before_navigation.png
+[2025-03-26T14:31:35.409Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T14:31:35.409Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T14:31:35.663Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=8
+[2025-03-26T14:31:35.670Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=8
+[2025-03-26T14:31:36.944Z] Screenshot saved: ./screenshots/1742999496857_calendar_after_navigation.png
+[2025-03-26T14:31:36.944Z] In-page date selection failed: No date cells found
+[2025-03-26T14:31:36.944Z] Tried fallback method to click any date cell
+[2025-03-26T14:31:37.945Z] Successfully completed step Select Date with manual approach
+[2025-03-26T14:31:40.021Z] Screenshot saved: ./screenshots/1742999499946_after_select_date_manual.png
+[2025-03-26T14:31:40.021Z] Performing step: Click NEXT After Date Selection
+[2025-03-26T14:31:40.087Z] Screenshot saved: ./screenshots/1742999500021_before_click_next_after_date_selection.png
+[2025-03-26T14:31:40.087Z] Getting AI guidance for: Click NEXT After Date Selection
+[2025-03-26T14:31:40.087Z] Making OpenAI API call #4 for step: Click NEXT After Date Selection
+[2025-03-26T14:31:44.701Z] AI Response received
+[2025-03-26T14:31:44.701Z] AI Guidance for Click NEXT After Date Selection: CLICK button.el-button.el-button--primary
+[2025-03-26T14:31:44.701Z] Applying AI guidance for Click NEXT After Date Selection
+[2025-03-26T14:31:44.701Z] Performing action: CLICK on button.el-button.el-button--primary with value none
+[2025-03-26T14:31:44.707Z] Failed to use selector directly: Node is either not clickable or not an Element
+[2025-03-26T14:31:44.708Z] Error in manual approach for Click NEXT After Date Selection: Cannot read properties of undefined (reading 'includes')
+pptr:evaluate;performAction%20(%2FUsers%2Foded%2FDocuments%2FWorkspace%2FBrowsar%2Fusj_ticket_purchaser.js%3A271%3A40):22:47
+[2025-03-26T14:31:44.708Z] AI guidance failed for Click NEXT After Date Selection, falling back to manual approach
+[2025-03-26T14:31:44.708Z] Using manual approach for: Click NEXT After Date Selection
+[2025-03-26T14:31:44.709Z] Error clicking NEXT button: No element found for selector: div.el-dialog__wrapper button.el-button--primary > span
+[2025-03-26T14:31:44.721Z] Clicked NEXT button using in-page evaluation
+[2025-03-26T14:31:44.721Z] Successfully completed step Click NEXT After Date Selection with manual approach
+[2025-03-26T14:31:46.786Z] Screenshot saved: ./screenshots/1742999506723_after_click_next_after_date_selection_manual.png
+[2025-03-26T14:31:46.786Z] Performing step: Select First Available Session
+[2025-03-26T14:31:46.844Z] Screenshot saved: ./screenshots/1742999506786_before_select_first_available_session.png
+[2025-03-26T14:31:46.844Z] Getting AI guidance for: Select First Available Session
+[2025-03-26T14:31:46.844Z] Making OpenAI API call #5 for step: Select First Available Session
+[2025-03-26T14:32:03.080Z] AI Response received
+[2025-03-26T14:32:03.080Z] AI Guidance for Select First Available Session: SELECT input[type='radio']:first-child
+[2025-03-26T14:32:03.080Z] Applying AI guidance for Select First Available Session
+[2025-03-26T14:32:03.080Z] Performing action: SELECT on input[type='radio']:first-child with value none
+[2025-03-26T14:32:03.081Z] AI guidance failed for Select First Available Session, falling back to manual approach
+[2025-03-26T14:32:03.081Z] AI guidance failed for Select First Available Session, falling back to manual approach
+[2025-03-26T14:32:03.081Z] Using manual approach for: Select First Available Session
+[2025-03-26T14:32:03.146Z] Saved screenshot of session selection page
+[2025-03-26T14:32:03.147Z] Current page info - Title: USJ, Has session text: false, Has radio buttons: false
+[2025-03-26T14:32:03.147Z] Not on session selection page, skipping session selection
+[2025-03-26T14:32:03.147Z] Successfully completed step Select First Available Session with manual approach
+[2025-03-26T14:32:05.218Z] Screenshot saved: ./screenshots/1742999525151_after_select_first_available_session_manual.png
+[2025-03-26T14:32:05.218Z] Performing step: Add To Cart
+[2025-03-26T14:32:05.279Z] Screenshot saved: ./screenshots/1742999525218_before_add_to_cart.png
+[2025-03-26T14:32:05.280Z] Getting AI guidance for: Add To Cart
+[2025-03-26T14:32:05.280Z] Making OpenAI API call #6 for step: Add To Cart
+[2025-03-26T14:32:10.661Z] AI Response received
+[2025-03-26T14:32:10.661Z] AI Guidance for Add To Cart: NAVIGATE a[href*='shopCartDetails']
+[2025-03-26T14:32:10.661Z] Applying AI guidance for Add To Cart
+[2025-03-26T14:32:10.661Z] Performing action: NAVIGATE on a[href*='shopCartDetails'] with value none
+[2025-03-26T14:32:10.662Z] AI guidance failed for Add To Cart, falling back to manual approach
+[2025-03-26T14:32:10.662Z] AI guidance failed for Add To Cart, falling back to manual approach
+[2025-03-26T14:32:10.662Z] Using manual approach for: Add To Cart
+[2025-03-26T14:32:10.662Z] Clicking ADD TO CART button - using enhanced detection
+[2025-03-26T14:32:10.731Z] In-page evaluation failed to find ADD TO CART button, trying direct selectors
+[2025-03-26T14:32:10.736Z] Trying to click any button in main content area
+[2025-03-26T14:32:10.813Z] All methods to click ADD TO CART button failed: Could not find or click ADD TO CART button with any method
+[2025-03-26T14:32:10.813Z] Error clicking ADD TO CART button: Could not find or click ADD TO CART button with any method
+[2025-03-26T14:32:10.813Z] Error in manual approach for Add To Cart: Could not find or click ADD TO CART button with any method
+[2025-03-26T14:32:10.813Z] ERROR: Failed to add to cart
+[2025-03-26T14:32:10.865Z] Screenshot saved: ./screenshots/1742999530813_error_state.png
+[2025-03-26T14:32:10.868Z] API details saved despite error
+[2025-03-26T14:33:14.157Z] OpenAI client initialized successfully.
+[2025-03-26T14:33:14.158Z] Starting purchase flow for Universal Express Pass 4: 4D & Choice (quantity: 1, date: 2025-04-29)
+[2025-03-26T14:33:15.778Z] Navigating to https://www.usjticketing.com/expressPass
+[2025-03-26T14:33:19.874Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T14:33:19.874Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:33:19.930Z] Captured Request: GET https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=a17cc2e2c53e4532ba799c9f81313e97&traceId=a17cc2e2c53e4532ba799c9f81313e97
+[2025-03-26T14:33:20.424Z] Captured Response: 200 https://api.hubspot.com/livechat-public/v1/message/public?portalId=9092818&conversations-embed=static-1.21071&mobile=false&messagesUtk=a17cc2e2c53e4532ba799c9f81313e97&traceId=a17cc2e2c53e4532ba799c9f81313e97
+[2025-03-26T14:33:21.104Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/type_config/page
+[2025-03-26T14:33:21.104Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/notice
+[2025-03-26T14:33:23.845Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:33:23.845Z] Captured Request: GET https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:33:24.154Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/news?noticeType=7
+[2025-03-26T14:33:24.318Z] Captured Response: 200 https://nta.tripodeck.com/api/official/usj/page?ticketKind=3
+[2025-03-26T14:33:24.972Z] Screenshot saved: ./screenshots/1742999604879_initial_page.png
+[2025-03-26T14:33:24.973Z] Setting quantity to 1
+[2025-03-26T14:33:24.973Z] Looking for product section: Universal Express Pass 4: 4D & Choice
+[2025-03-26T14:33:25.004Z] Found 19 potential product sections by heading
+[2025-03-26T14:33:25.004Z] Performing step: Set Quantity
+[2025-03-26T14:33:25.104Z] Screenshot saved: ./screenshots/1742999605004_before_set_quantity.png
+[2025-03-26T14:33:25.104Z] Getting AI guidance for: Set Quantity
+[2025-03-26T14:33:25.104Z] Making OpenAI API call #1 for step: Set Quantity
+[2025-03-26T14:33:25.202Z] Captured Request: POST https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T14:33:26.913Z] Captured Response: 200 https://travel.fraudprevention.jp/api/forms.json
+[2025-03-26T14:33:36.301Z] AI Response received
+[2025-03-26T14:33:36.301Z] AI Guidance for Set Quantity: CLICK [name='Universal Express Pass 4: 4D & Choice'] + .quantity-selector .plus
+[2025-03-26T14:33:36.301Z] Applying AI guidance for Set Quantity
+[2025-03-26T14:33:36.302Z] Performing action: CLICK on [name='Universal Express Pass 4: 4D & Choice'] + .quantity-selector .plus with value none
+[2025-03-26T14:33:36.303Z] Failed to use selector directly: No element found for selector: [name='Universal Express Pass 4: 4D & Choice'] + .quantity-selector .plus
+[2025-03-26T14:33:36.305Z] Error in manual approach for Set Quantity: Cannot read properties of undefined (reading 'includes')
+pptr:evaluate;performAction%20(%2FUsers%2Foded%2FDocuments%2FWorkspace%2FBrowsar%2Fusj_ticket_purchaser.js%3A271%3A40):22:47
+[2025-03-26T14:33:36.305Z] AI guidance failed for Set Quantity, falling back to manual approach
+[2025-03-26T14:33:36.305Z] Using manual approach for: Set Quantity
+[2025-03-26T14:33:36.305Z] Current quantity: 1, Target: 1
+[2025-03-26T14:33:36.305Z] Quantity already set correctly
+[2025-03-26T14:33:36.305Z] Successfully completed step Set Quantity with manual approach
+[2025-03-26T14:33:38.376Z] Screenshot saved: ./screenshots/1742999618306_after_set_quantity_manual.png
+[2025-03-26T14:33:38.376Z] Performing step: Click SELECT A DATE Button
+[2025-03-26T14:33:38.439Z] Screenshot saved: ./screenshots/1742999618376_before_click_select_a_date_button.png
+[2025-03-26T14:33:38.439Z] Getting AI guidance for: Click SELECT A DATE Button
+[2025-03-26T14:33:38.439Z] Making OpenAI API call #2 for step: Click SELECT A DATE Button
+[2025-03-26T14:33:57.214Z] AI Response received
+[2025-03-26T14:33:57.215Z] AI Guidance for Click SELECT A DATE Button: CLICK .el-button.el-button--info[disabled=false]:nth-of-type(2) + button[disabled]:enabled
+[2025-03-26T14:33:57.215Z] Applying AI guidance for Click SELECT A DATE Button
+[2025-03-26T14:33:57.215Z] Performing action: CLICK on .el-button.el-button--info[disabled=false]:nth-of-type(2) + button[disabled]:enabled with value none
+[2025-03-26T14:33:57.216Z] Failed to use selector directly: No element found for selector: .el-button.el-button--info[disabled=false]:nth-of-type(2) + button[disabled]:enabled
+[2025-03-26T14:33:57.216Z] Error in manual approach for Click SELECT A DATE Button: Cannot read properties of undefined (reading 'includes')
+pptr:evaluate;performAction%20(%2FUsers%2Foded%2FDocuments%2FWorkspace%2FBrowsar%2Fusj_ticket_purchaser.js%3A271%3A40):22:47
+[2025-03-26T14:33:57.216Z] AI guidance failed for Click SELECT A DATE Button, falling back to manual approach
+[2025-03-26T14:33:57.217Z] Using manual approach for: Click SELECT A DATE Button
+[2025-03-26T14:33:57.217Z] Error clicking date button with recorded selector: No element found for selector: div:nth-of-type(5) button > span
+[2025-03-26T14:33:57.219Z] All methods to click date button failed: Could not find or click SELECT A DATE button with any method
+[2025-03-26T14:33:57.219Z] Error in manual approach for Click SELECT A DATE Button: Could not find or click SELECT A DATE button with any method
+[2025-03-26T14:33:57.219Z] ERROR: Failed to click date button
+[2025-03-26T14:33:57.285Z] Screenshot saved: ./screenshots/1742999637219_error_state.png
+[2025-03-26T14:33:57.286Z] API details saved despite error

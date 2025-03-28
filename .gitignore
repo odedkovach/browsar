@@ -1,0 +1,33 @@
+# Node modules
+node_modules/
+
+# Screenshots directory
+screenshots/
+
+# Environment variables
+.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Generated files
+api_details.json
+usj_network_data.json
+usj_express_passes.json
+usj_api_endpoints.json
+usj_api_responses.json
+availability_apis.json
+usj_availability.json 

@@ -1,0 +1,17 @@
+{
+  "name": "usj-ticket-purchaser",
+  "version": "1.0.0",
+  "description": "Universal Studios Japan Express Pass Ticket Purchasing Automation",
+  "main": "index2.js",
+  "scripts": {
+    "start": "node index2.js",
+    "setup": "mkdir -p screenshots",
+    "install": "npm run setup",
+    "test": "echo \"No tests configured\" && exit 0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "openai": "^4.89.1",
+    "puppeteer": "^23.0.0"
+  }
+}
