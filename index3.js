@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const OpenAI = require('openai');
 require('dotenv').config(); // Load environment variables from .env file
+const captchaHandler = require('./captcha-handler'); // Import the captcha handler module
 
 // Configure the OpenAI client using your API key from environment variables
 const openai = new OpenAI({
@@ -1415,6 +1416,28 @@ async function fillPlaceOfResidence(page) {
     return false;
   }
 }
+
+// Map actions to their corresponding functions
+const hardcodedActions = {
+  findProduct: findProduct,
+  increaseQuantity: increaseQuantity,
+  clickSelectDate: clickSelectDate,
+  clickNextMonth: clickNextMonth,
+  selectDate: selectDate,
+  clickNext: clickNext,
+  selectFirstRadio: selectFirstRadio,
+  clickAddToCart: clickAddToCart,
+  clickNextStep: clickNextStep,
+  clickSecondNextStep: clickSecondNextStep,
+  clickCheckout: clickCheckout,
+  clickIAgree: handleIAgree,
+  fillFormDetails: fillFormDetails,
+  fillNationality: fillNationality,
+  fillPlaceOfResidence: fillPlaceOfResidence,
+  handleCaptcha: captchaHandler.handleCaptchaVerification, // Use the imported function
+  checkTermsCheckbox: checkTermsCheckbox,
+  checkCancellationCheckbox: checkCancellationCheckbox,
+};
 
 // Function to execute the step based on the instruction
 async function executeStep(instruction, page) {
