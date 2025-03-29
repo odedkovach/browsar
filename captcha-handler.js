@@ -140,7 +140,8 @@ async function getVerificationText(page) {
             width: img.width,
             height: img.height,
             alt: img.alt,
-            className: img.className
+            className: img.className,
+            selector: imgSel
           };
         }
       }
@@ -158,18 +159,29 @@ async function getVerificationText(page) {
     const imagePath = path.join(__dirname, 'verification_images', `verification_${timestamp}.png`);
     
     // Take screenshot of just the verification image
-    await page.evaluate((img) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-      return canvas.toDataURL('image/png');
-    }, verificationImg).then(async (dataUrl) => {
-      const base64Data = dataUrl.replace(/^data:image\/png;base64,/, '');
-      fs.writeFileSync(imagePath, base64Data, 'base64');
-      console.log(`Saved verification image to: ${imagePath}`);
+    const imageElement = await page.$(verificationImg.selector);
+    if (!imageElement) {
+      throw new Error('Could not find image element for screenshot');
+    }
+
+    // Get the bounding box of the image
+    const box = await imageElement.boundingBox();
+    if (!box) {
+      throw new Error('Could not get image bounding box');
+    }
+
+    // Take a screenshot of just the image area
+    await page.screenshot({
+      path: imagePath,
+      clip: {
+        x: box.x,
+        y: box.y,
+        width: box.width,
+        height: box.height
+      }
     });
+
+    console.log(`Saved verification image to: ${imagePath}`);
 
     // Send the image to GPT-4o for text extraction
     const response = await openai.chat.completions.create({
@@ -180,7 +192,7 @@ async function getVerificationText(page) {
           content: [
             {
               type: "text",
-              text: "Extract the text from this verification image. Return ONLY the text, nothing else."
+              text: "Extract the text from this verification image. Return ONLY the text, nothing else. Be precise and include all characters."
             },
             {
               type: "image_url",
