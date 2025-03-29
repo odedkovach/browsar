@@ -18,12 +18,15 @@ if (!fs.existsSync(screenshotsDir)) {
 
 // Helper function to take screenshots with timestamp
 const takeScreenshot = async (page, name) => {
-  const timestamp = new Date().toISOString().replace(/:/g, '-');
-  const filename = `${name}_${timestamp}.png`;
-  const filepath = path.join(screenshotsDir, filename);
-  await page.screenshot({ path: filepath });
-  console.log(`Screenshot saved: ${filename}`);
-  return filepath;
+  try {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const screenshotPath = path.join(screenshotsDir, `${name}_${timestamp}.png`);
+    
+    // await page.screenshot({ path: screenshotPath });
+    console.log(`Screenshot saved: ${name}_${timestamp}.png`);
+  } catch (error) {
+    console.error(`Error taking screenshot: ${error.message}`);
+  }
 };
 
 // Helper function to highlight an element before interacting with it
@@ -32,7 +35,7 @@ const highlightElement = async (page, element, color = 'red') => {
     const originalStyle = el.style.border;
     const originalBg = el.style.backgroundColor;
     
-    // Add a highlight
+    // Add a highlight by setting a red border and a slight background tint
     el.style.border = `3px solid ${color}`;
     el.style.backgroundColor = color === 'red' ? 'rgba(255, 0, 0, 0.2)' : 'rgba(0, 255, 0, 0.2)';
     el.style.boxShadow = '0 0 10px rgba(255, 0, 0, 0.7)';
@@ -49,17 +52,55 @@ const highlightElement = async (page, element, color = 'red') => {
 };
 
 async function handleCaptchaVerification(page) {
+  console.log('Starting captcha verification process...');
+  
   try {
-    console.log('Handling text verification');
-    await takeScreenshot(page, 'before_text_verification');
+    // Wait for the verification image to be visible
+    console.log('Waiting for verification image to be visible...');
+    await page.waitForSelector('img[src*="captcha"], img[src*="verification"]', { timeout: 10000 });
     
-    console.log('Looking for verification elements...');
+    // Take screenshot of the verification image
+    // await takeScreenshot(page, 'verification_image');
     
-    // Wait for verification elements to be visible
-    await page.waitForSelector('img[data-v-6aff2c22]', { visible: true, timeout: 10000 })
-      .catch(() => console.log('Verification image not found with first selector, trying alternatives...'));
+    // Get the verification text using OpenAI
+    const verificationText = await getVerificationText(page);
+    console.log('Verification text:', verificationText);
     
-    // Try multiple selectors for the verification image
+    // Enter the verification code
+    const codeEntered = await page.evaluate((code) => {
+      const input = document.querySelector('input[type="text"].el-input__inner[maxlength="6"]');
+      if (!input) return { success: false, reason: 'Verification code input not found' };
+      
+      input.value = '';
+      input.value = code;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      
+      input.style.border = '3px solid green';
+      input.style.backgroundColor = 'rgba(0, 255, 0, 0.1)';
+      
+      return { success: true };
+    }, verificationText);
+    
+    if (!codeEntered.success) {
+      throw new Error(`Failed to enter verification code: ${codeEntered.reason}`);
+    }
+    
+    console.log(`✅ Entered verification code: ${verificationText}`);
+    await delay(500);
+    
+    // await takeScreenshot(page, 'verification_code_entered');
+    return true;
+  } catch (error) {
+    console.error(`Error in handleCaptchaVerification: ${error.message}`);
+    // await takeScreenshot(page, 'error_verification');
+    throw error;
+  }
+}
+
+async function getVerificationText(page) {
+  try {
+    // Instead of taking a full page screenshot, capture only the highlighted verification image.
+    // Use the same selectors to find the verification image element.
     const imgSelectors = [
       'img[data-v-6aff2c22]', 
       'img.captcha-image', 
@@ -67,81 +108,36 @@ async function handleCaptchaVerification(page) {
       'div[class*="captcha"] img'
     ];
     
-    // Find verification image
     let verificationImg = null;
-    
-    // Try each selector until we find the image
     for (const imgSel of imgSelectors) {
       verificationImg = await page.$(imgSel);
       if (verificationImg) {
-        console.log(`Found verification image with selector: ${imgSel}`);
         break;
       }
     }
     
     if (!verificationImg) {
-      console.error('❌ Could not find verification image');
-      await takeScreenshot(page, 'verification_image_not_found');
-      return false;
+      console.error('❌ Could not find verification image for screenshot');
+      return null;
     }
     
-    console.log('Found verification image');
-    
-    // Highlight the verification image for better recognition
-    await highlightElement(page, verificationImg);
-    await takeScreenshot(page, 'text_verification');
-    
-    // Get verification text from the image using GPT-4o
-    const verificationText = await getVerificationText(page);
-    if (!verificationText) {
-      console.error('❌ Could not get verification text');
-      return false;
-    }
-    
-    console.log(`Text detected: ${verificationText}`);
-    
-    // Using exact selector based on form HTML
-    // Email
-    await page.locator('div:nth-of-type(10) input').click();
-    await page.locator('div:nth-of-type(10) input').fill(verificationText);
-    
-    // Wait for verification to complete
-    await delay(1000);
-    
-    // Just continue - we can't rely on the verification check
-    console.log('✅ Completed verification step');
-    return true;
-  } catch (error) {
-    console.error('Error in handleCaptchaVerification:', error);
-    await takeScreenshot(page, 'error_captcha_verification');
-    return false;
-  }
-}
-
-async function getVerificationText(page) {
-  try {
-    // Take a full screenshot with the highlighted image
+    // Capture a screenshot of only the verification image element
     const timestamp = new Date().toISOString().replace(/:/g, '-');
     const filename = `text_verification_${timestamp}.png`;
     const filepath = path.join(screenshotsDir, filename);
-    
-    // Take full screenshot
-    await page.screenshot({
-      path: filepath,
-      fullPage: true
-    });
-    console.log(`Full screenshot with highlighted text saved: ${filename}`);
+    await verificationImg.screenshot({ path: filepath });
+    console.log(`Screenshot of highlighted image saved: ${filename}`);
     
     // Read the image file and convert to base64
     const imageBuffer = fs.readFileSync(filepath);
     const base64Image = imageBuffer.toString('base64');
     
-    // Create a simpler prompt that explicitly asks for just the text
+    // Create a prompt that explicitly asks for just the text within the red rectangle
     const prompt = "Return ONLY the letters and numbers you see in the red rectangle. Do not add any other text or phrases like 'The text is'";
     
     console.log(`Sending request to OpenAI with prompt: "${prompt}"`);
     
-    // Send to GPT-4o for analysis
+    // Send the highlighted image to GPT-4o for analysis
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -204,4 +200,4 @@ module.exports = {
   takeScreenshot,
   highlightElement,
   delay
-}; 
+};

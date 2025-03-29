@@ -21,12 +21,15 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Helper function to take screenshots with timestamp
 const takeScreenshot = async (page, name) => {
-  const timestamp = new Date().toISOString().replace(/:/g, '-');
-  const filename = `${name}_${timestamp}.png`;
-  const filepath = path.join(screenshotsDir, filename);
-  await page.screenshot({ path: filepath });
-  console.log(`Screenshot saved: ${filename}`);
-  return filepath;
+  try {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const screenshotPath = path.join(screenshotsDir, `${name}_${timestamp}.png`);
+    
+    // await page.screenshot({ path: screenshotPath });
+    console.log(`Screenshot saved: ${name}_${timestamp}.png`);
+  } catch (error) {
+    console.error(`Error taking screenshot: ${error.message}`);
+  }
 };
 
 // Helper function to highlight an element before interacting with it
@@ -1502,7 +1505,7 @@ async function executeStep(instruction, page) {
       waitUntil: 'networkidle2' 
     });
     console.log('✅ Page loaded successfully');
-    await takeScreenshot(page, 'step1_page_loaded');
+    // await takeScreenshot(page, 'step1_page_loaded');
     
     // Clear any items in the cart if they exist
     console.log('\n---- Checking for and removing any items in cart ----');
@@ -1566,7 +1569,7 @@ async function executeStep(instruction, page) {
     
     // Wait for page to fully load
     console.log('Waiting for 5 seconds before starting the process...');
-    await delay(500);
+    await delay(5000);
     
     // Process each step with AI assistance and retry mechanism
     for (const step of steps) {
