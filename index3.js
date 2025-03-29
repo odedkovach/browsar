@@ -73,46 +73,32 @@ async function analyzeDropdownIssue(page, screenshotName) {
   }
 }
 
-// Function to get instruction from GPT-4o for the current step
-async function getStepInstruction(stepName, dom, retryCount, lastError) {
-  // Helper for sending the instruction prompt and getting the action from GPT-4o
-  // Map the step name to an explicit action to avoid AI mistakes
-  const hardcodedActions = {
-    'Find Universal Express Pass 4: Thrills & Choice product': { action: 'findProduct', productName: 'Universal Express Pass 4: Thrills & Choice' },
-    'Increase quantity to 1': { action: 'increaseQuantity' },
-    'Click SELECT A DATE button': { action: 'clickSelectDate' },
-    'Navigate to May 2025': { action: 'clickNextMonth' },
-    'Select date 31': { action: 'selectDate', day: 31 },
-    'Click Next': { action: 'clickNext' },
-    'Select first radio button': { action: 'selectFirstRadio' },
-    'Click Add to Cart': { action: 'clickAddToCart' },
-    'Click Next Step': { action: 'clickNextStep' },
-    'Click Second Next Step': { action: 'clickSecondNextStep' },
-    'Click Checkout': { action: 'clickCheckout' },
-    'Click I Agree': { action: 'clickIAgree' },
-    'Fill Form Details': { action: 'fillFormDetails' },
-    'Handle Captcha Verification': { action: 'handleCaptcha' },
-    'Enter Verification Code': { action: 'handleCaptcha' },
-    'Check Terms of Service Checkbox': { action: 'checkTermsCheckbox' },
-    'Check Cancellation Policy Checkbox': { action: 'checkCancellationCheckbox' }
-  };
+// Define the steps for our process with their corresponding actions
+const steps = [
+  { name: 'Find Universal Express Pass 4: Thrills & Choice product', action: 'findProduct', productName: 'Universal Express Pass 4: Thrills & Choice' },
+  { name: 'Increase quantity to 1', action: 'increaseQuantity' },
+  { name: 'Click SELECT A DATE button', action: 'clickSelectDate' },
+  { name: 'Navigate to May 2025', action: 'clickNextMonth' },
+  { name: 'Select date 31', action: 'selectDate', day: 31 },
+  { name: 'Click Next', action: 'clickNext' },
+  { name: 'Select first radio button', action: 'selectFirstRadio' },
+  { name: 'Click Add to Cart', action: 'clickAddToCart' },
+  { name: 'Click Next Step', action: 'clickNextStep' },
+  { name: 'Click Second Next Step', action: 'clickSecondNextStep' },
+  { name: 'Click Checkout', action: 'clickCheckout' },
+  { name: 'Click I Agree', action: 'clickIAgree' },
+  { name: 'Fill Form Details', action: 'fillFormDetails' },
+  { name: 'Fill Nationality', action: 'fillNationality' },
+  { name: 'Fill Place of Residence', action: 'fillPlaceOfResidence' },
+  { name: 'Handle Captcha Verification', action: 'handleCaptcha' },
+  { name: 'Check Terms of Service Checkbox', action: 'checkTermsCheckbox' },
+  { name: 'Check Cancellation Policy Checkbox', action: 'checkCancellationCheckbox' },
+];
 
-  // Use hardcoded action for this step if available
-  if (hardcodedActions[stepName]) {
-    console.log(`\nSending prompt to OpenAI for step: ${stepName}`);
-    
-    // Log a "fake" raw OpenAI response for consistency in logs
-    console.log('\n=== Raw OpenAI Response ===');
-    console.log('```json');
-    console.log(JSON.stringify(hardcodedActions[stepName]));
-    console.log('```');
-    console.log('===========================\n');
-    
-    return hardcodedActions[stepName];
-  }
-  
-  // If no hardcoded action, use the GPT-4o prompt
-  // ... rest of the existing function code ...
+// Function to get instruction for the current step
+async function getStepInstruction(step, dom, retryCount, lastError) {
+  // Return the step's action directly since it's already defined in the step object
+  return step;
 }
 
 // Check if a subtotal amount is visible on the page
@@ -1289,6 +1275,190 @@ async function fillFormDetails(instruction, page) {
   }
 }
 
+async function fillNationality(page) {
+  try {
+    console.log('Filling nationality field');
+    
+    // Click the nationality dropdown
+    await page.locator('div:nth-of-type(4) div.el-select input').click();
+    
+    // Type 'isra' to filter
+    await page.locator('div:nth-of-type(4) div.el-select input').fill('isra');
+    
+    // Wait a bit for the dropdown to update
+    await delay(1000);
+    
+    // Try multiple selectors for Israel option as in the recording
+    // Using the exact selectors and coordinates from the browser recording
+    try {
+      await page.locator('div:nth-of-type(3) li.hover').click({
+        offset: {
+          x: 383,
+          y: 19
+        }
+      });
+    } catch (e) {
+      console.log('First selector failed, trying alternative selectors:', e.message);
+      
+      try {
+        // Try XPath selector from the recording
+        await page.locator('xpath//html/body/div[3]/div[1]/div[1]/ul/li[106]').click({
+          offset: {
+            x: 383,
+            y: 19
+          }
+        });
+      } catch (e2) {
+        console.log('XPath selector failed, trying generic approach:', e2.message);
+        
+        // Last resort - try a more generic approach
+        await page.evaluate(() => {
+          const dropdowns = document.querySelectorAll('div.el-select-dropdown.el-popper');
+          for (const dropdown of dropdowns) {
+            if (dropdown.style.display !== 'none') {
+              const items = dropdown.querySelectorAll('li');
+              for (const item of items) {
+                if (item.textContent.includes('Israel')) {
+                  item.click();
+                  return true;
+                }
+              }
+            }
+          }
+          throw new Error('Israel option not found in visible dropdowns');
+        });
+      }
+    }
+    
+    // Wait to ensure the selection is registered
+    await delay(1000);
+    
+    console.log('✅ Successfully filled nationality field');
+    return true;
+  } catch (error) {
+    console.error('Error filling nationality:', error.message);
+    await takeScreenshot(page, 'error_fill_nationality');
+    return false;
+  }
+}
+
+async function fillPlaceOfResidence(page) {
+  try {
+    console.log('Filling Place of Residence field');
+    
+    // Click the Place of Residence dropdown
+    await page.locator('div:nth-of-type(5) div.el-select input').click();
+    
+    // Type 'isra' to filter
+    await page.locator('div:nth-of-type(5) div.el-select input').fill('isra');
+    
+    // Wait a bit for the dropdown to update
+    await delay(1000);
+    
+    // Try multiple selectors and approaches to click Israel
+    try {
+      // First attempt - target visible dropdown item
+      await page.evaluate(() => {
+        const dropdowns = document.querySelectorAll('div.el-select-dropdown.el-popper');
+        for (const dropdown of dropdowns) {
+          if (dropdown.style.display !== 'none') {
+            const items = dropdown.querySelectorAll('li');
+            for (const item of items) {
+              if (item.textContent.includes('Israel')) {
+                item.click();
+                return true;
+              }
+            }
+          }
+        }
+        throw new Error('Israel option not found in visible dropdowns');
+      });
+    } catch (e) {
+      console.log('First attempt failed, trying direct selectors:', e.message);
+      
+      // Second attempt - using the hover class that may be present
+      try {
+        await page.locator('li.hover').click();
+      } catch (e2) {
+        console.log('Second attempt failed, trying xpath:', e2.message);
+        
+        // Third attempt - try XPath selector
+        try {
+          // Find any dropdown that's currently visible
+          const liElements = await page.$$eval('li.el-select-dropdown__item', (items) => {
+            return items.filter(item => {
+              // Check if the item is visible
+              const style = window.getComputedStyle(item);
+              return style.display !== 'none' && item.textContent.includes('Israel');
+            }).map(item => items.indexOf(item));
+          });
+          
+          if (liElements.length > 0) {
+            // Click the first Israel option found
+            await page.locator('li.el-select-dropdown__item').nth(liElements[0]).click();
+          }
+        } catch (e3) {
+          console.log('All attempts failed:', e3.message);
+          throw e3;
+        }
+      }
+    }
+    
+    // Wait to ensure the selection is registered
+    await delay(1000);
+    
+    console.log('✅ Successfully filled Place of Residence field');
+    return true;
+  } catch (error) {
+    console.error('Error filling Place of Residence:', error.message);
+    await takeScreenshot(page, 'error_fill_place_of_residence');
+    return false;
+  }
+}
+
+// Function to execute the step based on the instruction
+async function executeStep(instruction, page) {
+  switch (instruction.action) {
+    case 'findProduct':
+      return await findProduct(instruction, page);
+    case 'increaseQuantity':
+      return await increaseQuantity(instruction, page);
+    case 'clickSelectDate':
+      return await clickSelectDate(instruction, page);
+    case 'clickNextMonth':
+      return await clickNextMonth(instruction, page);
+    case 'selectDate':
+      return await selectDate(instruction, page);
+    case 'clickNext':
+      return await clickNext(instruction, page);
+    case 'selectFirstRadio':
+      return await selectFirstRadio(instruction, page);
+    case 'clickAddToCart':
+      return await clickAddToCart(instruction, page);
+    case 'clickNextStep':
+      return await clickNextStep(instruction, page);
+    case 'clickSecondNextStep':
+      return await clickSecondNextStep(instruction, page);
+    case 'clickCheckout':
+      return await clickCheckout(instruction, page);
+    case 'clickIAgree':
+      return await handleIAgree(page);
+    case 'fillFormDetails':
+      return await fillFormDetails(instruction, page);
+    case 'fillNationality':
+      return await fillNationality(page);
+    case 'fillPlaceOfResidence':
+      return await fillPlaceOfResidence(page);
+    case 'handleCaptcha':
+      return await handleCaptchaVerification(page);
+    case 'checkTermsCheckbox':
+      return await checkTermsCheckbox(instruction, page);
+    case 'checkCancellationCheckbox':
+      return await checkCancellationCheckbox(instruction, page);
+    default:
+      throw new Error(`Unknown action: ${instruction.action}`);
+  }
+}
 
 (async () => {
   console.log('Starting USJ Express Pass ticket selection process with GPT-4o assistance...');
@@ -1375,29 +1545,9 @@ async function fillFormDetails(instruction, page) {
     console.log('Waiting for 5 seconds before starting the process...');
     await delay(500);
     
-    // Define the steps for our process
-    const steps = [
-      'Find Universal Express Pass 4: Thrills & Choice product',
-      'Increase quantity to 1',
-      'Click SELECT A DATE button',
-      'Navigate to May 2025',
-      'Select date 31',
-      'Click Next',
-      'Select first radio button',
-      'Click Add to Cart',
-      'Click Next Step',
-      'Click Second Next Step',
-      'Click Checkout',
-      'Click I Agree',
-      'Fill Form Details',
-      'Handle Captcha Verification',
-      'Check Terms of Service Checkbox',
-      'Check Cancellation Policy Checkbox'
-    ];
-    
     // Process each step with AI assistance and retry mechanism
     for (const step of steps) {
-      console.log(`\n---- Processing step: ${step} ----`);
+      console.log(`\n---- Processing step: ${step.name} ----`);
       console.log(`Waiting 4 seconds before starting this step...`);
       await delay(1000);
       
@@ -1408,121 +1558,47 @@ async function fillFormDetails(instruction, page) {
       
       while (!stepSuccess && retryCount <= MAX_RETRIES) {
         try {
-          // Get the current DOM as HTML
-          const dom = await page.content();
+          // Get the current DOM state
+          const dom = await page.evaluate(() => document.documentElement.outerHTML);
           
           // Get instruction from GPT-4o with retry information if applicable
           const instruction = await getStepInstruction(step, dom, retryCount, lastError);
           console.log("Obtained instruction:", instruction);
           
           // Take a screenshot before each action
-          await takeScreenshot(page, `before_${step.replace(/\s+/g, '_')}${retryCount > 0 ? `_retry${retryCount}` : ''}`);
+          await takeScreenshot(page, `before_${step.name.replace(/\s+/g, '_')}${retryCount > 0 ? `_retry${retryCount}` : ''}`);
           console.log(`About to perform action: ${instruction.action}. Waiting 1 seconds...`);
           await delay(1000);
           
-          // Handle the different actions based on GPT-4o's instructions
-          console.log(`Executing action: ${instruction.action}`);
+          // Execute the step
+          stepSuccess = await executeStep(instruction, page);
           
-          if (instruction.action === 'findProduct') {
-            stepSuccess = await findProduct(instruction, page);
-            console.log(`findProduct completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'increaseQuantity') {
-            stepSuccess = await increaseQuantity(instruction, page);
-            console.log(`increaseQuantity completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'clickSelectDate') {
-            stepSuccess = await clickSelectDate(instruction, page);
-            console.log(`clickSelectDate completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'clickNextMonth') {
-            stepSuccess = await clickNextMonth(instruction, page);
-            console.log(`clickNextMonth completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'selectDate') {
-            stepSuccess = await selectDate(instruction, page);
-            console.log(`selectDate completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'clickNext') {
-            stepSuccess = await clickNext(instruction, page);
-            console.log(`clickNext completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'selectFirstRadio') {
-            stepSuccess = await selectFirstRadio(instruction, page);
-            console.log(`selectFirstRadio completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'clickAddToCart') {
-            stepSuccess = await clickAddToCart(instruction, page);
-            console.log(`clickAddToCart completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'clickNextStep') {
-            stepSuccess = await clickNextStep(instruction, page);
-            console.log(`clickNextStep completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'clickSecondNextStep') {
-            stepSuccess = await clickSecondNextStep(instruction, page);
-            console.log(`clickSecondNextStep completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'clickCheckout') {
-            stepSuccess = await clickCheckout(instruction, page);
-            console.log(`clickCheckout completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'clickIAgree') {
-            stepSuccess = await handleIAgree(page);
-            console.log(`handleIAgree completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'fillFormDetails') {
-            stepSuccess = await fillFormDetails(instruction, page);
-            console.log(`fillFormDetails completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'handleCaptcha') {
-            stepSuccess = await handleCaptchaVerification(page);
-            console.log(`handleCaptchaVerification completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'enterVerificationCode') {
-            stepSuccess = await enterVerificationCode(instruction, page);
-            console.log(`enterVerificationCode completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'checkTermsCheckbox') {
-            stepSuccess = await checkTermsCheckbox(instruction, page);
-            console.log(`checkTermsCheckbox completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'checkCancellationCheckbox') {
-            stepSuccess = await checkCancellationCheckbox(instruction, page);
-            console.log(`checkCancellationCheckbox completed with success: ${stepSuccess}`);
-          }
-          else if (instruction.action === 'fillPhoneNumber') {
-            stepSuccess = await fillPhoneNumber(instruction, page);
-            console.log(`fillPhoneNumber completed with success: ${stepSuccess}`);
-          }
-          
-          // If we got here without an error, the step was successful
           if (!stepSuccess) {
             stepSuccess = true;  // Ensure we mark as success if no error thrown
-            console.log(`Step ${step} completed successfully`);
+            console.log(`Step ${step.name} completed successfully`);
           }
         } catch (error) {
-          console.error(`❌ Error processing step ${step} (${retryCount > 0 ? `Retry #${retryCount}` : 'First attempt'}):`, error.message);
+          console.error(`❌ Error processing step ${step.name} (${retryCount > 0 ? `Retry #${retryCount}` : 'First attempt'}):`, error.message);
           lastError = error.message;
           
           // Take an error screenshot
-          await takeScreenshot(page, `error_${step.replace(/\s+/g, '_')}${retryCount > 0 ? `_retry${retryCount}` : ''}`);
+          await takeScreenshot(page, `error_${step.name.replace(/\s+/g, '_')}${retryCount > 0 ? `_retry${retryCount}` : ''}`);
           
           // Extended wait after error
-          await delay(1000);
+          await delay(2000);
           
           retryCount++;
           if (retryCount > MAX_RETRIES) {
-            console.error(`❌ Failed to complete step "${step}" after ${MAX_RETRIES} retries. Stopping execution.`);
+            console.error(`❌ Failed to complete step "${step.name}" after ${MAX_RETRIES} retries. Stopping execution.`);
             process.exit(1); // Exit the script with error code
           } else {
-            console.log(`⚠️ Retrying step "${step}" (Attempt ${retryCount} of ${MAX_RETRIES})...`);
+            console.log(`⚠️ Retrying step "${step.name}" (Attempt ${retryCount} of ${MAX_RETRIES})...`);
           }
         }
         
         // Add a clear indicator when moving to next step
         if (stepSuccess) {
-          console.log(`\n✅ Completed step: ${step} - Moving to next step\n`);
+          console.log(`\n✅ Completed step: ${step.name} - Moving to next step\n`);
         }
       }
     }
