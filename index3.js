@@ -1420,6 +1420,102 @@ async function fillPlaceOfResidence(page) {
   }
 }
 
+// Function to click the Continue button
+async function clickContinue(instruction, page) {
+  console.log('Clicking Continue button');
+  
+  try {
+    await takeScreenshot(page, 'before_click_continue');
+    
+    const buttonClicked = await page.evaluate(() => {
+      // Try multiple selectors for the Continue button
+      const continueButtons = Array.from(document.querySelectorAll('button, [role="button"], a.button'))
+        .filter(btn => {
+          const text = btn.textContent.trim().toLowerCase();
+          return text.includes('continue') || 
+                 btn.classList.contains('continue-btn-primary') ||
+                 btn.querySelector('span')?.textContent.trim().toLowerCase().includes('continue');
+        });
+      
+      if (continueButtons.length === 0) {
+        return { success: false, reason: 'Continue button not found' };
+      }
+      
+      // Highlight and click the button
+      const btn = continueButtons[0];
+      btn.style.border = '3px solid red';
+      btn.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+      btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      btn.click();
+      
+      return { success: true, text: btn.textContent };
+    });
+    
+    if (!buttonClicked.success) {
+      throw new Error(buttonClicked.reason);
+    }
+    
+    console.log(`✅ Clicked button: ${buttonClicked.text}`);
+    
+    // Wait for the page to update
+    await delay(2000);
+    await takeScreenshot(page, 'after_click_continue');
+    
+    return true;
+  } catch (error) {
+    console.error(`Error in clickContinue: ${error.message}`);
+    throw error;
+  }
+}
+
+// Function to click the Credit Card button
+async function clickCreditCard(instruction, page) {
+  console.log('Clicking Credit Card button');
+  
+  try {
+    await takeScreenshot(page, 'before_click_credit_card');
+    
+    const buttonClicked = await page.evaluate(() => {
+      // Try multiple selectors for the Credit Card button
+      const creditCardButtons = Array.from(document.querySelectorAll('button, [role="button"], a.button'))
+        .filter(btn => {
+          const text = btn.textContent.trim().toLowerCase();
+          return text.includes('credit card') || 
+                 text.includes('クレジットカード') ||
+                 btn.querySelector('span')?.textContent.trim().toLowerCase().includes('credit card');
+        });
+      
+      if (creditCardButtons.length === 0) {
+        return { success: false, reason: 'Credit Card button not found' };
+      }
+      
+      // Highlight and click the button
+      const btn = creditCardButtons[0];
+      btn.style.border = '3px solid red';
+      btn.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+      btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      btn.click();
+      
+      return { success: true, text: btn.textContent };
+    });
+    
+    if (!buttonClicked.success) {
+      throw new Error(buttonClicked.reason);
+    }
+    
+    console.log(`✅ Clicked button: ${buttonClicked.text}`);
+    
+    // Wait for the page to update
+    await delay(2000);
+    await takeScreenshot(page, 'after_click_credit_card');
+    
+    return true;
+  } catch (error) {
+    console.error(`Error in clickCreditCard: ${error.message}`);
+    throw error;
+  }
+}
+
 // Map actions to their corresponding functions
 const hardcodedActions = {
   findProduct: findProduct,
@@ -1437,9 +1533,11 @@ const hardcodedActions = {
   fillFormDetails: fillFormDetails,
   fillNationality: fillNationality,
   fillPlaceOfResidence: fillPlaceOfResidence,
-  handleCaptcha: captchaHandler.handleCaptchaVerification, // Use the imported function
+  handleCaptcha: captchaHandler.handleCaptchaVerification,
   checkTermsCheckbox: checkTermsCheckbox,
   checkCancellationCheckbox: checkCancellationCheckbox,
+  clickContinue: clickContinue,
+  clickCreditCard: clickCreditCard
 };
 
 // Function to execute the step based on the instruction
@@ -1481,6 +1579,10 @@ async function executeStep(instruction, page) {
       return await checkTermsCheckbox(instruction, page);
     case 'checkCancellationCheckbox':
       return await checkCancellationCheckbox(instruction, page);
+    case 'clickContinue':
+      return await clickContinue(instruction, page);
+    case 'clickCreditCard':
+      return await clickCreditCard(instruction, page);
     default:
       throw new Error(`Unknown action: ${instruction.action}`);
   }
