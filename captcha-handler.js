@@ -170,6 +170,8 @@ async function getVerificationText(page) {
       throw new Error('Could not get image bounding box');
     }
 
+    console.log('Image bounding box:', box);
+
     // Take a screenshot of just the image area
     await page.screenshot({
       path: imagePath,
@@ -182,6 +184,12 @@ async function getVerificationText(page) {
     });
 
     console.log(`Saved verification image to: ${imagePath}`);
+    console.log('Image dimensions:', {
+      width: box.width,
+      height: box.height,
+      x: box.x,
+      y: box.y
+    });
 
     // Send the image to GPT-4o for text extraction
     const response = await openai.chat.completions.create({
@@ -192,7 +200,7 @@ async function getVerificationText(page) {
           content: [
             {
               type: "text",
-              text: "Extract the text from this verification image. Return ONLY the text, nothing else. Be precise and include all characters."
+              text: "Extract the text from this verification image. Return ONLY the text, nothing else. Be precise and include all characters. The text should be exactly 6 characters long."
             },
             {
               type: "image_url",
@@ -208,6 +216,7 @@ async function getVerificationText(page) {
 
     const extractedText = response.choices[0].message.content.trim();
     console.log('Extracted text:', extractedText);
+    console.log('Text length:', extractedText.length);
     
     return extractedText;
   } catch (error) {
