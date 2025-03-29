@@ -292,157 +292,170 @@ async function handleIAgree(page) {
 
 async function handleCaptchaVerification(page) {
   try {
-    console.log('Handling text verification');
-    await takeScreenshot(page, 'before_text_verification');
+    console.log('Handling captcha verification');
     
-    console.log('Looking for verification elements...');
-    
-    // Wait for verification elements to be visible
-    await page.waitForSelector('img[data-v-6aff2c22]', { visible: true, timeout: 10000 })
-      .catch(() => console.log('Verification image not found with first selector, trying alternatives...'));
-    
-    // Try multiple selectors for the verification image
-    const imgSelectors = [
-      'img[data-v-6aff2c22]', 
-      'img.captcha-image', 
-      'div.captcha-container img', 
-      'div[class*="captcha"] img'
-    ];
-    
-    // Find verification image
-    let verificationImg = null;
-    
-    // Try each selector until we find the image
-    for (const imgSel of imgSelectors) {
-      verificationImg = await page.$(imgSel);
-      if (verificationImg) {
-        console.log(`Found verification image with selector: ${imgSel}`);
-        break;
+    // Try up to 3 times to handle the captcha
+    for (let attempt = 0; attempt < 3; attempt++) {
+      console.log(`Captcha verification attempt #${attempt + 1}`);
+      
+      // Try multiple selectors to find the verification image
+      const captchaSelectors = [
+        '.verify-code', 
+        'img[data-v-6aff2c22]', 
+        'img.captcha-image', 
+        'div.captcha-container img', 
+        'div[class*="captcha"] img',
+        'div[class*="verify"] img'
+      ];
+      
+      let captchaElement = null;
+      
+      // Try each selector until we find the image
+      for (const selector of captchaSelectors) {
+        try {
+          await page.waitForSelector(selector, { visible: true, timeout: 3000 });
+          captchaElement = await page.$(selector);
+          if (captchaElement) {
+            console.log(`Found captcha with selector: ${selector}`);
+            break;
+          }
+        } catch (e) {
+          // Continue to next selector
+        }
+      }
+      
+      if (!captchaElement) {
+        console.error('Captcha image not found on attempt', attempt + 1);
+        if (attempt < 2) {
+          console.log('Reloading page and trying again...');
+          await page.reload({ waitUntil: 'networkidle2' });
+          await delay(2000);
+          continue;
+        } else {
+          throw new Error('Captcha image not found after 3 attempts');
+        }
+      }
+      
+      // Highlight the element for better visibility in screenshots
+      await highlightElement(page, captchaElement, 'red');
+      
+      // Get the captcha text using OpenAI
+      const captchaText = await getCaptchaText(page, captchaElement);
+      
+      // Simple validation (alphanumeric, typically 4-6 chars)
+      if (/^[a-zA-Z0-9]{4,6}$/.test(captchaText)) {
+        console.log(`Valid captcha text detected: ${captchaText}`);
+        
+        // Try to find and fill the input field
+        try {
+          await page.locator('div:nth-of-type(12) > div > div > div > div > input').fill(captchaText);
+          console.log('✅ Successfully filled verification code');
+          return true;
+        } catch (inputError) {
+          console.error('Error filling captcha input:', inputError.message);
+          
+          // Try alternative selectors for the input field
+          const inputSelectors = [
+            'input[placeholder*="verification"]',
+            'input[placeholder*="code"]',
+            'input[placeholder*="captcha"]',
+            'div:nth-of-type(10) input',
+            'div[class*="verification"] input',
+            'div[class*="captcha"] input'
+          ];
+          
+          let inputFound = false;
+          for (const selector of inputSelectors) {
+            try {
+              await page.waitForSelector(selector, { visible: true, timeout: 1000 });
+              await page.fill(selector, captchaText);
+              console.log(`Filled captcha using selector: ${selector}`);
+              inputFound = true;
+              break;
+            } catch (e) {
+              // Continue to next selector
+            }
+          }
+          
+          if (inputFound) {
+            return true;
+          } else if (attempt < 2) {
+            console.log('Could not find input field, reloading page and trying again...');
+            await page.reload({ waitUntil: 'networkidle2' });
+            await delay(2000);
+            continue;
+          } else {
+            throw new Error('Could not find captcha input field after 3 attempts');
+          }
+        }
+      } else {
+        console.warn(`Invalid captcha text detected: "${captchaText}". Retrying...`);
+        await takeScreenshot(page, `invalid_captcha_attempt_${attempt + 1}`);
+        if (attempt < 2) {
+          await page.reload({ waitUntil: 'networkidle2' });
+          await delay(2000);
+        } else {
+          throw new Error('Invalid captcha text after 3 attempts');
+        }
       }
     }
     
-    if (!verificationImg) {
-      console.error('❌ Could not find verification image');
-      await takeScreenshot(page, 'verification_image_not_found');
-      return false;
-    }
-    
-    console.log('Found verification image');
-    
-    // Highlight the verification image for better recognition
-    await highlightElement(page, verificationImg);
-    await takeScreenshot(page, 'text_verification');
-    
-    // Get verification text from the image using GPT-4o
-    const verificationText = await getVerificationText(page);
-    if (!verificationText) {
-      console.error('❌ Could not get verification text');
-      return false;
-    }
-    
-    console.log(`Text detected: ${verificationText}`);
-    
-    // Using exact selector based on form HTML
-      // Email
-      await page.locator('div:nth-of-type(10) input').click();
-      await page.locator('div:nth-of-type(10) input').fill(verificationText);
-
-
-   
-
-  
-   
-    // Wait for verification to complete
-    await delay(1000);
-    
-    // Just continue - we can't rely on the verification check
-    console.log('✅ Completed verification step');
-    return true;
+    throw new Error('Failed captcha verification after 3 attempts');
   } catch (error) {
-    console.error('Error in handleCaptchaVerification:', error);
+    console.error('Error handling captcha verification:', error.message);
     await takeScreenshot(page, 'error_captcha_verification');
     return false;
   }
 }
 
-async function getVerificationText(page) {
-  try {
-    // Take a full screenshot with the highlighted image
-    const timestamp = new Date().toISOString().replace(/:/g, '-');
-    const filename = `text_verification_${timestamp}.png`;
-    const filepath = path.join(screenshotsDir, filename);
-    
-    // Take full screenshot
-    await page.screenshot({
-      path: filepath,
-      fullPage: true
-    });
-    console.log(`Full screenshot with highlighted text saved: ${filename}`);
-    
-    // Read the image file and convert to base64
-    const imageBuffer = fs.readFileSync(filepath);
-    const base64Image = imageBuffer.toString('base64');
-    
-    // Create a simpler prompt that explicitly asks for just the text
-    const prompt = "Return ONLY the letters and numbers you see in the red rectangle. Do not add any other text or phrases like 'The text is'";
-    
-    console.log(`Sending request to OpenAI with prompt: "${prompt}"`);
-    
-    // Send to GPT-4o for analysis
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: prompt
-            },
-            {
-              type: "image_url",
-              image_url: {
-                url: `data:image/png;base64,${base64Image}`
-              }
-            }
-          ]
-        }
-      ]
-    });
-    
-    // Log the full response for debugging
-    console.log('Raw OpenAI response:');
-    console.log(JSON.stringify(response, null, 2));
-    
-    let verificationText = response.choices[0].message.content.trim();
-    
-    // Remove common prefixes that might be included
-    const prefixesToRemove = [
-      "The text in the red rectangle is",
-      "The text is",
-      "The captcha is",
-      "The code is",
-      "The verification code is",
-      "The text reads",
-      "I see",
-      "It says"
-    ];
-    
-    for (const prefix of prefixesToRemove) {
-      if (verificationText.toLowerCase().startsWith(prefix.toLowerCase())) {
-        verificationText = verificationText.substring(prefix.length).trim();
-      }
+async function getCaptchaText(page, captchaElement) {
+  const boundingBox = await captchaElement.boundingBox();
+  const captchaPath = path.join(screenshotsDir, `captcha_${new Date().toISOString().replace(/:/g, '-')}.png`);
+  
+  // Take a screenshot of just the captcha
+  await page.screenshot({
+    path: captchaPath,
+    clip: {
+      x: boundingBox.x,
+      y: boundingBox.y,
+      width: boundingBox.width,
+      height: boundingBox.height
     }
-    
-    // Remove any quotation marks, colons, or periods
-    verificationText = verificationText.replace(/["':,.]/g, '').trim();
-    
-    console.log(`Processed verification text: "${verificationText}"`);
-    return verificationText;
-  } catch (error) {
-    console.error('❌ Error getting verification text:', error.message);
-    return null;
-  }
+  });
+  
+  console.log(`Captcha screenshot saved to ${captchaPath}`);
+  
+  // Convert to base64
+  const base64Image = fs.readFileSync(captchaPath, 'base64');
+  
+  // Use GPT-4o with vision capabilities to identify the captcha
+  console.log('Asking GPT-4o for captcha text...');
+  
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "user",
+        content: [
+          { 
+            type: "text", 
+            text: "Return ONLY the letters and numbers from this verification code image. Do not include any extra text or explanation." 
+          },
+          { 
+            type: "image_url", 
+            image_url: { 
+              url: `data:image/png;base64,${base64Image}` 
+            } 
+          }
+        ]
+      }
+    ],
+    temperature: 0,
+    max_tokens: 10
+  });
+  
+  // Process the response to get only alphanumeric characters
+  return response.choices[0].message.content.trim().replace(/\W/g, '');
 }
 
 // Functions to handle checkbox checking
