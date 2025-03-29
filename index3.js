@@ -94,8 +94,7 @@ async function getStepInstruction(stepName, dom, retryCount, lastError) {
     'Handle Captcha Verification': { action: 'handleCaptcha' },
     'Enter Verification Code': { action: 'handleCaptcha' },
     'Check Terms of Service Checkbox': { action: 'checkTermsCheckbox' },
-    'Check Cancellation Policy Checkbox': { action: 'checkCancellationCheckbox' },
-    'Fill Phone Number': { action: 'fillPhoneNumber' }
+    'Check Cancellation Policy Checkbox': { action: 'checkCancellationCheckbox' }
   };
 
   // Use hardcoded action for this step if available
@@ -358,120 +357,15 @@ async function handleCaptchaVerification(page) {
     console.log(`Text detected: ${verificationText}`);
     
     // Using exact selector based on form HTML
-    const captchaInput = await page.$('div[data-v-6aff2c22].el-form-item.is-error.is-required input.el-input__inner');
-    
-    if (!captchaInput) {
-      console.error('❌ Could not find captcha input field');
-      
-      // Try a more targeted approach - find inputs in the verification section
-      const allInputs = await page.$$('input.el-input__inner');
-      console.log(`Found ${allInputs.length} input fields, trying to find the right one`);
-      
-      // Use the last input field - it's typically the verification code field
-      if (allInputs.length > 0) {
-        // Get the last input field - this is most likely the verification code field
-        const verificationInput = allInputs[allInputs.length - 1];
-        
-        // Clear any existing text and enter the verification text
-        await verificationInput.click({ clickCount: 3 }); // Triple click to select all text
-        await verificationInput.type(''); // Clear field
-        await delay(200);
-        await verificationInput.type(verificationText, { delay: 100 });
-        console.log('Filled verification code in last input field');
-      } else {
-        return false;
-      }
-    } else {
-      // Clear any existing text and enter the verification text
-      await captchaInput.click({ clickCount: 3 }); // Triple click to select all text
-      await captchaInput.type(''); // Clear field
-      await delay(200);
-      await captchaInput.type(verificationText, { delay: 100 });
-    }
-    
-    // Take screenshot after entering text
-    await takeScreenshot(page, 'text_entered');
-    
-    // Enable the continue button if it exists and is disabled
-    await page.evaluate(() => {
-      // Find the correct continue button (might be disabled)
-      const continueBtn = document.querySelector('button.continue-btn-info.el-button--info.is-disabled');
-      if (continueBtn) {
-        // Remove disabled attribute and classes
-        continueBtn.removeAttribute('disabled');
-        continueBtn.classList.remove('is-disabled');
-        continueBtn.classList.add('el-button--primary');
-        continueBtn.classList.remove('el-button--info');
-        
-        // Also try to show the active button if hidden
-        const activeContinueBtn = document.querySelector('button.continue-btn-primary.el-button--primary');
-        if (activeContinueBtn) {
-          activeContinueBtn.style.display = 'inline-block';
-        }
-        
-        console.log('Enabled continue button');
-      }
-    });
-    
-    // Try to click the continue button
-    const continueBtnFound = await page.evaluate(() => {
-      // Try different selectors for the continue button
-      const btnSelectors = [
-        'button.continue-btn-primary', 
-        'button.mt15.continue-btn-primary',
-        'button.el-button--primary span',
-        'button.el-button--primary',
-        'button.el-button span'
-      ];
-      
-      // Try each selector
-      for (const selector of btnSelectors) {
-        const elements = document.querySelectorAll(selector);
-        for (const el of elements) {
-          // Check if it's the CONTINUE button
-          const text = el.tagName === 'BUTTON' ? el.textContent.trim() : el.textContent.trim();
-          if (text === 'CONTINUE') {
-            const button = el.tagName === 'BUTTON' ? el : el.closest('button');
-            
-            // Make sure the button is visible and enabled
-            button.style.display = 'inline-block';
-            button.disabled = false;
-            button.classList.remove('is-disabled');
-            
-            // Click it
-            button.click();
-            return true;
-          }
-        }
-      }
-      
-      return false;
-    });
-    
-    if (!continueBtnFound) {
-      console.log('❌ Could not find or click CONTINUE button, trying direct selector');
-      
-      try {
-        // Try using page.click on various selectors
-        await page.click('button.continue-btn-primary');
-        console.log('Clicked continue button using page.click');
-      } catch (clickError) {
-        console.error('❌ Error clicking continue button:', clickError.message);
-        
-        // Final attempt - use a script to find and click any button with "CONTINUE" text
-        await page.evaluate(() => {
-          const buttons = Array.from(document.querySelectorAll('button'));
-          for (const btn of buttons) {
-            if (btn.textContent.includes('CONTINUE')) {
-              console.log('Found and clicking button with CONTINUE text');
-              btn.click();
-              return;
-            }
-          }
-        });
-      }
-    }
-    
+      // Email
+      await page.locator('div:nth-of-type(10) input').click();
+      await page.locator('div:nth-of-type(10) input').fill(verificationText);
+
+
+   
+
+  
+   
     // Wait for verification to complete
     await delay(1000);
     
@@ -479,7 +373,8 @@ async function handleCaptchaVerification(page) {
     console.log('✅ Completed verification step');
     return true;
   } catch (error) {
-    console.error('❌ Error handling verification:', error.message);
+    console.error('Error in handleCaptchaVerification:', error);
+    await takeScreenshot(page, 'error_captcha_verification');
     return false;
   }
 }
@@ -1353,382 +1248,47 @@ async function enterVerificationCode(instruction, page) {
 async function fillFormDetails(instruction, page) {
   try {
     console.log('Filling form details');
-    await takeScreenshot(page, 'before_filling_form');
-    
-    // Wait for the form to be available
-    await page.waitForSelector('form.el-form');
-    console.log('Form found, starting to fill details');
-
-    // Gather all input fields with the common class
-    const inputs = await page.$$('input.el-input__inner');
-    console.log(`Found ${inputs.length} input fields`);
-
-    // --------------------------------------------------
-    // Fill the Contact Form Fields by their order/index:
-    // Index mapping (based on provided HTML):
-    //   [0] → First Name   (data-gtm-form-interact-field-id="1")
-    //   [1] → Last Name    (data-gtm-form-interact-field-id="2")
-    //   [2] → Country Code (data-gtm-form-interact-field-id="0")
-    //   [3] → Phone Number (data-gtm-form-interact-field-id="3")
-    //   [4] → Nationality  (data-gtm-form-interact-field-id="4", readonly dropdown)
-    //   [5] → Residence    (data-gtm-form-interact-field-id="5", readonly dropdown)
-    //   [6] → Address      (data-gtm-form-interact-field-id="6")
-    //   [7] → Email        (data-gtm-form-interact-field-id="7")
-    //   [8] → Confirm Email(data-gtm-form-interact-field-id="8")
-    //   [9] → Verification Code (no data-gtm attribute)
-    // --------------------------------------------------
+    const timeout = 5000;
+    page.setDefaultTimeout(timeout);
 
     // First Name
-    console.log('Filling First Name');
-    await inputs[0].click({ clickCount: 3 }); // Clear any existing text
-    await inputs[0].type('');
-    await inputs[0].type('oded');
-    await delay(200);
-
+    await page.locator('form > div:nth-of-type(1) input').click();
+    await page.locator('form > div:nth-of-type(1) input').fill('oded');
+    
     // Last Name
-    console.log('Filling Last Name');
-    await inputs[1].click({ clickCount: 3 });
-    await inputs[1].type('');
-    await inputs[1].type('kovach');
-    await delay(200);
-
-    // --- Phone Number Section ---
-    console.log('Handling Phone Number Section');
-    // Country Code
-    await inputs[2].click();
-    await takeScreenshot(page, 'before_country_code');
+    await page.locator('form > div:nth-of-type(2) input').click();
+    await page.locator('form > div:nth-of-type(2) input').fill('kovach');
     
-    // Wait for the dropdown to appear if available
-    await page.waitForSelector('.el-select-dropdown', { timeout: 3000 })
-      .catch(() => console.log('Country code dropdown not visible'));
-    
-    await inputs[2].type('+972');
-    await page.keyboard.press('Enter');
-    await delay(500);
+    // Phone Number - Country Code
+    await page.locator('div.pc-phoneNumber-input div.el-select input').click();
+    await page.locator('div.pc-phoneNumber-input div.el-select input').fill('isra');
+    await page.locator('::-p-text(Israel+972)').click();
     
     // Phone Number
-    await inputs[3].click({ clickCount: 3 });
-    await inputs[3].type('');
-    await inputs[3].type('0547777655');
-    await delay(200);
-
-    // --- Nationality Dropdown ---
-    console.log('Handling Nationality Dropdown');
-    await takeScreenshot(page, 'before_nationality');
-    await inputs[4].click();
-    await delay(500);
+    await page.locator('div.reset-el-select > input').click();
+    await page.locator('div.reset-el-select > input').fill('0547777655');
     
-    await page.waitForSelector('.el-select-dropdown', { timeout: 3000 });
-    await delay(500);
-    
-    const nationalitySelected = await page.evaluate(() => {
-      const simulateNativeClick = (element) => {
-        const rect = element.getBoundingClientRect();
-        element.dispatchEvent(new MouseEvent('mousedown', {
-          bubbles: true,
-          cancelable: true,
-          view: window,
-          clientX: rect.left + rect.width/2,
-          clientY: rect.top + rect.height/2
-        }));
-        element.dispatchEvent(new MouseEvent('mouseup', {
-          bubbles: true,
-          cancelable: true,
-          view: window,
-          clientX: rect.left + rect.width/2,
-          clientY: rect.top + rect.height/2
-        }));
-        element.dispatchEvent(new MouseEvent('click', {
-          bubbles: true,
-          cancelable: true,
-          view: window,
-          clientX: rect.left + rect.width/2,
-          clientY: rect.top + rect.height/2
-        }));
-      };
-
-      // Try to find Israel in different ways
-      const options = Array.from(document.querySelectorAll('.el-select-dropdown__item span'));
-      console.log(`Found ${options.length} nationality options`);
-      
-      const israel = options.find(opt => opt.innerText.trim() === 'Israel');
-      if (israel) {
-        console.log('Found Israel by exact match');
-        const parentLi = israel.closest('li.el-select-dropdown__item');
-        if (parentLi) {
-          simulateNativeClick(parentLi);
-          return true;
-        }
-        simulateNativeClick(israel);
-        return true;
-      }
-      
-      // Backup: try finding by partial match
-      const israelByPartial = options.find(opt => opt.innerText.includes('Israel'));
-      if (israelByPartial) {
-        console.log('Found Israel by partial match');
-        const parentLi = israelByPartial.closest('li.el-select-dropdown__item');
-        if (parentLi) {
-          simulateNativeClick(parentLi);
-          return true;
-        }
-        simulateNativeClick(israelByPartial);
-        return true;
-      }
-      
-      return false;
-    });
-    
-    if (!nationalitySelected) {
-      console.log('⚠️ Could not select Israel for nationality');
-    }
-    
-    await delay(1000);
-    await takeScreenshot(page, 'after_nationality');
-
-    // --- Place of Residence Dropdown ---
-    console.log('Handling Place of Residence Dropdown');
-    await takeScreenshot(page, 'before_residence');
-    await inputs[5].click();
-    await delay(500);
-    
-    await page.waitForSelector('.el-select-dropdown', { timeout: 3000 });
-    await delay(500);
-    
-    const residenceSelected = await page.evaluate(() => {
-      const simulateNativeClick = (element) => {
-        const rect = element.getBoundingClientRect();
-        element.dispatchEvent(new MouseEvent('mousedown', {
-          bubbles: true,
-          cancelable: true,
-          view: window,
-          clientX: rect.left + rect.width/2,
-          clientY: rect.top + rect.height/2
-        }));
-        element.dispatchEvent(new MouseEvent('mouseup', {
-          bubbles: true,
-          cancelable: true,
-          view: window,
-          clientX: rect.left + rect.width/2,
-          clientY: rect.top + rect.height/2
-        }));
-        element.dispatchEvent(new MouseEvent('click', {
-          bubbles: true,
-          cancelable: true,
-          view: window,
-          clientX: rect.left + rect.width/2,
-          clientY: rect.top + rect.height/2
-        }));
-      };
-
-      const options = Array.from(document.querySelectorAll('.el-select-dropdown__item span'));
-      console.log(`Found ${options.length} residence options`);
-      
-      const israel = options.find(opt => opt.innerText.trim() === 'Israel');
-      if (israel) {
-        console.log('Found Israel by exact match');
-        const parentLi = israel.closest('li.el-select-dropdown__item');
-        if (parentLi) {
-          simulateNativeClick(parentLi);
-          return true;
-        }
-        simulateNativeClick(israel);
-        return true;
-      }
-      
-      // Backup: try finding by partial match
-      const israelByPartial = options.find(opt => opt.innerText.includes('Israel'));
-      if (israelByPartial) {
-        console.log('Found Israel by partial match');
-        const parentLi = israelByPartial.closest('li.el-select-dropdown__item');
-        if (parentLi) {
-          simulateNativeClick(parentLi);
-          return true;
-        }
-        simulateNativeClick(israelByPartial);
-        return true;
-      }
-      
-      return false;
-    });
-    
-    if (!residenceSelected) {
-      console.log('⚠️ Could not select Israel for residence');
-    }
-    
-    await delay(1000);
-    await takeScreenshot(page, 'after_residence');
-
     // Address
-    console.log('Filling Address');
-    await inputs[6].click({ clickCount: 3 });
-    await inputs[6].type('');
-    await inputs[6].type('rokah 106 Ramat Gan');
-    await delay(200);
-
-    // Email Address
-    console.log('Filling Email');
-    await inputs[7].click({ clickCount: 3 });
-    await inputs[7].type('');
-    await inputs[7].type('oded.kovach@gmail.com');
-    await delay(200);
-
-    // Confirm Email Address
-    console.log('Filling Confirm Email');
-    await inputs[8].click({ clickCount: 3 });
-    await inputs[8].type('');
-    await inputs[8].type('oded.kovach@gmail.com');
-    await delay(200);
-
-    // Take final screenshot
-    await takeScreenshot(page, 'after_filling_form');
-    console.log('✅ Form filled successfully');
+    await page.locator('div:nth-of-type(7) input').click();
+    await page.locator('div:nth-of-type(7) input').fill('rokah 106');
     
-    return true;
-  } catch (error) {
-    console.error('❌ Error filling form:', error.message);
-    await takeScreenshot(page, 'form_fill_error');
-    return false;
-  }
-}
-
-// Add new function to handle phone number separately
-async function fillPhoneNumber(instruction, page) {
-  try {
-    console.log('Filling phone number fields');
-    await takeScreenshot(page, 'before_filling_phone');
+    // Email
+    await page.locator('div:nth-of-type(8) input').click();
+    await page.locator('div:nth-of-type(8) input').fill('oded.kovach@gmail.com');
     
-    // Target the phone number container element directly based on the provided HTML
-    await page.evaluate(() => {
-      // Find the phone number container by its class
-      const phoneContainer = document.querySelector('div.el-form-item.pc-phoneNumber-input');
-      if (phoneContainer) {
-        phoneContainer.style.border = '3px solid green';
-        console.log('Found phone container');
-      } else {
-        console.log('Phone container not found');
-      }
-    });
+    // Confirm Email
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Shift');
+    await page.locator('div:nth-of-type(9) input').fill('oded.kovach@gmail.com');
     
-    // First handle the country code dropdown
-    await page.evaluate(() => {
-      // Click the country code dropdown (first input in the phone container)
-      const countryCodeInput = document.querySelector('div.el-form-item.pc-phoneNumber-input .el-select input');
-      if (countryCodeInput) {
-        console.log('Found country code input');
-        countryCodeInput.click();
-      } else {
-        console.log('Country code input not found');
-      }
-    });
-    
-    // Wait for dropdown to appear
-    await page.waitForSelector('.el-select-dropdown', { timeout: 3000 });
-    await delay(500); // Extra delay to ensure dropdown is fully loaded
-    
-    // Select Israel from the dropdown - use the exact selector from the provided HTML
-    const israelSelected = await page.evaluate(() => {
-      // Use the exact selector structure from the provided HTML
-      const israelItem = document.querySelector('li.el-select-dropdown__item[data-v-6aff2c22] span[style*="float: left"]:not([style*="float: right"])');
-      
-      // If exact selector doesn't work, try these backup methods
-      if (!israelItem) {
-        console.log('Exact selector failed, trying alternative approaches');
-        
-        // First backup: Find item containing both "Israel" and "+972"
-        const dropdownItems = Array.from(document.querySelectorAll('li.el-select-dropdown__item'));
-        for (const item of dropdownItems) {
-          if (item.textContent.includes('Israel') && item.textContent.includes('+972')) {
-            console.log('Found Israel item by text content');
-            item.click();
-            return true;
-          }
-        }
-        
-        // Second backup: Try finding spans containing "Israel"
-        const israelSpans = Array.from(document.querySelectorAll('span'))
-          .filter(span => span.textContent.trim() === 'Israel');
-        
-        if (israelSpans.length > 0) {
-          console.log('Found Israel span by text content');
-          // Click the li parent
-          const parent = israelSpans[0].closest('li.el-select-dropdown__item');
-          if (parent) {
-            parent.click();
-            return true;
-          } else {
-            // Click the span itself if no parent
-            israelSpans[0].click();
-            return true;
-          }
-        }
-        
-        return false;
-      }
-      
-      // If we found the exact element, click its parent li
-      const parentLi = israelItem.closest('li.el-select-dropdown__item');
-      console.log('Found Israel dropdown item with exact selector');
-      
-      if (parentLi) {
-        // Click the parent li element (more reliable)
-        parentLi.click();
-        return true;
-      } else {
-        // Fallback to clicking the span itself
-        israelItem.click();
-        return true;
-      }
-    });
-    
-    if (!israelSelected) {
-      console.log('⚠️ Could not select Israel from dropdown using exact selectors, trying direct approach');
-      
-      // Last resort: Use page.click directly 
-      try {
-        // Click on Israel in the dropdown by targeting any visible element containing Israel
-        await page.click('li.el-select-dropdown__item');
-        console.log('Clicked dropdown item with direct selector');
-      } catch (clickError) {
-        console.error('Failed to click Israel with direct approach:', clickError.message);
-      }
-    }
-    
-    // Wait for dropdown to close
     await delay(1000);
-    
-    // Now handle the actual phone number input
-    await page.evaluate(() => {
-      // Target the exact phone number input using the data attribute
-      const phoneInput = document.querySelector('div.el-form-item.pc-phoneNumber-input .reset-el-select input[data-gtm-form-interact-field-id="2"]');
-      if (phoneInput) {
-        console.log('Found phone number input field');
-        
-        // Clear existing value
-        phoneInput.value = '';
-        
-        // Set new value and dispatch input event
-        phoneInput.value = '0547777655';
-        phoneInput.dispatchEvent(new Event('input', { bubbles: true }));
-        
-        return true;
-      } else {
-        console.log('Could not find phone number input field');
-        return false;
-      }
-    });
-    
-    console.log('Filled phone number: 0547777655');
-    await takeScreenshot(page, 'after_filling_phone');
-    
-    console.log('✅ Phone number filled successfully');
     return true;
   } catch (error) {
-    console.error('❌ Error filling phone number:', error.message);
-    await takeScreenshot(page, 'phone_fill_error');
+    console.error('Error filling form details:', error.message);
     return false;
   }
 }
+
 
 (async () => {
   console.log('Starting USJ Express Pass ticket selection process with GPT-4o assistance...');
@@ -1817,29 +1377,27 @@ async function fillPhoneNumber(instruction, page) {
     
     // Define the steps for our process
     const steps = [
-      { name: 'Find Universal Express Pass 4: Thrills & Choice product', action: 'findProduct' },
-      { name: 'Increase quantity to 1', action: 'increaseQuantity' },
-      { name: 'Click SELECT A DATE button', action: 'clickSelectDate' },
-      { name: 'Navigate to May 2025', action: 'clickNextMonth' },
-      { name: 'Select date 31', action: 'selectDate', day: 31 },
-      { name: 'Click Next', action: 'clickNext' },
-      { name: 'Select first radio button', action: 'selectFirstRadio' },
-      { name: 'Click Add to Cart', action: 'clickAddToCart' },
-      { name: 'Click Next Step', action: 'clickNextStep' },
-      { name: 'Click Second Next Step', action: 'clickSecondNextStep' },
-      { name: 'Click Checkout', action: 'clickCheckout' },
-      { name: 'Click I Agree', action: 'clickIAgree' },
-      { name: 'Fill Form Details', action: 'fillFormDetails' },
-      { name: 'Handle Captcha Verification', action: 'handleCaptcha' },
-      { name: 'Enter Verification Code', action: 'handleCaptcha' },
-      { name: 'Check Terms of Service Checkbox', action: 'checkTermsCheckbox' },
-      { name: 'Check Cancellation Policy Checkbox', action: 'checkCancellationCheckbox' },
-      { name: 'Fill Phone Number', action: 'fillPhoneNumber' }
+      'Find Universal Express Pass 4: Thrills & Choice product',
+      'Increase quantity to 1',
+      'Click SELECT A DATE button',
+      'Navigate to May 2025',
+      'Select date 31',
+      'Click Next',
+      'Select first radio button',
+      'Click Add to Cart',
+      'Click Next Step',
+      'Click Second Next Step',
+      'Click Checkout',
+      'Click I Agree',
+      'Fill Form Details',
+      'Handle Captcha Verification',
+      'Check Terms of Service Checkbox',
+      'Check Cancellation Policy Checkbox'
     ];
     
     // Process each step with AI assistance and retry mechanism
     for (const step of steps) {
-      console.log(`\n---- Processing step: ${step.name} ----`);
+      console.log(`\n---- Processing step: ${step} ----`);
       console.log(`Waiting 4 seconds before starting this step...`);
       await delay(1000);
       
@@ -1854,11 +1412,11 @@ async function fillPhoneNumber(instruction, page) {
           const dom = await page.content();
           
           // Get instruction from GPT-4o with retry information if applicable
-          const instruction = await getStepInstruction(step.name, dom, retryCount, lastError);
+          const instruction = await getStepInstruction(step, dom, retryCount, lastError);
           console.log("Obtained instruction:", instruction);
           
           // Take a screenshot before each action
-          await takeScreenshot(page, `before_${step.name.replace(/\s+/g, '_')}${retryCount > 0 ? `_retry${retryCount}` : ''}`);
+          await takeScreenshot(page, `before_${step.replace(/\s+/g, '_')}${retryCount > 0 ? `_retry${retryCount}` : ''}`);
           console.log(`About to perform action: ${instruction.action}. Waiting 1 seconds...`);
           await delay(1000);
           
@@ -1941,30 +1499,30 @@ async function fillPhoneNumber(instruction, page) {
           // If we got here without an error, the step was successful
           if (!stepSuccess) {
             stepSuccess = true;  // Ensure we mark as success if no error thrown
-            console.log(`Step ${step.name} completed successfully`);
+            console.log(`Step ${step} completed successfully`);
           }
         } catch (error) {
-          console.error(`❌ Error processing step ${step.name} (${retryCount > 0 ? `Retry #${retryCount}` : 'First attempt'}):`, error.message);
+          console.error(`❌ Error processing step ${step} (${retryCount > 0 ? `Retry #${retryCount}` : 'First attempt'}):`, error.message);
           lastError = error.message;
           
           // Take an error screenshot
-          await takeScreenshot(page, `error_${step.name.replace(/\s+/g, '_')}${retryCount > 0 ? `_retry${retryCount}` : ''}`);
+          await takeScreenshot(page, `error_${step.replace(/\s+/g, '_')}${retryCount > 0 ? `_retry${retryCount}` : ''}`);
           
           // Extended wait after error
           await delay(1000);
           
           retryCount++;
           if (retryCount > MAX_RETRIES) {
-            console.error(`❌ Failed to complete step "${step.name}" after ${MAX_RETRIES} retries. Stopping execution.`);
+            console.error(`❌ Failed to complete step "${step}" after ${MAX_RETRIES} retries. Stopping execution.`);
             process.exit(1); // Exit the script with error code
           } else {
-            console.log(`⚠️ Retrying step "${step.name}" (Attempt ${retryCount} of ${MAX_RETRIES})...`);
+            console.log(`⚠️ Retrying step "${step}" (Attempt ${retryCount} of ${MAX_RETRIES})...`);
           }
         }
         
         // Add a clear indicator when moving to next step
         if (stepSuccess) {
-          console.log(`\n✅ Completed step: ${step.name} - Moving to next step\n`);
+          console.log(`\n✅ Completed step: ${step} - Moving to next step\n`);
         }
       }
     }
