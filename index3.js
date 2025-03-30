@@ -97,6 +97,9 @@ const steps = [
   { name: 'Handle Captcha Verification', action: 'handleCaptcha' },
   { name: 'Check Terms of Service Checkbox', action: 'checkTermsCheckbox' },
   { name: 'Check Cancellation Policy Checkbox', action: 'checkCancellationCheckbox' },
+  { name: 'Click Continue', action: 'clickContinue' },
+  { name: 'Click Credit Card', action: 'clickCreditCard' },
+  { name: 'Checkout Continue', action: 'continue_checkout' }
 ];
 
 // Function to get instruction for the current step
@@ -1516,6 +1519,101 @@ async function clickCreditCard(instruction, page) {
   }
 }
 
+async function continue_checkout(page) {
+  try {
+    console.log('Attempting to click checkout continue button...');
+    
+    // Take a screenshot before action
+    await takeScreenshot(page, 'before_checkout_continue');
+    
+    // Highlight and click the continue button
+    const buttonFound = await page.evaluate(() => {
+      // Try various selectors from the recorded JSON
+      const selectors = [
+        'div.container span > span',
+        document.evaluate('//*[@id="paySubmit"]/span/span', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue,
+        'div.container span > span',
+        'button:contains("CONTINUE")',
+        '[id="paySubmit"]',
+        'button span:contains("CONTINUE")'
+      ];
+      
+      let continueButton = null;
+      
+      // Try each selector
+      for (const selector of selectors) {
+        if (typeof selector === 'object' && selector !== null) {
+          // Handle XPath result
+          continueButton = selector;
+          break;
+        }
+        
+        const elements = document.querySelectorAll(selector);
+        if (elements.length > 0) {
+          for (const el of elements) {
+            if (el.textContent.includes('CONTINUE')) {
+              continueButton = el;
+              break;
+            }
+          }
+          if (continueButton) break;
+        }
+      }
+      
+      if (!continueButton) {
+        // Try paySubmit specifically
+        const paySubmit = document.getElementById('paySubmit');
+        if (paySubmit) {
+          continueButton = paySubmit;
+        }
+      }
+      
+      if (!continueButton) {
+        console.log('❌ No CONTINUE button found');
+        return false;
+      }
+      
+      // Highlight the button
+      continueButton.style.border = '3px solid green';
+      continueButton.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
+      
+      // Get the clickable element (may be the button or a parent)
+      let clickTarget = continueButton;
+      
+      // If it's a span, try to find the button parent
+      if (clickTarget.tagName.toLowerCase() === 'span') {
+        clickTarget = clickTarget.closest('button') || clickTarget.parentElement || clickTarget;
+      }
+      
+      // Make sure it's visible
+      clickTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Click it
+      clickTarget.click();
+      
+      console.log('✅ CONTINUE button clicked');
+      return true;
+    });
+    
+    if (!buttonFound) {
+      throw new Error('CONTINUE button for checkout not found');
+    }
+    
+    // Wait for navigation or content change using delay instead of waitForTimeout
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Take screenshot after clicking
+    await takeScreenshot(page, 'after_checkout_continue');
+    
+    console.log('✅ Checkout continue step completed successfully');
+    return true;
+  } catch (error) {
+    console.error(`❌ Error in continue_checkout: ${error.message}`);
+    await takeScreenshot(page, 'error_checkout_continue');
+    throw error;
+  }
+}
+
 // Map actions to their corresponding functions
 const hardcodedActions = {
   findProduct: findProduct,
@@ -1533,11 +1631,12 @@ const hardcodedActions = {
   fillFormDetails: fillFormDetails,
   fillNationality: fillNationality,
   fillPlaceOfResidence: fillPlaceOfResidence,
-  handleCaptcha: captchaHandler.handleCaptchaVerification,
+  handleCaptcha: captchaHandler.handleCaptcha,
   checkTermsCheckbox: checkTermsCheckbox,
   checkCancellationCheckbox: checkCancellationCheckbox,
   clickContinue: clickContinue,
-  clickCreditCard: clickCreditCard
+  clickCreditCard: clickCreditCard,
+  continue_checkout: continue_checkout
 };
 
 // Function to execute the step based on the instruction
@@ -1583,6 +1682,8 @@ async function executeStep(instruction, page) {
       return await clickContinue(instruction, page);
     case 'clickCreditCard':
       return await clickCreditCard(instruction, page);
+    case 'continue_checkout':
+      return await continue_checkout(page);
     default:
       throw new Error(`Unknown action: ${instruction.action}`);
   }
