@@ -79,7 +79,7 @@ async function analyzeDropdownIssue(page, screenshotName) {
 
 // Define the steps for our process with their corresponding actions
 const steps = [
-  { name: 'Find Universal Express Pass 4: Thrills & Choice product', action: 'findProduct', productName: 'Universal Express Pass 4: Thrills & Choice' },
+  { name: 'Find Universal Express Pass 4: Thrills & Choice product', action: 'findProduct', productName: 'Universal Express Pass 4: 4D & Thrills' },
   { name: 'Increase quantity to 1', action: 'increaseQuantity' },
   { name: 'Click SELECT A DATE button', action: 'clickSelectDate' },
   { name: 'Navigate to May 2025', action: 'clickNextMonth' },
@@ -1789,6 +1789,49 @@ async function executeStep(instruction, page) {
       throw new Error(`Unknown action: ${instruction.action}`);
   }
 }
+
+// New wrapper function to initiate the ticket purchasing process
+async function purchaceTikcet(productName, quantity = 1, date = '2025-01-01') {
+    const puppeteer = require('puppeteer');
+    console.log('Starting purchaceTikcet with product name:', productName);
+    
+    // Launch browser
+    const browser = await puppeteer.launch({ 
+        headless: false,
+        defaultViewport: null,
+        args: ['--start-maximized']
+    });
+    
+    // Open a new page
+    const page = await browser.newPage();
+    page.setDefaultTimeout(60000); // Set timeout to 60 seconds
+    
+    // Navigate to the USJ Express Pass page
+    console.log('Navigating to USJ Express Pass page...');
+    await page.goto('https://www.usjticketing.com/expressPass', { waitUntil: 'networkidle2' });
+    
+    // Wait for dynamic content to load
+    await delay(5000);
+    
+    // Build the ticket details using the product name parameter
+    const ticketDetails = {
+        name: productName,
+        quantity: quantity,
+        date: date
+    };
+    console.log('Ticket Details:', ticketDetails);
+    
+    // Call the existing ticket purchasing process
+    await purchaseTicket(page, ticketDetails);
+    
+    console.log('Ticket purchase process initiated.');
+    
+    // Optionally, leave the browser open for inspection or close it
+    // await browser.close();
+}
+
+// Export the function if needed for external use (optional)
+module.exports = { purchaceTikcet };
 
 (async () => {
   console.log('Starting USJ Express Pass ticket selection process with GPT-4o assistance...');
