@@ -99,7 +99,9 @@ const steps = [
   { name: 'Check Cancellation Policy Checkbox', action: 'checkCancellationCheckbox' },
   { name: 'Click Continue', action: 'clickContinue' },
   { name: 'Click Credit Card', action: 'clickCreditCard' },
-  { name: 'Checkout Continue', action: 'continue_checkout' }
+  { name: 'Checkout Continue', action: 'continue_checkout' },
+  { name: 'Fill Checkout', action: 'fillCheckout' },
+  { name: 'Fill Checkout Nationality', action: 'fillCheckoutNationality' }
 ];
 
 // Function to get instruction for the current step
@@ -1614,6 +1616,99 @@ async function continue_checkout(page) {
   }
 }
 
+async function fillCheckout(page) {
+    try {
+        console.log('Attempting to fill checkout form...');
+        await takeScreenshot(page, 'before_fill_checkout');
+
+        // Fill in credit card number
+        await page.type('#cardNo', '4111111111111111');
+        await delay(1000);
+
+        // Fill in expiration date
+        await page.type('#card_exp', '1230');
+        await delay(1000);
+
+        // Fill in CVV
+        await page.type('div:nth-of-type(2) > div:nth-of-type(2) input', '123');
+        await delay(1000);
+
+        // Fill in card holder name
+        await page.type('#card_holder', 'odedkovach');
+        await delay(1000);
+
+        // Fill in email
+        await page.type('#email', 'oded.kovach@gmail.com');
+        await delay(1000);
+
+        // Fill in phone
+        await page.type('#phone', '1234567890');
+        await delay(1000);
+
+        await takeScreenshot(page, 'after_fill_checkout');
+        console.log('Successfully filled checkout form');
+        return true;
+    } catch (error) {
+        console.error('Error in fillCheckout:', error);
+        await takeScreenshot(page, 'error_fill_checkout');
+        return false;
+    }
+}
+
+async function fillCheckoutNationality(page) {
+    try {
+        console.log('Attempting to fill checkout nationality...');
+        await takeScreenshot(page, 'before_fill_checkout_nationality');
+
+        // Click the country dropdown
+        await page.locator('#country').click();
+        await delay(1000);
+
+        // Type 'israel' to filter
+        await page.locator('#country').fill('israel');
+        await delay(1000);
+
+        // Click the Israel option using multiple selectors
+        try {
+            // Try the hover class first
+            await page.locator('li.hover').click();
+        } catch (e) {
+            console.log('First selector failed, trying XPath:', e.message);
+            try {
+                // Try XPath selector
+                await page.locator('xpath//html/body/div[3]/div[1]/div[1]/ul/li[110]').click();
+            } catch (e2) {
+                console.log('XPath selector failed, trying generic approach:', e2.message);
+                // Last resort - try to find Israel in any visible dropdown
+                await page.evaluate(() => {
+                    const dropdowns = document.querySelectorAll('div.el-select-dropdown.el-popper');
+                    for (const dropdown of dropdowns) {
+                        if (dropdown.style.display !== 'none') {
+                            const items = dropdown.querySelectorAll('li');
+                            for (const item of items) {
+                                if (item.textContent.includes('Israel')) {
+                                    item.click();
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    throw new Error('Israel option not found in visible dropdowns');
+                });
+            }
+        }
+
+        await delay(1000);
+        await takeScreenshot(page, 'after_fill_checkout_nationality');
+        console.log('Successfully filled checkout nationality');
+        return true;
+    } catch (error) {
+        console.error('Error in fillCheckoutNationality:', error);
+        await takeScreenshot(page, 'error_fill_checkout_nationality');
+        return false;
+    }
+}
+
 // Map actions to their corresponding functions
 const hardcodedActions = {
   findProduct: findProduct,
@@ -1636,7 +1731,9 @@ const hardcodedActions = {
   checkCancellationCheckbox: checkCancellationCheckbox,
   clickContinue: clickContinue,
   clickCreditCard: clickCreditCard,
-  continue_checkout: continue_checkout
+  continue_checkout: continue_checkout,
+  fillCheckout: fillCheckout,
+  fillCheckoutNationality: fillCheckoutNationality
 };
 
 // Function to execute the step based on the instruction
@@ -1684,6 +1781,10 @@ async function executeStep(instruction, page) {
       return await clickCreditCard(instruction, page);
     case 'continue_checkout':
       return await continue_checkout(page);
+    case 'fillCheckout':
+      return await fillCheckout(page);
+    case 'fillCheckoutNationality':
+      return await fillCheckoutNationality(page);
     default:
       throw new Error(`Unknown action: ${instruction.action}`);
   }
