@@ -155,8 +155,12 @@ async function getVerificationText(page) {
     console.log('Found verification image:', verificationImg);
 
     // Save the image to a file
+    const verificationDir = path.join(__dirname, 'verification_images');
+    if (!fs.existsSync(verificationDir)) {
+      fs.mkdirSync(verificationDir, { recursive: true });
+    }
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const imagePath = path.join(__dirname, 'verification_images', `verification_${timestamp}.png`);
+    const imagePath = path.join(verificationDir, `verification_${timestamp}.png`);
     
     // Take screenshot of just the verification image
     const imageElement = await page.$(verificationImg.selector);
@@ -200,7 +204,10 @@ async function getVerificationText(page) {
           content: [
             {
               type: "text",
-              text: "Extract the text from this verification image. Return ONLY the text, nothing else. Be precise and include all characters. The text should be exactly 6 characters long."
+              text: "Extract the text from this verification image. Return ONLY the text - 6 digits or letters, nothing else. Be precise and include all characters. The text should be exactly 6 characters long."
+            },
+            reasoning={
+              "effort": "high"
             },
             {
               type: "image_url",
