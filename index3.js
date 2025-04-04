@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs');
 const OpenAI = require('openai');
+const axios = require('axios');
 require('dotenv').config(); // Load environment variables from .env file
 const captchaHandler = require('./captcha-handler'); // Import the captcha handler module
 
@@ -76,11 +77,11 @@ async function analyzeDropdownIssue(page, screenshotName) {
     return "Analysis failed";
   }
 }
-
+productName= 'Universal Express Pass 4: 4D & Thrills';
 // Define the steps for our process with their corresponding actions
 const steps = [
-  { name: 'Find Universal Express Pass 4: Thrills & Choice product', action: 'findProduct', productName: 'Universal Express Pass 4: 4D & Thrills' },
-  { name: 'Increase quantity to 1', action: 'increaseQuantity' },
+  { name: `Find ${productName} product`, action: 'findProduct', productName: productName },
+  { name: 'Increase quantity to 2', action: 'increaseQuantity', quantity: 3 },
   { name: 'Click SELECT A DATE button', action: 'clickSelectDate' },
   { name: 'Navigate to May 2025', action: 'clickNextMonth' },
   { name: 'Select date 31', action: 'selectDate', day: 31 },
@@ -299,159 +300,361 @@ async function handleIAgree(page) {
     }
 }
 
-async function handleCaptchaVerification(page) {
-  try {
+async function handleCaptcha(instruction, page) {
     console.log('Handling text verification');
     await takeScreenshot(page, 'before_text_verification');
-    
     console.log('Looking for verification elements...');
-    
-    // Wait for verification elements to be visible
-    await page.waitForSelector('img[data-v-6aff2c22]', { visible: true, timeout: 10000 })
-      .catch(() => console.log('Verification image not found with first selector, trying alternatives...'));
-    
-    // Try multiple selectors for the verification image
-    const imgSelectors = [
-      'img[data-v-6aff2c22]', 
-      'img.captcha-image', 
-      'div.captcha-container img', 
-      'div[class*="captcha"] img'
-    ];
-    
-    // Find verification image
-    let verificationImg = null;
-    
-    // Try each selector until we find the image
-    for (const imgSel of imgSelectors) {
-      verificationImg = await page.$(imgSel);
-      if (verificationImg) {
-        console.log(`Found verification image with selector: ${imgSel}`);
-        break;
-      }
-    }
-    
-    if (!verificationImg) {
-      console.error('❌ Could not find verification image');
-      await takeScreenshot(page, 'verification_image_not_found');
-      return false;
-    }
-    
-    console.log('Found verification image');
-    
-    // Highlight the verification image for better recognition
-    await highlightElement(page, verificationImg);
-    await takeScreenshot(page, 'text_verification');
-    
-    // Get verification text from the image using GPT-4o
-    const verificationText = await getVerificationText(page);
-    if (!verificationText) {
-      console.error('❌ Could not get verification text');
-      return false;
-    }
-    
-    console.log(`Text detected: ${verificationText}`);
-    
-    // Using exact selector based on form HTML
-      // Email
-      await page.locator('div:nth-of-type(10) input').click();
-      await page.locator('div:nth-of-type(10) input').fill(verificationText);
 
-
-   
-
-  
-   
-    // Wait for verification to complete
-    await delay(1000);
-    
-    // Just continue - we can't rely on the verification check
-    console.log('✅ Completed verification step');
-    return true;
-  } catch (error) {
-    console.error('Error in handleCaptchaVerification:', error);
-    await takeScreenshot(page, 'error_captcha_verification');
-    return false;
-  }
-}
-
-async function getVerificationText(page) {
-  try {
-    // Take a full screenshot with the highlighted image
-    const timestamp = new Date().toISOString().replace(/:/g, '-');
-    const filename = `text_verification_${timestamp}.png`;
-    const filepath = path.join(screenshotsDir, filename);
-    
-    // Take full screenshot
-    await page.screenshot({
-      path: filepath,
-      fullPage: true
-    });
-    console.log(`Full screenshot with highlighted text saved: ${filename}`);
-    
-    // Read the image file and convert to base64
-    const imageBuffer = fs.readFileSync(filepath);
-    const base64Image = imageBuffer.toString('base64');
-    
-    // Create a simpler prompt that explicitly asks for just the text
-    const prompt = "Return ONLY the letters and numbers you see in the red rectangle. Do not add any other text or phrases like 'The text is'";
-    
-    console.log(`Sending request to OpenAI with prompt: "${prompt}"`);
-    
-    // Send to GPT-4o for analysis
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: prompt
-            },
-            {
-              type: "image_url",
-              image_url: {
-                url: `data:image/png;base64,${base64Image}`
-              }
+    try {
+        // First, wait for the verification image to be visible
+        console.log('Waiting for verification image to be fully loaded...');
+        await page.waitForSelector('img[data-v-6aff2c22], .verification-image, img[src*="captcha"], img[src*="verification"], img[class*="captcha"], img[class*="verification"]', { visible: true, timeout: 10000 });
+        
+        // Try multiple selectors to find the verification image
+        const selectors = [
+            'img[data-v-6aff2c22]',
+            '.verification-image',
+            'img[src*="captcha"]',
+            'img[src*="verification"]',
+            'img[class*="captcha"]',
+            'img[class*="verification"]'
+        ];
+        
+        let verificationImageSelector = null;
+        for (const selector of selectors) {
+            const exists = await page.evaluate((sel) => document.querySelector(sel) !== null, selector);
+            if (exists) {
+                console.log(`Found verification image with selector: ${selector}`);
+                verificationImageSelector = selector;
+                break;
             }
-          ]
         }
-      ]
-    });
-    
-    // Log the full response for debugging
-    console.log('Raw OpenAI response:');
-    console.log(JSON.stringify(response, null, 2));
-    
-    let verificationText = response.choices[0].message.content.trim();
-    
-    // Remove common prefixes that might be included
-    const prefixesToRemove = [
-      "The text in the red rectangle is",
-      "The text is",
-      "The captcha is",
-      "The code is",
-      "The verification code is",
-      "The text reads",
-      "I see",
-      "It says"
-    ];
-    
-    for (const prefix of prefixesToRemove) {
-      if (verificationText.toLowerCase().startsWith(prefix.toLowerCase())) {
-        verificationText = verificationText.substring(prefix.length).trim();
-      }
+        
+        if (!verificationImageSelector) {
+            throw new Error('Verification image not found');
+        }
+        
+        console.log('Found verification image');
+        
+        // Enhanced image processing
+        const enhancedScreenshot = await page.evaluate((selector) => {
+            const img = document.querySelector(selector);
+            if (!img) return null;
+            
+            // Create a canvas to enhance the image
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas dimensions to match the image
+            canvas.width = img.width * 2; // Increase size for better clarity
+            canvas.height = img.height * 2;
+            
+            // Draw the image on the canvas with increased contrast
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            // Apply image enhancements
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            
+            // Increase contrast and sharpness
+            for (let i = 0; i < data.length; i += 4) {
+                // Increase contrast
+                data[i] = data[i] < 128 ? data[i] * 0.8 : data[i] * 1.2;
+                data[i+1] = data[i+1] < 128 ? data[i+1] * 0.8 : data[i+1] * 1.2;
+                data[i+2] = data[i+2] < 128 ? data[i+2] * 0.8 : data[i+2] * 1.2;
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            
+            // Highlight the image with a red border
+            img.style.border = '3px solid red';
+            
+            // Return the enhanced image as a data URL
+            return {
+                originalSrc: img.src,
+                enhancedImage: canvas.toDataURL('image/png'),
+                width: img.width,
+                height: img.height
+            };
+        }, verificationImageSelector);
+        
+        if (!enhancedScreenshot) {
+            throw new Error('Failed to process verification image');
+        }
+        
+        // Take a full screenshot with the highlighted captcha
+        await takeScreenshot(page, 'text_verification');
+        
+        // Save a full screenshot with highlighted text for debugging
+        await page.screenshot({ path: `screenshots/text_verification_${new Date().toISOString().replace(/:/g, '-')}.png` });
+        
+        // We'll try multiple prompts with retries
+        const prompts = [
+            "Return ONLY the characters you see in the red-bordered image. Do not include any explanations or extra text. Just the CAPTCHA text.",
+            "What letters and numbers do you see in the red-bordered verification image? Return ONLY the characters, nothing else.",
+            "Identify the CAPTCHA characters in the red-bordered image. Provide ONLY the characters with no additional text."
+        ];
+        
+        let verificationText = '';
+        let success = false;
+        
+        // Try each prompt until we get a good response
+        for (let i = 0; i < prompts.length && !success; i++) {
+            const prompt = prompts[i];
+            console.log(`Attempt ${i+1}: Using prompt: "${prompt}"`);
+            
+            try {
+                // Create a detailed OpenAI prompt with both original and enhanced image
+                const apiResponse = await axios.post(
+                    'https://api.openai.com/v1/chat/completions',
+                    {
+                        model: "gpt-4o",
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are a CAPTCHA solving assistant. Your only job is to identify the text in verification images. Return ONLY the characters, with no additional text or explanations."
+                            },
+                            {
+                                role: "user",
+                                content: [
+                                    {
+                                        type: "text",
+                                        text: prompt
+                                    },
+                                    {
+                                        type: "image_url",
+                                        image_url: {
+                                            url: enhancedScreenshot.enhancedImage
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        max_tokens: 30
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+                        }
+                    }
+                );
+                
+                console.log('Raw OpenAI response:');
+                console.log(JSON.stringify(apiResponse.data, null, 2));
+                
+                // Extract the text from the API response
+                let rawText = apiResponse.data.choices[0].message.content;
+                
+                // Clean up the response - remove any non-alphanumeric characters
+                verificationText = rawText.replace(/[^a-zA-Z0-9]/g, '');
+                
+                // Check if we got a reasonable response
+                if (verificationText.length >= 4 && verificationText.length <= 8) {
+                    console.log(`Processed verification text: "${verificationText}"`);
+                    success = true;
+                    break;
+                } else {
+                    console.log(`Got invalid text length (${verificationText.length}): "${verificationText}". Trying another prompt.`);
+                }
+            } catch (error) {
+                console.error(`Error with prompt ${i+1}:`, error.message);
+                // Continue to next prompt
+            }
+        }
+        
+        if (!success) {
+            throw new Error('Failed to extract valid verification text after multiple attempts');
+        }
+        
+        // Try to find the input field and submit the captcha
+        console.log(`Text detected: ${verificationText}`);
+        
+        // Attempt multiple approaches to find and fill the verification input field
+        let captchaFilled = false;
+        
+        // Approach 1: Try specific attribute-based selectors
+        try {
+            console.log('Approach 1: Using attribute-based selectors...');
+            // Wait for the input field with shorter timeout
+            const inputExists = await page.evaluate(() => {
+                const selectors = [
+                    'input[placeholder*="verification"]', 
+                    'input[placeholder*="captcha"]', 
+                    'input[name*="captcha"]', 
+                    'input[class*="verification"]', 
+                    'input[class*="captcha"]',
+                    'input[aria-label*="verification"]', 
+                    'input[aria-label*="captcha"]'
+                ];
+                
+                for (const selector of selectors) {
+                    if (document.querySelector(selector)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            
+            if (inputExists) {
+                console.log('Found input field with attribute-based selector');
+                await page.evaluate((text) => {
+                    const selectors = [
+                        'input[placeholder*="verification"]', 
+                        'input[placeholder*="captcha"]', 
+                        'input[name*="captcha"]', 
+                        'input[class*="verification"]', 
+                        'input[class*="captcha"]',
+                        'input[aria-label*="verification"]', 
+                        'input[aria-label*="captcha"]'
+                    ];
+                    
+                    for (const selector of selectors) {
+                        const input = document.querySelector(selector);
+                        if (input) {
+                            input.value = text;
+                            input.dispatchEvent(new Event('input', { bubbles: true }));
+                            input.dispatchEvent(new Event('change', { bubbles: true }));
+                            return;
+                        }
+                    }
+                }, verificationText);
+                
+                captchaFilled = true;
+            }
+        } catch (error) {
+            console.log('Approach 1 failed:', error.message);
+        }
+        
+        // Approach 2: Try specific positional selector (like the original code)
+        if (!captchaFilled) {
+            try {
+                console.log('Approach 2: Using positional selector (div:nth-of-type(10) input)...');
+                const inputExists = await page.evaluate(() => {
+                    return document.querySelector('div:nth-of-type(10) input') !== null;
+                });
+                
+                if (inputExists) {
+                    console.log('Found input field with positional selector');
+                    await page.locator('div:nth-of-type(10) input').click();
+                    await page.locator('div:nth-of-type(10) input').fill(verificationText);
+                    captchaFilled = true;
+                }
+            } catch (error) {
+                console.log('Approach 2 failed:', error.message);
+            }
+        }
+        
+        // Approach 3: Look for any input field near the verification image
+        if (!captchaFilled) {
+            try {
+                console.log('Approach 3: Looking for any input field near the verification image...');
+                const inputFound = await page.evaluate((imgSelector) => {
+                    const img = document.querySelector(imgSelector);
+                    if (!img) return false;
+                    
+                    // Try to find any input within the same form or container
+                    let container = img.parentElement;
+                    for (let i = 0; i < 5; i++) {
+                        if (!container) break;
+                        
+                        // Look for inputs within this container
+                        const inputs = container.querySelectorAll('input[type="text"]');
+                        if (inputs.length > 0) {
+                            // Fill the first available input
+                            inputs[0].value = '';
+                            inputs[0].focus();
+                            return true;
+                        }
+                        
+                        // Move up one level
+                        container = container.parentElement;
+                    }
+                    
+                    return false;
+                }, verificationImageSelector);
+                
+                if (inputFound) {
+                    console.log('Found input field near verification image');
+                    await page.keyboard.type(verificationText);
+                    captchaFilled = true;
+                }
+            } catch (error) {
+                console.log('Approach 3 failed:', error.message);
+            }
+        }
+        
+        // Approach 4: Look for any visible text input on the page
+        if (!captchaFilled) {
+            try {
+                console.log('Approach 4: Looking for any visible text input...');
+                const inputFound = await page.evaluate(() => {
+                    // Find all visible text inputs
+                    const allInputs = Array.from(document.querySelectorAll('input[type="text"]'))
+                        .filter(input => {
+                            const style = window.getComputedStyle(input);
+                            return style.display !== 'none' && 
+                                   style.visibility !== 'hidden' && 
+                                   input.offsetParent !== null;
+                        });
+                    
+                    // Use the first visible input
+                    if (allInputs.length > 0) {
+                        allInputs[0].style.border = '3px solid red';
+                        allInputs[0].focus();
+                        return true;
+                    }
+                    
+                    return false;
+                });
+                
+                if (inputFound) {
+                    console.log('Found visible text input');
+                    await page.keyboard.type(verificationText);
+                    captchaFilled = true;
+                }
+            } catch (error) {
+                console.log('Approach 4 failed:', error.message);
+            }
+        }
+        
+        if (!captchaFilled) {
+            throw new Error('Could not find or fill the verification input field');
+        }
+        
+        // Wait a moment for the input to register
+        await delay(1000);
+        
+        console.log('✅ Completed verification step');
+        return true;
+    } catch (error) {
+        console.error(`Error in handleCaptcha: ${error.message}`);
+        
+        // If we fail, try one more approach - look for any input field that might accept the CAPTCHA
+        try {
+            await page.evaluate(() => {
+                // Look for any text input that's visible
+                const inputs = Array.from(document.querySelectorAll('input[type="text"]'))
+                    .filter(input => {
+                        const style = window.getComputedStyle(input);
+                        return style.display !== 'none' && style.visibility !== 'hidden' && input.offsetParent !== null;
+                    });
+                
+                if (inputs.length > 0) {
+                    // Highlight it for debugging
+                    inputs[0].style.border = '2px solid red';
+                    return true;
+                }
+                return false;
+            });
+            
+            await takeScreenshot(page, 'found_possible_captcha_input');
+            
+            throw new Error(`Failed to complete captcha: ${error.message}`);
+        } catch (finalError) {
+            throw new Error(`Failed to handle captcha: ${error.message}`);
+        }
     }
-    
-    // Remove any quotation marks, colons, or periods
-    verificationText = verificationText.replace(/["':,.]/g, '').trim();
-    
-    console.log(`Processed verification text: "${verificationText}"`);
-    return verificationText;
-  } catch (error) {
-    console.error('❌ Error getting verification text:', error.message);
-    return null;
-  }
 }
 
 // Functions to handle checkbox checking
@@ -567,179 +770,75 @@ async function findProduct(instruction, page) {
 }
 
 async function increaseQuantity(instruction, page) {
-    console.log('Increasing ticket quantity to 1');
+    // Get quantity from instruction, default to 1 if not specified
+    const targetQuantity = instruction.quantity || 1;
+    console.log(`QUANTITY DEBUG: Target quantity is ${targetQuantity}`);
     
-    // Multiple strategies for finding and clicking the plus button
-    const strategies = [
-        // Strategy 1: Standard approach from parent card
-        async () => {
-            return await page.evaluate(() => {
-                // First find the product title
-                const productTitle = Array.from(document.querySelectorAll('h3'))
-                    .find(title => title.textContent.includes('Universal Express Pass 4: Thrills & Choice'));
-                
-                if (!productTitle) return { success: false, reason: 'Product title not found' };
-                
-                // Find the card container
-                let cardElement = productTitle;
-                for (let i = 0; i < 5; i++) {
-                    if (!cardElement.parentElement) break;
-                    cardElement = cardElement.parentElement;
-                    if (cardElement.tagName === 'DIV' && 
-                        (cardElement.className.includes('card') || 
-                        cardElement.querySelector('.card') ||
-                        cardElement.querySelector('button'))) {
-                        break;
-                    }
-                }
-                
-                // Find the plus button in this card
-                const plusButton = cardElement.querySelector('.plus, [class*="plus"], span[class*="blue"][class*="Font"]:not([class*="minus"])');
-                
-                if (!plusButton) return { success: false, reason: 'Plus button not found' };
-                
-                // Highlight the button
-                plusButton.style.border = '3px solid red';
-                plusButton.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
-                
-                // Click it
-                plusButton.click();
-                
-                return { success: true, text: plusButton.textContent, strategy: 'card-parent' };
-            });
-        },
-        
-        // Strategy 2: Direct search for plus buttons
-        async () => {
-            return await page.evaluate(() => {
-                // Find all plus buttons, being very specific to avoid minus buttons
-                const allPlusButtons = Array.from(document.querySelectorAll('button, span, div'))
-                    .filter(el => {
-                        // Check if it's the plus button by various characteristics
-                        const hasPlus = el.textContent === '+' || 
-                                       el.getAttribute('aria-label')?.toLowerCase().includes('increase') ||
-                                       el.className.toLowerCase().includes('plus') ||
-                                       el.className.toLowerCase().includes('increment');
-                        
-                        // Explicitly exclude minus buttons
-                        const isMinus = el.textContent === '-' || 
-                                       el.getAttribute('aria-label')?.toLowerCase().includes('decrease') ||
-                                       el.className.toLowerCase().includes('minus') ||
-                                       el.className.toLowerCase().includes('decrement');
-                        
-                        // Only return true for plus buttons
-                        return hasPlus && !isMinus;
-                    });
+    // Use the product name from the instruction if available, otherwise use the global productName
+    const pname = instruction.productName || productName;
+    
+    // Simplified approach - just one strategy with detailed logging
+    try {
+        console.log('QUANTITY DEBUG: Using direct search strategy for plus buttons');
+        const result = await page.evaluate((pName, quantity) => {
+            console.log(`QUANTITY DEBUG: Inside evaluate with quantity=${quantity}`);
+            
+            // Find all plus buttons
+            const allPlusButtons = Array.from(document.querySelectorAll('button, span, div'))
+                .filter(el => {
+                    const hasPlus = el.textContent === '+' || 
+                                  el.getAttribute('aria-label')?.toLowerCase().includes('increase') ||
+                                  el.className.toLowerCase().includes('plus') ||
+                                  el.className.toLowerCase().includes('increment');
+                    const isMinus = el.textContent === '-' || 
+                                  el.getAttribute('aria-label')?.toLowerCase().includes('decrease') ||
+                                  el.className.toLowerCase().includes('minus') ||
+                                  el.className.toLowerCase().includes('decrement');
+                    return hasPlus && !isMinus;
+                });
 
-                if (allPlusButtons.length === 0) return { success: false, reason: 'No plus buttons found' };
+            console.log(`QUANTITY DEBUG: Found ${allPlusButtons.length} plus buttons`);
+            if (allPlusButtons.length === 0) return { success: false, reason: 'No plus buttons found' };
 
-                // Find the plus button near our target product
-                let targetButton = null;
-
-                for (const btn of allPlusButtons) {
-                    // Look upward to find if it's related to our product
-                    let currentEl = btn;
-                    for (let i = 0; i < 8; i++) {
-                        if (!currentEl.parentElement) break;
-                        currentEl = currentEl.parentElement;
-
-                        // If we find the product title, this is our button
-                        if (currentEl.tagName === 'H3' && 
-                            currentEl.textContent.includes('Universal Express Pass 4: Thrills & Choice')) {
-                            targetButton = btn;
-                            break;
-                        }
-
-                        // Also check if any child elements contain the product name
-                        const titleElements = currentEl.querySelectorAll('h3');
-                        for (const title of titleElements) {
-                            if (title.textContent.includes('Universal Express Pass 4: Thrills & Choice')) {
-                                targetButton = btn;
-                                break;
-                            }
-                        }
-
-                        if (targetButton) break;
-                    }
-
-                    if (targetButton) break;
-                }
-
-                if (!targetButton) {
-                    // If we couldn't find one associated with our product, look for the rightmost plus button
-                    // since the plus is usually to the right of minus
-                    const rightmostPlus = allPlusButtons.reduce((rightmost, current) => {
-                        const currentRect = current.getBoundingClientRect();
-                        const rightmostRect = rightmost?.getBoundingClientRect();
-                        if (!rightmost || currentRect.right > rightmostRect.right) {
-                            return current;
-                        }
-                        return rightmost;
-                    }, null);
-                    
-                    if (rightmostPlus) {
-                        targetButton = rightmostPlus;
-                    }
-                }
-
-                if (!targetButton) return { success: false, reason: 'Could not find plus button' };
-
-                // Highlight and click
-                targetButton.style.border = '3px solid green';  // Changed to green to distinguish from minus button
-                targetButton.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
-                targetButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                // Log what we're clicking for verification
-                console.log('Clicking button with text:', targetButton.textContent);
+            // Use the first plus button
+            const targetButton = allPlusButtons[0];
+            
+            // Highlight for visibility
+            targetButton.style.border = '3px solid green';
+            targetButton.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
+            targetButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            console.log('QUANTITY DEBUG: Button text:', targetButton.textContent);
+            
+            // IMPORTANT: Set click count EXACTLY to the target quantity
+            console.log(`QUANTITY DEBUG: Will click EXACTLY ${quantity} times`);
+            
+            // Click exactly 'quantity' times
+            for (let i = 0; i < quantity; i++) {
+                console.log(`QUANTITY DEBUG: Click ${i+1}/${quantity}`);
                 targetButton.click();
-
-                return { success: true, strategy: 'direct-search', buttonText: targetButton.textContent };
-            });
-        }
-    ];
-    
-    // Try each strategy until one works
-    let quantityIncreased = { success: false, reason: 'No strategies attempted' };
-    for (let i = 0; i < strategies.length; i++) {
-        try {
-            quantityIncreased = await strategies[i]();
-            if (quantityIncreased.success) {
-                console.log(`✅ Increased quantity using strategy: ${quantityIncreased.strategy}`);
-                break;
             }
-        } catch (strategyError) {
-            console.log(`Strategy ${i+1} failed:`, strategyError.message);
+            
+            return { success: true, strategy: 'direct-search', buttonText: targetButton.textContent, clickCount: quantity };
+        }, pname, targetQuantity);
+        
+        console.log(`QUANTITY DEBUG: Evaluate returned: ${JSON.stringify(result)}`);
+        
+        if (result.success) {
+            console.log(`✅ Increased quantity using strategy: ${result.strategy}, clicked ${result.clickCount} times`);
+            // Add delay after clicks to allow page to update
+            await delay(1000 * result.clickCount);
+        } else {
+            throw new Error(`Could not increase quantity: ${result.reason}`);
         }
+        
+        // Take a screenshot to verify
+        await takeScreenshot(page, 'quantity_increased');
+        return true;
+    } catch (error) {
+        console.error(`Error in increaseQuantity: ${error.message}`);
+        throw error;
     }
-    
-    if (!quantityIncreased.success) {
-        throw new Error(`Could not increase quantity after trying all strategies: ${quantityIncreased.reason}`);
-    }
-    
-    // Verify the quantity was actually increased
-    await delay(1000);
-    const quantityVerified = await page.evaluate(() => {
-        // Look for quantity indicators or inputs
-        const quantityElements = document.querySelectorAll('[class*="quantity"], input[type="number"], .counter, [class*="Counter"]');
-        for (const el of quantityElements) {
-            if (el.tagName === 'INPUT' && el.value === '1') {
-                return { success: true, method: 'input-value' };
-            }
-            if (el.textContent && el.textContent.trim() === '1') {
-                return { success: true, method: 'element-text' };
-            }
-        }
-        return { success: false, reason: 'Could not verify quantity increase' };
-    });
-    
-    if (quantityVerified.success) {
-        console.log(`✅ Verified quantity increase to 1 using method: ${quantityVerified.method}`);
-    } else {
-        console.log(`⚠️ ${quantityVerified.reason}, but proceeding anyway`);
-    }
-    
-    await takeScreenshot(page, 'quantity_increased');
-    return true;
 }
 
 async function clickSelectDate(instruction, page) {
@@ -1726,7 +1825,7 @@ const hardcodedActions = {
   fillFormDetails: fillFormDetails,
   fillNationality: fillNationality,
   fillPlaceOfResidence: fillPlaceOfResidence,
-  handleCaptcha: captchaHandler.handleCaptcha,
+  handleCaptcha: handleCaptcha,
   checkTermsCheckbox: checkTermsCheckbox,
   checkCancellationCheckbox: checkCancellationCheckbox,
   clickContinue: clickContinue,
@@ -1770,7 +1869,7 @@ async function executeStep(instruction, page) {
     case 'fillPlaceOfResidence':
       return await fillPlaceOfResidence(page);
     case 'handleCaptcha':
-      return await handleCaptchaVerification(page);
+      return await handleCaptcha(instruction, page);
     case 'checkTermsCheckbox':
       return await checkTermsCheckbox(instruction, page);
     case 'checkCancellationCheckbox':
@@ -1788,6 +1887,62 @@ async function executeStep(instruction, page) {
     default:
       throw new Error(`Unknown action: ${instruction.action}`);
   }
+}
+
+// New function to process the ticket purchasing steps
+async function purchaseTicket(page, ticketDetails) {
+    // Update global productName based on ticket details
+    productName = ticketDetails.name;
+    console.log('Starting purchaseTicket with details:', ticketDetails);
+
+    // Update the quantity in the steps array
+    steps[1].name = `Increase quantity to ${ticketDetails.quantity}`;
+    steps[1].quantity = ticketDetails.quantity;
+
+    // Process each step from the steps array
+    for (const step of steps) {
+        // Ensure the step uses the dynamic product name
+        if (!step.productName) {
+            step.productName = ticketDetails.name;
+        }
+
+        console.log(`\n---- Processing step: ${step.name} ----`);
+        let stepSuccess = false;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
+        let lastError = null;
+
+        while (!stepSuccess && retryCount <= MAX_RETRIES) {
+            try {
+                // For simplicity, we'll assume the instruction is the step itself
+                const instruction = step;
+                console.log('Executing instruction:', instruction);
+                await takeScreenshot(page, `before_${instruction.name.replace(/\s+/g, '_')}${retryCount > 0 ? `_retry${retryCount}` : ''}`);
+                await delay(1000);
+
+                // Execute the step using the mapped function
+                stepSuccess = await executeStep(instruction, page);
+
+                if (!stepSuccess) {
+                    // If no error but step did not succeed, mark as success (this pattern follows previous logic)
+                    stepSuccess = true;
+                    console.log(`Step ${instruction.name} completed successfully without explicit success signal`);
+                }
+            } catch (error) {
+                console.error(`Error executing step ${step.name}, attempt ${retryCount+1}:`, error.message);
+                lastError = error.message;
+                await delay(2000);
+                retryCount++;
+                if (retryCount > MAX_RETRIES) {
+                    throw new Error(`Failed to complete step ${step.name} after ${MAX_RETRIES} retries: ${lastError}`);
+                } else {
+                    console.log(`⚠️ Retrying step "${step.name}" (Attempt ${retryCount} of ${MAX_RETRIES})...`);
+                }
+            }
+        }
+        console.log(`Completed step: ${step.name}`);
+    }
+    console.log('All steps processed successfully.');
 }
 
 // New wrapper function to initiate the ticket purchasing process
@@ -1821,7 +1976,7 @@ async function purchaceTikcet(productName, quantity = 1, date = '2025-01-01') {
     };
     console.log('Ticket Details:', ticketDetails);
     
-    // Call the existing ticket purchasing process
+    // Call the ticket purchasing process
     await purchaseTicket(page, ticketDetails);
     
     console.log('Ticket purchase process initiated.');
@@ -1833,166 +1988,168 @@ async function purchaceTikcet(productName, quantity = 1, date = '2025-01-01') {
 // Export the function if needed for external use (optional)
 module.exports = { purchaceTikcet };
 
-(async () => {
-  console.log('Starting USJ Express Pass ticket selection process with GPT-4o assistance...');
-  
-  const browser = await puppeteer.launch({ 
-    headless: false,
-    defaultViewport: null, // Use full window size
-    args: ['--start-maximized'] // Start with maximized window
-  });
-  
-  try {
-    const page = await browser.newPage();
-    page.setDefaultTimeout(30000); // 30 seconds timeout
-    
-    // Step 1: Navigate to the Express Pass page
-    console.log('\n---- Step 1: Navigating to USJ Express Pass page ----');
-    await page.goto('https://www.usjticketing.com/expressPass', { 
-      waitUntil: 'networkidle2' 
-    });
-    console.log('✅ Page loaded successfully');
-    // await takeScreenshot(page, 'step1_page_loaded');
-    
-    // Clear any items in the cart if they exist
-    console.log('\n---- Checking for and removing any items in cart ----');
-    await delay(1000);
-    
-    try {
-      // Look for cart icon or count indicator
-      const hasCartItems = await page.evaluate(() => {
-        const cartIndicators = document.querySelectorAll('[class*="cart"], [class*="Cart"], [class*="basket"], [class*="Basket"]');
-        for (const indicator of cartIndicators) {
-          if (indicator.textContent.includes('1') || 
-              indicator.textContent.includes('2') || 
-              indicator.textContent.includes('3') ||
-              indicator.querySelector('[class*="count"]')) {
-            return true;
-          }
-        }
-        return false;
-      });
-      
-      if (hasCartItems) {
-        console.log('⚠️ Items found in cart. Attempting to clear cart...');
+if (require.main === module) {
+    (async () => {
+        console.log('Starting USJ Express Pass ticket selection process with GPT-4o assistance...');
         
-        // Click on cart icon
-        await page.evaluate(() => {
-          const cartButtons = document.querySelectorAll('[class*="cart"], [class*="Cart"], [class*="basket"], [class*="Basket"]');
-          if (cartButtons.length > 0) {
-            cartButtons[0].click();
-            return true;
-          }
-          return false;
+        const browser = await puppeteer.launch({ 
+            headless: false,
+            defaultViewport: null, // Use full window size
+            args: ['--start-maximized'] // Start with maximized window
         });
         
-        await delay(1000);
-        
-        // Look for and click any "Remove" or "Clear" buttons
-        await page.evaluate(() => {
-          const removeButtons = Array.from(document.querySelectorAll('button, a, [role="button"]'))
-            .filter(el => 
-              el.textContent.includes('Remove') || 
-              el.textContent.includes('Clear') || 
-              el.textContent.includes('Delete') ||
-              el.textContent.includes('Empty cart')
-            );
-            
-          if (removeButtons.length > 0) {
-            removeButtons.forEach(btn => btn.click());
-            return true;
-          }
-          return false;
-        });
-        
-        await delay(500);
-        console.log('Cart should now be empty');
-      } else {
-        console.log('✅ No items in cart');
-      }
-    } catch (error) {
-      console.log('Error checking cart:', error.message);
-    }
-    
-    // Wait for page to fully load
-    console.log('Waiting for 5 seconds before starting the process...');
-    await delay(5000);
-    
-    // Process each step with AI assistance and retry mechanism
-    for (const step of steps) {
-      console.log(`\n---- Processing step: ${step.name} ----`);
-      console.log(`Waiting 4 seconds before starting this step...`);
-      await delay(1000);
-      
-      let stepSuccess = false;
-      let retryCount = 0;
-      let lastError = null;
-      const MAX_RETRIES = 3;
-      
-      while (!stepSuccess && retryCount <= MAX_RETRIES) {
         try {
-          // Get the current DOM state
-          const dom = await page.evaluate(() => document.documentElement.outerHTML);
-          
-          // Get instruction from GPT-4o with retry information if applicable
-          const instruction = await getStepInstruction(step, dom, retryCount, lastError);
-          console.log("Obtained instruction:", instruction);
-          
-          // Take a screenshot before each action
-          await takeScreenshot(page, `before_${step.name.replace(/\s+/g, '_')}${retryCount > 0 ? `_retry${retryCount}` : ''}`);
-          console.log(`About to perform action: ${instruction.action}. Waiting 1 seconds...`);
-          await delay(1000);
-          
-          // Execute the step
-          stepSuccess = await executeStep(instruction, page);
-          
-          if (!stepSuccess) {
-            stepSuccess = true;  // Ensure we mark as success if no error thrown
-            console.log(`Step ${step.name} completed successfully`);
-          }
+            const page = await browser.newPage();
+            page.setDefaultTimeout(30000); // 30 seconds timeout
+            
+            // Step 1: Navigate to the Express Pass page
+            console.log('\n---- Step 1: Navigating to USJ Express Pass page ----');
+            await page.goto('https://www.usjticketing.com/expressPass', { 
+                waitUntil: 'networkidle2' 
+            });
+            console.log('✅ Page loaded successfully');
+            // await takeScreenshot(page, 'step1_page_loaded');
+            
+            // Clear any items in the cart if they exist
+            console.log('\n---- Checking for and removing any items in cart ----');
+            await delay(1000);
+            
+            try {
+                // Look for cart icon or count indicator
+                const hasCartItems = await page.evaluate(() => {
+                    const cartIndicators = document.querySelectorAll('[class*="cart"], [class*="Cart"], [class*="basket"], [class*="Basket"]');
+                    for (const indicator of cartIndicators) {
+                        if (indicator.textContent.includes('1') || 
+                            indicator.textContent.includes('2') || 
+                            indicator.textContent.includes('3') ||
+                            indicator.querySelector('[class*="count"]')) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+                
+                if (hasCartItems) {
+                    console.log('⚠️ Items found in cart. Attempting to clear cart...');
+                    
+                    // Click on cart icon
+                    await page.evaluate(() => {
+                        const cartButtons = document.querySelectorAll('[class*="cart"], [class*="Cart"], [class*="basket"], [class*="Basket"]');
+                        if (cartButtons.length > 0) {
+                            cartButtons[0].click();
+                            return true;
+                        }
+                        return false;
+                    });
+                    
+                    await delay(1000);
+                    
+                    // Look for and click any "Remove" or "Clear" buttons
+                    await page.evaluate(() => {
+                        const removeButtons = Array.from(document.querySelectorAll('button, a, [role="button"]'))
+                            .filter(el => 
+                                el.textContent.includes('Remove') || 
+                                el.textContent.includes('Clear') || 
+                                el.textContent.includes('Delete') ||
+                                el.textContent.includes('Empty cart')
+                            );
+                            
+                        if (removeButtons.length > 0) {
+                            removeButtons.forEach(btn => btn.click());
+                            return true;
+                        }
+                        return false;
+                    });
+                    
+                    await delay(500);
+                    console.log('Cart should now be empty');
+                } else {
+                    console.log('✅ No items in cart');
+                }
+            } catch (error) {
+                console.log('Error checking cart:', error.message);
+            }
+            
+            // Wait for page to fully load
+            console.log('Waiting for 5 seconds before starting the process...');
+            await delay(5000);
+            
+            // Process each step with AI assistance and retry mechanism
+            for (const step of steps) {
+                console.log(`\n---- Processing step: ${step.name} ----`);
+                console.log(`Waiting 4 seconds before starting this step...`);
+                await delay(1000);
+                
+                let stepSuccess = false;
+                let retryCount = 0;
+                let lastError = null;
+                const MAX_RETRIES = 3;
+                
+                while (!stepSuccess && retryCount <= MAX_RETRIES) {
+                    try {
+                        // Get the current DOM state
+                        const dom = await page.evaluate(() => document.documentElement.outerHTML);
+                        
+                        // Get instruction from GPT-4o with retry information if applicable
+                        const instruction = await getStepInstruction(step, dom, retryCount, lastError);
+                        console.log("Obtained instruction:", instruction);
+                        
+                        // Take a screenshot before each action
+                        await takeScreenshot(page, `before_${step.name.replace(/\s+/g, '_')}${retryCount > 0 ? `_retry${retryCount}` : ''}`);
+                        console.log(`About to perform action: ${instruction.action}. Waiting 1 seconds...`);
+                        await delay(1000);
+                        
+                        // Execute the step
+                        stepSuccess = await executeStep(instruction, page);
+                        
+                        if (!stepSuccess) {
+                            stepSuccess = true;  // Ensure we mark as success if no error thrown
+                            console.log(`Step ${step.name} completed successfully`);
+                        }
+                    } catch (error) {
+                        console.error(`❌ Error processing step ${step.name} (${retryCount > 0 ? `Retry #${retryCount}` : 'First attempt'}):`, error.message);
+                        lastError = error.message;
+                        
+                        // Take an error screenshot
+                        await takeScreenshot(page, `error_${step.name.replace(/\s+/g, '_')}${retryCount > 0 ? `_retry${retryCount}` : ''}`);
+                        
+                        // Extended wait after error
+                        await delay(2000);
+                        
+                        retryCount++;
+                        if (retryCount > MAX_RETRIES) {
+                            console.error(`❌ Failed to complete step "${step.name}" after ${MAX_RETRIES} retries. Stopping execution.`);
+                            process.exit(1); // Exit the script with error code
+                        } else {
+                            console.log(`⚠️ Retrying step "${step.name}" (Attempt ${retryCount} of ${MAX_RETRIES})...`);
+                        }
+                    }
+                    
+                    // Add a clear indicator when moving to next step
+                    if (stepSuccess) {
+                        console.log(`\n✅ Completed step: ${step.name} - Moving to next step\n`);
+                    }
+                }
+            }
+            
+            // Final wait and screenshot
+            console.log('\n---- Process completed ----');
+            await delay(1000);
+            await takeScreenshot(page, 'final_state');
+            
+            console.log('✅ Script completed successfully');
         } catch (error) {
-          console.error(`❌ Error processing step ${step.name} (${retryCount > 0 ? `Retry #${retryCount}` : 'First attempt'}):`, error.message);
-          lastError = error.message;
-          
-          // Take an error screenshot
-          await takeScreenshot(page, `error_${step.name.replace(/\s+/g, '_')}${retryCount > 0 ? `_retry${retryCount}` : ''}`);
-          
-          // Extended wait after error
-          await delay(2000);
-          
-          retryCount++;
-          if (retryCount > MAX_RETRIES) {
-            console.error(`❌ Failed to complete step "${step.name}" after ${MAX_RETRIES} retries. Stopping execution.`);
-            process.exit(1); // Exit the script with error code
-          } else {
-            console.log(`⚠️ Retrying step "${step.name}" (Attempt ${retryCount} of ${MAX_RETRIES})...`);
-          }
+            console.error('❌ Error:', error.message);
+            // Take a screenshot on error
+            try {
+                const page = (await browser.pages())[0];
+                await takeScreenshot(page, 'error_state');
+            } catch (screenshotError) {
+                console.error('Failed to take error screenshot:', screenshotError.message);
+            }
+        } finally {
+            console.log('Script complete. Browser will remain open for inspection.');
+            // Removing browser.close() to keep the browser open
         }
-        
-        // Add a clear indicator when moving to next step
-        if (stepSuccess) {
-          console.log(`\n✅ Completed step: ${step.name} - Moving to next step\n`);
-        }
-      }
-    }
-      
-    // Final wait and screenshot
-    console.log('\n---- Process completed ----');
-    await delay(1000);
-    await takeScreenshot(page, 'final_state');
-    
-    console.log('✅ Script completed successfully');
-  } catch (error) {
-    console.error('❌ Error:', error.message);
-    // Take a screenshot on error
-    try {
-      const page = (await browser.pages())[0];
-      await takeScreenshot(page, 'error_state');
-    } catch (screenshotError) {
-      console.error('Failed to take error screenshot:', screenshotError.message);
-    }
-  } finally {
-    console.log('Script complete. Browser will remain open for inspection.');
-    // Removing browser.close() to keep the browser open
-  }
-})();
+    })();
+}
