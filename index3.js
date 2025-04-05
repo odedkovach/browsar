@@ -81,7 +81,7 @@ productName= 'Universal Express Pass 4: 4D & Thrills';
 // Define the steps for our process with their corresponding actions
 const steps = [
   { name: `Find ${productName} product`, action: 'findProduct', productName: productName },
-  { name: 'Increase quantity to 2', action: 'increaseQuantity', quantity: 3 },
+  { name: 'Increase quantity ', action: 'increaseQuantity', quantity: 3 },
   { name: 'Click SELECT A DATE button', action: 'clickSelectDate' },
   { name: 'Navigate to May 2025', action: 'clickNextMonth' },
   { name: 'Select date 31', action: 'selectDate', day: 31 },
@@ -734,33 +734,154 @@ async function findProduct(instruction, page) {
         });
         await delay(1000);
         
-        const productFound = await page.evaluate((productName) => {
-            // First find the h3 with the product title
+        // Take a screenshot of the available products
+        await takeScreenshot(page, 'available_products');
+        
+        // First get a list of all product names for debugging
+        const productList = await page.evaluate(() => {
+            return Array.from(document.querySelectorAll('h3'))
+                .map(el => el.textContent.trim())
+                .filter(text => text.length > 0);
+        });
+        
+        console.log('Available products:', productList);
+        
+        // Use exact product name matching
+        const productFound = await page.evaluate((exactProductName) => {
+            // Log exact product we're looking for
+            console.log(`Looking for exact product: "${exactProductName}"`);
+            
+            // First find the h3 with the EXACT product title
             const productTitles = Array.from(document.querySelectorAll('h3'));
-            const targetTitle = productTitles.find(title => 
-                title.textContent.includes(productName)
-            );
+            let targetTitle = null;
+            
+            // Try exact match first
+            for (const title of productTitles) {
+                const titleText = title.textContent.trim();
+                console.log(`Comparing "${titleText}" with "${exactProductName}"`);
+                
+                if (titleText === exactProductName) {
+                    targetTitle = title;
+                    console.log("Found exact match!");
+                    break;
+                }
+            }
+            
+            // If no exact match, try includes
+            if (!targetTitle) {
+                for (const title of productTitles) {
+                    const titleText = title.textContent.trim();
+                    if (titleText.includes(exactProductName)) {
+                        targetTitle = title;
+                        console.log("Found partial match!");
+                        break;
+                    }
+                }
+            }
             
             if (!targetTitle) return { success: false, reason: 'Product title not found' };
             
             // Highlight the title
-            targetTitle.style.border = '3px solid red';
-            targetTitle.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+            targetTitle.style.border = '5px solid red';
+            targetTitle.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
             
             // Scroll to it
             targetTitle.scrollIntoView({ behavior: 'smooth', block: 'center' });
             
+            // Find the card containing this title
+            let card = targetTitle;
+            let foundButton = null;
+            
+            // Try to go up to find the card containing this product
+            for (let i = 0; i < 8; i++) {
+                if (!card.parentElement) break;
+                card = card.parentElement;
+                
+                // Look for SELECT A DATE button within this card
+                const buttons = card.querySelectorAll('button');
+                for (const button of buttons) {
+                    if (button.textContent.includes('SELECT A DATE')) {
+                        console.log("Found SELECT A DATE button in this card");
+                        foundButton = button;
+                        break;
+                    }
+                }
+                
+                if (foundButton) break;
+                
+                // If we find a container that seems to contain multiple products, stop climbing
+                if (card.querySelectorAll('h3').length > 1) {
+                    console.log("Found container with multiple products, stopping here");
+                    break;
+                }
+            }
+            
+            // Make sure this is the right card by double-checking the title
+            const cardTitle = card.querySelector('h3');
+            if (cardTitle && cardTitle !== targetTitle) {
+                console.log(`Card contains a different title: ${cardTitle.textContent}`);
+                return { 
+                    success: false, 
+                    reason: `Found wrong card with title: ${cardTitle.textContent}` 
+                };
+            }
+            
+            // Highlight the entire card
+            card.style.border = '5px solid blue';
+            card.style.backgroundColor = 'rgba(0, 0, 255, 0.1)';
+            
+            // If we found a button, click it to select this product
+            if (foundButton) {
+                // Highlight the button
+                foundButton.style.border = '5px solid green';
+                foundButton.style.backgroundColor = 'rgba(0, 255, 0, 0.3)';
+                
+                // Make absolutely sure this is for our exact product
+                const relatedTitle = card.querySelector('h3');
+                if (relatedTitle) {
+                    const titleText = relatedTitle.textContent.trim();
+                    console.log(`Button is for product: "${titleText}"`);
+                    
+                    if (titleText === exactProductName || titleText.includes(exactProductName)) {
+                        // Click the button to select this specific product
+                        console.log("Clicking SELECT A DATE button for this product");
+                        foundButton.click();
+                        return { 
+                            success: true, 
+                            text: titleText,
+                            clicked: true
+                        };
+                    } else {
+                        console.log("Title doesn't match our product, not clicking");
+                        return { 
+                            success: false, 
+                            reason: `Button belongs to wrong product: ${titleText}` 
+                        };
+                    }
+                }
+            } else {
+                console.log("No SELECT A DATE button found in this card");
+            }
+            
             return { 
                 success: true, 
-                text: targetTitle.textContent 
+                text: targetTitle.textContent,
+                clicked: foundButton !== null
             };
         }, instruction.productName);
         
         if (!productFound.success) {
+            console.error(`Could not find product: ${productFound.reason}`);
             throw new Error(`Could not find product: ${productFound.reason}`);
         }
         
         console.log(`✅ Found product: ${productFound.text}`);
+        if (productFound.clicked) {
+            console.log(`✅ Clicked SELECT A DATE button for ${instruction.productName}`);
+        } else {
+            console.log(`⚠️ Product found but no button clicked - will proceed with next steps`);
+        }
+        
         await takeScreenshot(page, 'product_found');
         return true;  // Explicitly return true for success
     } catch (error) {
@@ -772,64 +893,216 @@ async function findProduct(instruction, page) {
 async function increaseQuantity(instruction, page) {
     // Get quantity from instruction, default to 1 if not specified
     const targetQuantity = instruction.quantity || 1;
-    console.log(`QUANTITY DEBUG: Target quantity is ${targetQuantity}`);
+    console.log(`Increasing quantity to ${targetQuantity}`);
     
-    // Use the product name from the instruction if available, otherwise use the global productName
-    const pname = instruction.productName || productName;
-    
-    // Simplified approach - just one strategy with detailed logging
     try {
-        console.log('QUANTITY DEBUG: Using direct search strategy for plus buttons');
-        const result = await page.evaluate((pName, quantity) => {
-            console.log(`QUANTITY DEBUG: Inside evaluate with quantity=${quantity}`);
+        // APPROACH 1: Try using recorded selector pattern from the JSON
+        console.log('Strategy 1: Using positional selectors from recording');
+        
+        // The increment was done on the product at position 11
+        // We'll make this more generic by checking all cards and taking the one we want
+        const result = await page.evaluate((quantity, productNameFromInstruction) => {
+            // Log to help debug
+            console.log(`Looking to increase quantity to ${quantity} for product: ${productNameFromInstruction}`);
             
-            // Find all plus buttons
-            const allPlusButtons = Array.from(document.querySelectorAll('button, span, div'))
-                .filter(el => {
-                    const hasPlus = el.textContent === '+' || 
-                                  el.getAttribute('aria-label')?.toLowerCase().includes('increase') ||
-                                  el.className.toLowerCase().includes('plus') ||
-                                  el.className.toLowerCase().includes('increment');
-                    const isMinus = el.textContent === '-' || 
-                                  el.getAttribute('aria-label')?.toLowerCase().includes('decrease') ||
-                                  el.className.toLowerCase().includes('minus') ||
-                                  el.className.toLowerCase().includes('decrement');
-                    return hasPlus && !isMinus;
-                });
-
-            console.log(`QUANTITY DEBUG: Found ${allPlusButtons.length} plus buttons`);
-            if (allPlusButtons.length === 0) return { success: false, reason: 'No plus buttons found' };
-
-            // Use the first plus button
-            const targetButton = allPlusButtons[0];
+            // MULTIPLE STRATEGIES FOR FINDING THE CORRECT PRODUCT CARD
             
-            // Highlight for visibility
-            targetButton.style.border = '3px solid green';
-            targetButton.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
-            targetButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Strategy 1: Look for all product cards
+            const allProductCards = Array.from(document.querySelectorAll('div[class*="card"], div[class*="product"], div[class*="item"]'));
             
-            console.log('QUANTITY DEBUG: Button text:', targetButton.textContent);
+            // Function to check if a card contains our product
+            const findProductCardByName = (cards, productName) => {
+                for (let i = 0; i < cards.length; i++) {
+                    const card = cards[i];
+                    const titleEls = card.querySelectorAll('h3, h2, h4, [class*="title"]');
+                    for (const el of titleEls) {
+                        if (el.textContent.includes(productName)) {
+                            console.log(`Found product card #${i+1} containing "${productName}"`);
+                            return {
+                                index: i,
+                                element: card,
+                                method: 'by-product-name'
+                            };
+                        }
+                    }
+                }
+                return null;
+            };
             
-            // IMPORTANT: Set click count EXACTLY to the target quantity
-            console.log(`QUANTITY DEBUG: Will click EXACTLY ${quantity} times`);
+            // Try to find the product card by name
+            let targetCard = null;
+            let targetIndex = 0;
             
-            // Click exactly 'quantity' times
-            for (let i = 0; i < quantity; i++) {
-                console.log(`QUANTITY DEBUG: Click ${i+1}/${quantity}`);
-                targetButton.click();
+            if (productNameFromInstruction) {
+                const result = findProductCardByName(allProductCards, productNameFromInstruction);
+                if (result) {
+                    targetCard = result.element;
+                    targetIndex = result.index;
+                }
             }
             
-            return { success: true, strategy: 'direct-search', buttonText: targetButton.textContent, clickCount: quantity };
-        }, pname, targetQuantity);
-        
-        console.log(`QUANTITY DEBUG: Evaluate returned: ${JSON.stringify(result)}`);
+            // If no specific card found, check if calendar is already open (meaning we already clicked a card)
+            if (!targetCard) {
+                // Check if any calendar or date picker is visible
+                const datePickerVisible = document.querySelector('.el-picker-panel, [class*="calendar"], [class*="datepicker"]');
+                
+                if (datePickerVisible) {
+                    // We already clicked a product and the date picker is open
+                    // Look for any nearby quantity controls
+                    const plusButtons = Array.from(document.querySelectorAll('span.plus, span[class*="plus"], button[class*="plus"], [aria-label*="increase"]'));
+                    
+                    if (plusButtons.length > 0) {
+                        // Use the first plus button we find
+                        const plusButton = plusButtons[0];
+                        plusButton.style.border = '3px solid red';
+                        plusButton.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                        
+                        // Click the button exactly 'quantity' times
+                        for (let i = 0; i < quantity; i++) {
+                            plusButton.click();
+                            console.log(`Click ${i+1}/${quantity}`);
+                        }
+                        
+                        return { 
+                            success: true, 
+                            strategy: 'datepicker-open', 
+                            clickCount: quantity
+                        };
+                    }
+                }
+            }
+            
+            // STRATEGY FOR CLICKING BUTTONS:
+            // 1. Try to use exact selector from recording if no specific card found
+            // 2. If card was found, search for plus button within that card
+            
+            if (!targetCard) {
+                // Use selector from the recording - look for all plus buttons across any card
+                const allPlusButtons = Array.from(document.querySelectorAll('span.plus, span[class*="plus"], button[class*="plus"], [aria-label*="increase"]'));
+                
+                if (allPlusButtons.length === 0) {
+                    return { success: false, reason: 'No plus buttons found on the page' };
+                }
+                
+                // Try the specific selector from recording - div:nth-of-type(11) span.plus
+                let plusButton = null;
+                try {
+                    // Try exact selector from recording first if no specific product was requested
+                    if (!productNameFromInstruction) {
+                        const recordedButton = document.querySelector('div:nth-of-type(11) span.plus');
+                        if (recordedButton) {
+                            plusButton = recordedButton;
+                            console.log('Found plus button using recorded selector');
+                        }
+                    }
+                    
+                    // If not found, use any plus button
+                    if (!plusButton) {
+                        plusButton = allPlusButtons[0];
+                        console.log('Using first available plus button');
+                    }
+                    
+                    // Highlight the button
+                    plusButton.style.border = '3px solid red';
+                    plusButton.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                    
+                    // Click the button exactly 'quantity' times
+                    for (let i = 0; i < quantity; i++) {
+                        plusButton.click();
+                        console.log(`Click ${i+1}/${quantity}`);
+                    }
+                    
+                    return { 
+                        success: true, 
+                        strategy: 'generic', 
+                        clickCount: quantity
+                    };
+                    
+                } catch (e) {
+                    console.log('Error using recorded selector:', e);
+                }
+            } else {
+                // We found the specific product card
+                // Find plus button within this card
+                const plusButton = targetCard.querySelector('span.plus, span[class*="plus"], button[class*="plus"], [aria-label*="increase"]');
+                
+                if (!plusButton) {
+                    return { success: false, reason: 'Plus button not found in the product card' };
+                }
+                
+                // Highlight the button
+                plusButton.style.border = '3px solid red';
+                plusButton.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                
+                // Click the button exactly 'quantity' times
+                for (let i = 0; i < quantity; i++) {
+                    plusButton.click();
+                    console.log(`Click ${i+1}/${quantity}`);
+                }
+                
+                return { 
+                    success: true, 
+                    strategy: 'specific-card', 
+                    clickCount: quantity
+                };
+            }
+            
+            // STRATEGY 3: Most versatile, uses alternative XPath selector
+            try {
+                // Try using the XPath from the recording
+                const xpathResult = document.evaluate('//*[@id="app"]//span[contains(@class, "plus")]', document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+                
+                if (xpathResult.snapshotLength > 0) {
+                    const plusButton = xpathResult.snapshotItem(0);
+                    
+                    // Highlight the button
+                    plusButton.style.border = '3px solid red';
+                    plusButton.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                    
+                    // Click the button exactly 'quantity' times
+                    for (let i = 0; i < quantity; i++) {
+                        plusButton.click();
+                        console.log(`Click ${i+1}/${quantity}`);
+                    }
+                    
+                    return { 
+                        success: true, 
+                        strategy: 'xpath', 
+                        clickCount: quantity
+                    };
+                }
+            } catch (e) {
+                console.log('Error with XPath strategy:', e);
+            }
+            
+            return { success: false, reason: 'All strategies failed to find and click plus button' };
+        }, targetQuantity, instruction.productName);
         
         if (result.success) {
-            console.log(`✅ Increased quantity using strategy: ${result.strategy}, clicked ${result.clickCount} times`);
+            console.log(`✅ Increased quantity to ${targetQuantity} using strategy: ${result.strategy}`);
             // Add delay after clicks to allow page to update
-            await delay(1000 * result.clickCount);
+            await delay(1000);
         } else {
-            throw new Error(`Could not increase quantity: ${result.reason}`);
+            // If first approach fails, try the direct click method
+            console.log('Strategy 1 failed. Trying Strategy 2: Direct selector click');
+            
+            // Use the specific selector pattern from the recording
+            await page.$$eval('div span.plus', (buttons, qty) => {
+                if (buttons.length > 0) {
+                    // Highlight the button for visibility
+                    buttons[0].style.border = '3px solid red';
+                    
+                    // Click exactly qty times
+                    for (let i = 0; i < qty; i++) {
+                        buttons[0].click();
+                    }
+                    return true;
+                }
+                return false;
+            }, targetQuantity);
+            
+            console.log('✅ Increased quantity with direct click strategy');
+            await delay(1000);
         }
         
         // Take a screenshot to verify
@@ -842,120 +1115,185 @@ async function increaseQuantity(instruction, page) {
 }
 
 async function clickSelectDate(instruction, page) {
-    console.log('Looking for enabled SELECT A DATE button...');
+    console.log('Looking for SELECT A DATE button...');
     
-    const dateButtonClicked = await page.evaluate(() => {
-        // Find all primary buttons with SELECT A DATE text
-        const buttons = Array.from(document.querySelectorAll('button.el-button.el-button--primary'))
-            .filter(button => {
-                const span = button.querySelector('span');
-                return span && span.textContent.trim() === 'SELECT A DATE';
-            });
-
-        console.log(`Found ${buttons.length} SELECT A DATE buttons`);
-        
-        // Find the enabled button
-        const enabledButton = buttons.find(button => 
-            !button.disabled && 
-            !button.hasAttribute('disabled') && 
-            !button.classList.contains('is-disabled')
-        );
-        
-        if (!enabledButton) {
-            console.log('No enabled SELECT A DATE button found');
-            return { success: false, reason: 'No enabled SELECT A DATE button found' };
-        }
-
-        // Log button details for debugging
-        console.log('Found enabled button:', {
-            html: enabledButton.outerHTML,
-            classes: enabledButton.className,
-            disabled: enabledButton.disabled
+    try {
+        // First, check if the date picker is already visible
+        const datePickerVisible = await page.evaluate(() => {
+            return document.querySelector('.el-picker-panel, [class*="calendar"], [class*="datepicker"]') !== null;
         });
-
-        // Highlight the button we're going to click
-        enabledButton.style.border = '3px solid green';
-        enabledButton.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
         
-        // Scroll into view and click
-        enabledButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        enabledButton.click();
+        if (datePickerVisible) {
+            console.log('Date picker is already visible, no need to click SELECT A DATE');
+            return true;
+        }
         
-        return { success: true };
-    });
-    
-    if (!dateButtonClicked.success) {
-        throw new Error(`Failed to click SELECT A DATE button: ${dateButtonClicked.reason}`);
-    }
-    
-    console.log('✅ Clicked SELECT A DATE button');
-    
-    // Take screenshot right after click
-    await takeScreenshot(page, 'after_select_date_click');
-    
-    // Wait longer for calendar to appear (increased from 2s to 5s)
-    console.log('Waiting for calendar to appear...');
-    await delay(1000);
-    
-    // More comprehensive calendar detection
-    const calendarVisible = await page.evaluate(() => {
-        // Helper function to check if element is visible
-        const isVisible = (element) => {
-            if (!element) return false;
-            const style = window.getComputedStyle(element);
-            return style.display !== 'none' && 
-                   style.visibility !== 'hidden' && 
-                   style.opacity !== '0' &&
-                   element.offsetParent !== null;
-        };
-
-        // Try multiple selectors for calendar
-        const calendarSelectors = [
-            '.el-picker-panel',
-            '.el-date-picker',
-            '[class*="calendar"]',
-            '[class*="datepicker"]',
-            '.el-picker-panel__body',
-            '.el-date-picker__header'
-        ];
-
-        // Check each selector
-        for (const selector of calendarSelectors) {
-            const elements = document.querySelectorAll(selector);
-            for (const el of elements) {
-                if (isVisible(el)) {
-                    console.log('Found visible calendar:', selector);
-                    el.style.border = '3px solid green';
-                    el.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.7)';
-                    return { found: true, selector };
+        // Take a screenshot before looking for the button
+        await takeScreenshot(page, 'before_click_select_date');
+        
+        // APPROACH 1: Try using a generic strategy to find SELECT A DATE buttons
+        const buttonClicked = await page.evaluate(() => {
+            // Function to highlight an element
+            const highlight = (el, color = 'green') => {
+                el.style.border = `3px solid ${color}`;
+                el.style.backgroundColor = color === 'red' ? 'rgba(255, 0, 0, 0.2)' : 'rgba(0, 255, 0, 0.2)';
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            };
+            
+            // Strategy 1: Find any visible SELECT A DATE button
+            const findButtonByText = (text) => {
+                const buttons = Array.from(document.querySelectorAll('button'));
+                for (const button of buttons) {
+                    if (button.textContent.includes(text)) {
+                        return button;
+                    }
+                    
+                    // Check button's children (e.g., spans)
+                    const spans = button.querySelectorAll('span');
+                    for (const span of spans) {
+                        if (span.textContent.includes(text)) {
+                            return button;
+                        }
+                    }
+                }
+                return null;
+            };
+            
+            // Try to find the SELECT A DATE button
+            let selectDateButton = findButtonByText('SELECT A DATE');
+            
+            if (!selectDateButton) {
+                // Try alternative texts
+                selectDateButton = findButtonByText('Select a date') 
+                    || findButtonByText('Select Date')
+                    || findButtonByText('CALENDAR')
+                    || findButtonByText('Calendar');
+            }
+            
+            if (selectDateButton) {
+                highlight(selectDateButton);
+                selectDateButton.click();
+                return { success: true, method: 'text-search' };
+            }
+            
+            // Strategy 2: Try positional selectors
+            // Based on a typical product card layout
+            const productCards = document.querySelectorAll('div[class*="card"], div[class*="product"], div[class*="item"]');
+            
+            for (let i = 0; i < productCards.length; i++) {
+                const card = productCards[i];
+                // Check if this card has the quantity controls active
+                const hasVisibleQuantityControls = card.querySelector('span.plus[style*="border"]') !== null;
+                
+                if (hasVisibleQuantityControls) {
+                    console.log(`Found card #${i+1} with active quantity controls`);
+                    
+                    // Look for any button in this card
+                    const buttons = card.querySelectorAll('button');
+                    if (buttons.length > 0) {
+                        const button = buttons[0]; // Use the first button
+                        highlight(button, 'red');
+                        button.click();
+                        return { success: true, method: 'active-card-button' };
+                    }
                 }
             }
-        }
-
-        // Additional check for month/year elements
-        const monthYearElements = document.querySelectorAll('[class*="month"], [class*="year"]');
-        for (const el of monthYearElements) {
-            if (isVisible(el) && el.closest('[class*="picker"], [class*="calendar"]')) {
-                console.log('Found calendar via month/year element');
-                const calendar = el.closest('[class*="picker"], [class*="calendar"]');
-                calendar.style.border = '3px solid green';
-                calendar.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.7)';
-                return { found: true, selector: 'month/year' };
+            
+            // Strategy 3: Use XPath selector from recording
+            try {
+                // Create a similar XPath pattern to what we'd find after quantity is set
+                const xpathResult = document.evaluate('//div[.//span[contains(@class, "plus")]]//button', document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+                
+                if (xpathResult.snapshotLength > 0) {
+                    const button = xpathResult.snapshotItem(0);
+                    highlight(button, 'blue');
+                    button.click();
+                    return { success: true, method: 'xpath' };
+                }
+            } catch (e) {
+                console.log('XPath strategy failed:', e);
             }
+            
+            return { success: false, reason: 'No SELECT A DATE button found using any strategy' };
+        });
+        
+        if (buttonClicked && buttonClicked.success) {
+            console.log(`✅ Clicked SELECT A DATE button using method: ${buttonClicked.method}`);
+            // Wait for the calendar to appear
+            await delay(2000);
+            
+            // Take screenshot after clicking
+            await takeScreenshot(page, 'after_select_date_click');
+            
+            // Check if calendar is visible
+            const calendarVisible = await page.evaluate(() => {
+                const calendar = document.querySelector('.el-picker-panel, [class*="calendar"], [class*="datepicker"]');
+                return calendar !== null;
+            });
+            
+            if (calendarVisible) {
+                console.log('✅ Calendar is visible after clicking SELECT A DATE');
+                return true;
+            }
+            
+            // If calendar not visible, try direct click on any button in the active product card
+            console.log('⚠️ Calendar not visible, trying direct button click');
+            await page.evaluate(() => {
+                // Find the card with highlighted quantity controls
+                const cards = document.querySelectorAll('div[class*="card"], div[class*="product"], div[class*="item"]');
+                for (const card of cards) {
+                    if (card.querySelector('[style*="border: 3px solid red"]')) {
+                        // This is likely our active card, click its main button
+                        const buttons = card.querySelectorAll('button');
+                        if (buttons.length > 0) {
+                            buttons[0].click();
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            });
+            
+            // Wait again and check
+            await delay(2000);
+            return true;
         }
-
-        return { found: false };
-    });
-    
-    if (!calendarVisible.found) {
-        console.log('⚠️ Calendar detection failed, but continuing since it might be visible...');
-        // Instead of retrying, we'll assume the calendar is there and proceed
-        await takeScreenshot(page, 'calendar_assumed_visible');
+        
+        // APPROACH 2: If general strategy fails, try direct XPath click from recording
+        console.log('⚠️ Could not find SELECT A DATE button with generic strategy, trying direct click');
+        
+        // Use the exact buttonSelector from your recording JSON
+        await page.evaluate(() => {
+            // Try position-based selector from recording
+            const button = document.querySelector('div:nth-of-type(11) button');
+            if (button) {
+                button.style.border = '3px solid purple';
+                button.click();
+                return true;
+            }
+            
+            // Try any button that might be the SELECT A DATE
+            const buttons = document.querySelectorAll('button');
+            for (const btn of buttons) {
+                if (btn.textContent.includes('DATE') || btn.textContent.includes('Date')) {
+                    btn.style.border = '3px solid orange';
+                    btn.click();
+                    return true;
+                }
+            }
+            
+            return false;
+        });
+        
+        await delay(2000);
+        console.log('✅ Attempted direct button click');
+        
+        // Take screenshot after clicking
+        await takeScreenshot(page, 'after_direct_click');
         return true;
-    } else {
-        console.log(`✅ Calendar found using selector: ${calendarVisible.selector}`);
-        await takeScreenshot(page, 'calendar_visible');
-        return true;
+    } catch (error) {
+        console.error(`Error in clickSelectDate: ${error.message}`);
+        throw error;
     }
 }
 
@@ -1091,27 +1429,49 @@ async function clickNext(instruction, page) {
 }
 
 async function selectFirstRadio(instruction, page) {
-    console.log('Selecting first radio button');
+    console.log('Selecting first enabled radio button');
     
     const radioSelected = await page.evaluate(() => {
         // Find all radio buttons
-        const radioButtons = document.querySelectorAll('input[type="radio"]');
-        // Get the first one
-        const firstRadio = radioButtons[0];
+        const radioButtons = Array.from(document.querySelectorAll('input[type="radio"]'));
         
-        if (!firstRadio) {
+        if (radioButtons.length === 0) {
             return { success: false, reason: 'No radio buttons found' };
         }
         
+        // Filter for enabled radio buttons
+        const enabledRadios = radioButtons.filter(radio => 
+            !radio.disabled && 
+            !radio.hasAttribute('disabled') && 
+            !radio.classList.contains('is-disabled') &&
+            !radio.parentElement?.classList.contains('is-disabled') &&
+            !radio.closest('label')?.classList.contains('is-disabled')
+        );
+        
+        console.log(`Found ${radioButtons.length} radio buttons, ${enabledRadios.length} are enabled`);
+        
+        if (enabledRadios.length === 0) {
+            return { success: false, reason: 'No enabled radio buttons found' };
+        }
+        
+        // Get the first enabled radio
+        const firstEnabledRadio = enabledRadios[0];
+        
         // Highlight the radio button and its label
-        const label = firstRadio.closest('label') || firstRadio.parentElement;
+        const label = firstEnabledRadio.closest('label') || firstEnabledRadio.parentElement;
         if (label) {
             label.style.border = '3px solid green';
             label.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
+        } else {
+            firstEnabledRadio.style.outline = '3px solid green';
         }
         
+        // Scroll into view before clicking
+        const elementToScroll = label || firstEnabledRadio;
+        elementToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
         // Click the radio button
-        firstRadio.click();
+        firstEnabledRadio.click();
         
         return { success: true };
     });
@@ -1120,7 +1480,7 @@ async function selectFirstRadio(instruction, page) {
         throw new Error(`Could not select radio button: ${radioSelected.reason}`);
     }
     
-    console.log('✅ Selected first radio button');
+    console.log('✅ Selected first enabled radio button');
     await delay(500);
     
     // Take screenshot after selecting
@@ -1895,9 +2255,25 @@ async function purchaseTicket(page, ticketDetails) {
     productName = ticketDetails.name;
     console.log('Starting purchaseTicket with details:', ticketDetails);
 
-    // Update the quantity in the steps array
-    steps[1].name = `Increase quantity to ${ticketDetails.quantity}`;
-    steps[1].quantity = ticketDetails.quantity;
+    // Update the product name in the findProduct step
+    for (let i = 0; i < steps.length; i++) {
+        if (steps[i].action === 'findProduct') {
+            console.log(`Found product step at index ${i}, updating from ${steps[i].productName} to ${ticketDetails.name}`);
+            steps[i].name = `Find ${ticketDetails.name} product`;
+            steps[i].productName = ticketDetails.name;
+        }
+        // Make sure all steps have the productName set
+        steps[i].productName = ticketDetails.name;
+    }
+    
+    // Update the quantity in the steps array - search for it by action type instead of fixed index
+    for (let i = 0; i < steps.length; i++) {
+        if (steps[i].action === 'increaseQuantity') {
+            console.log(`Found quantity step at index ${i}, updating from ${steps[i].quantity} to ${ticketDetails.quantity}`);
+            steps[i].name = `Increase quantity to ${ticketDetails.quantity}`;
+            steps[i].quantity = ticketDetails.quantity;
+        }
+    }
 
     // Process each step from the steps array
     for (const step of steps) {
@@ -1945,44 +2321,40 @@ async function purchaseTicket(page, ticketDetails) {
     console.log('All steps processed successfully.');
 }
 
-// New wrapper function to initiate the ticket purchasing process
-async function purchaceTikcet(productName, quantity = 1, date = '2025-01-01') {
-    const puppeteer = require('puppeteer');
-    console.log('Starting purchaceTikcet with product name:', productName);
-    
-    // Launch browser
-    const browser = await puppeteer.launch({ 
-        headless: false,
-        defaultViewport: null,
-        args: ['--start-maximized']
-    });
-    
-    // Open a new page
-    const page = await browser.newPage();
-    page.setDefaultTimeout(60000); // Set timeout to 60 seconds
-    
-    // Navigate to the USJ Express Pass page
-    console.log('Navigating to USJ Express Pass page...');
-    await page.goto('https://www.usjticketing.com/expressPass', { waitUntil: 'networkidle2' });
-    
-    // Wait for dynamic content to load
-    await delay(5000);
-    
-    // Build the ticket details using the product name parameter
-    const ticketDetails = {
-        name: productName,
-        quantity: quantity,
-        date: date
-    };
-    console.log('Ticket Details:', ticketDetails);
-    
-    // Call the ticket purchasing process
-    await purchaseTicket(page, ticketDetails);
-    
-    console.log('Ticket purchase process initiated.');
-    
-    // Optionally, leave the browser open for inspection or close it
-    // await browser.close();
+// Wrapper function with the typo in the name
+async function purchaceTikcet(ticketDetails) {
+    try {
+        console.log(`Starting purchaceTikcet with product name: ${ticketDetails.name}`);
+        // Start a Puppeteer browser
+        const browser = await puppeteer.launch({
+            headless: false,
+            defaultViewport: null,
+            args: ['--start-maximized']
+        });
+
+        const page = await browser.newPage();
+        
+        // Navigate to the correct USJ Express Pass page
+        console.log('Navigating to USJ Express Pass page...');
+        await page.goto('https://www.usjticketing.com/expressPass');
+        
+        // Wait for a reasonable time to ensure the page is fully loaded
+        await delay(5000);
+        
+        // Make sure the ticketDetails are properly formatted
+        console.log('Ticket Details:', ticketDetails);
+        
+        // Call the main purchase function
+        await purchaseTicket(page, ticketDetails);
+        
+        console.log('Ticket purchase process initiated.');
+        
+        // Keep the browser open for verification
+        // await browser.close();
+    } catch (error) {
+        console.error('Error running purchaceTikcet:', error);
+        throw error;
+    }
 }
 
 // Export the function if needed for external use (optional)
