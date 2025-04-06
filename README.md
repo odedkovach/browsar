@@ -1,118 +1,167 @@
-# USJ Express Pass Ticket Purchaser
+# USJ Ticket Purchase API
 
-Automated script for purchasing Express Pass tickets from Universal Studios Japan's official ticketing website.
-
-## Features
-
-- Automates the entire Express Pass ticket purchasing flow
-- Configurable ticket quantity, date selection, and session time
-- Takes screenshots at key steps for monitoring and debugging
-- Robust error handling with screenshots of error states
-- Multiple selector strategies to ensure reliable operation
-
-## Prerequisites
-
-- Node.js (version 14 or higher)
-- npm
+A REST API wrapper for automating ticket purchases on the Universal Studios Japan website using Puppeteer.
 
 ## Installation
 
+1. Clone the repository
+2. Install dependencies:
+
 ```bash
-# Clone this repository
-git clone https://github.com/yourusername/usj-ticket-purchaser.git
-
-# Navigate to the project directory
-cd usj-ticket-purchaser
-
-# Install dependencies
 npm install
+```
+
+3. Create a `.env` file with your OpenAI API key:
+
+```
+OPENAI_API_KEY=your_api_key_here
 ```
 
 ## Usage
 
-Run the script with default settings:
+Start the API server:
 
 ```bash
-npm start
+node api.js
 ```
 
-Or directly with Node:
+The server runs on port 3000 by default. You can change this by setting the `PORT` environment variable.
 
-```bash
-node index2.js
-```
+## API Endpoints
 
-## Configuration
+### Purchase Tickets
 
-All settings can be configured in the `config.js` file. The configuration is organized into the following sections:
+**Endpoint:** `POST /api/purchase`
 
-### Browser Settings
+**Request Body:**
 
-```javascript
-browser: {
-    headless: false,          // Set to true for invisible browser
-    slowMo: 20,               // Slow down operations (ms)
-    width: 1024,              // Browser window width
-    height: 900               // Browser window height
+```json
+{
+  "name": "Universal Express Pass 4: Fun Variety",
+  "quantity": 2,
+  "date": "2025-5-31"
 }
 ```
 
-### Ticket Settings
+| Parameter | Type   | Description                     |
+|-----------|--------|---------------------------------|
+| name      | string | The name of the ticket product  |
+| quantity  | number | The number of tickets to purchase |
+| date      | string | The date in YYYY-MM-DD format   |
 
-```javascript
-ticket: {
-    productIndex: 10,         // Which product to select (div index)
-    quantity: 1,              // Number of tickets to purchase
-    date: {
-        advanceMonths: 1,     // How many months to advance in calendar
-        row: 3,               // Which row in the calendar to select
-        column: 6             // Which column in the calendar to select
+**Response:**
+
+```json
+{
+  "success": true,
+  "message": "Purchase job initiated",
+  "jobId": "job_1"
+}
+```
+
+The API immediately returns a job ID and processes the purchase asynchronously.
+
+### Check Job Status
+
+**Endpoint:** `GET /api/purchase/:jobId`
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "job": {
+    "id": "job_1",
+    "status": "running",
+    "startTime": "2023-04-04T21:37:55.827Z",
+    "params": {
+      "name": "Universal Express Pass 4: Fun Variety",
+      "quantity": 2,
+      "date": "2025-5-31"
     },
-    session: {
-        index: 1              // Which session/time slot to select (1 = first)
+    "logs": [
+      "Purchase job created",
+      "Starting ticket purchase process"
+    ],
+    "error": null
+  }
+}
+```
+
+### List All Jobs
+
+**Endpoint:** `GET /api/purchases`
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "count": 1,
+  "jobs": [
+    {
+      "id": "job_1",
+      "status": "completed",
+      "startTime": "2023-04-04T21:37:55.827Z",
+      "completionTime": "2023-04-04T21:45:10.414Z",
+      "params": {
+        "name": "Universal Express Pass 4: Fun Variety",
+        "quantity": 2,
+        "date": "2025-5-31"
+      },
+      "hasError": false
     }
+  ]
 }
 ```
 
-### Behavior Settings
+## Job Status Values
+
+- `initializing`: Job is being created
+- `running`: The purchase process is currently running
+- `completed`: The purchase process completed successfully
+- `failed`: The purchase process failed (check the `error` field for details)
+
+## Error Handling
+
+The API returns appropriate HTTP status codes and error messages:
+
+- `400 Bad Request`: Missing or invalid parameters
+- `404 Not Found`: Job ID not found
+- `500 Internal Server Error`: Server-side errors
+
+## Examples
+
+### Using cURL
+
+```bash
+# Purchase tickets
+curl -X POST http://localhost:3000/api/purchase \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Universal Express Pass 4: Fun Variety","quantity":2,"date":"2025-5-31"}'
+
+# Check status
+curl http://localhost:3000/api/purchase/job_1
+
+# List all jobs
+curl http://localhost:3000/api/purchases
+```
+
+### Using JavaScript (Fetch API)
 
 ```javascript
-behavior: {
-    timeoutMs: 5000,          // Default timeout for operations
-    autoClose: false,         // Auto-close browser after completion
-    takeErrorScreenshots: true // Take screenshots on errors
-}
-```
-
-### Debug Settings
-
-```javascript
-debug: {
-    saveAllScreenshots: false, // Save screenshots at every step
-    screenshotDir: './screenshots' // Directory for screenshots
-}
-```
-
-## Important Notes
-
-- The script runs in non-headless mode by default so you can see what's happening
-- Intentional slowdowns (`slowMo`) are included to make the process visible and more reliable
-- Screenshots are saved in the `./screenshots` directory
-- If the script fails, check the console output for error messages
-
-## Legal Considerations
-
-This script is provided for educational purposes only. Automating purchases on the USJ website may violate their terms of service. Use at your own risk and responsibility.
-
-## Troubleshooting
-
-If the script fails:
-
-1. Check the console output for error messages
-2. Look at the screenshot taken at the time of the error (saved in the screenshots directory)
-3. Verify that your internet connection is stable
-4. The website's structure may have changed - check the selectors and update if necessary
-
-## License
-
-This project is provided as-is, without warranties or conditions of any kind. 
+// Purchase tickets
+fetch('http://localhost:3000/api/purchase', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    name: 'Universal Express Pass 4: Fun Variety',
+    quantity: 2,
+    date: '2025-5-31'
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+``` 
