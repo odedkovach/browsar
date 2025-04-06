@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USJ Ticket Purchase API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .card {
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .status {
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+    </style>
+</head>
+<body>
+    <h1>USJ Ticket Purchase API Tester</h1>
+    
+    <div class="card">
+        <h2>Test API Connectivity</h2>
+        <button id="testButton">Test API Connection</button>
+        <div id="testResult" class="status"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Purchase Ticket</h2>
+        <form id="purchaseForm">
+            <div>
+                <label for="name">Ticket Name:</label>
+                <input type="text" id="name" name="name" value="Universal Express Pass 4: Fun Variety" required>
+            </div>
+            
+            <div>
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" name="quantity" value="2" min="1" max="10" required>
+            </div>
+            
+            <div>
+                <label for="date">Date:</label>
+                <input type="text" id="date" name="date" value="2025-5-31" placeholder="YYYY-MM-DD" required>
+            </div>
+            
+            <button type="submit">Start Purchase</button>
+        </form>
+        <div id="purchaseResult" class="status"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Check Job Status</h2>
+        <div>
+            <label for="jobId">Job ID:</label>
+            <input type="text" id="jobId" name="jobId" placeholder="e.g., job_1">
+            <button id="checkStatusButton">Check Status</button>
+        </div>
+        <div id="statusResult" class="status"></div>
+    </div>
+    
+    <div class="card">
+        <h2>List All Jobs</h2>
+        <button id="listJobsButton">List All Jobs</button>
+        <div id="listResult" class="status"></div>
+        <pre id="jobsList"></pre>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:3001';
+        
+        // Test API Connection
+        document.getElementById('testButton').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.textContent = 'Testing...';
+            resultDiv.className = 'status';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/test`);
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    resultDiv.textContent = 'API is working! 👍';
+                    resultDiv.className = 'status success';
+                } else {
+                    resultDiv.textContent = `Error: ${data.error || 'Unknown error'}`;
+                    resultDiv.className = 'status error';
+                }
+            } catch (error) {
+                resultDiv.textContent = `Connection error: ${error.message}`;
+                resultDiv.className = 'status error';
+            }
+        });
+        
+        // Purchase Ticket
+        document.getElementById('purchaseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('purchaseResult');
+            resultDiv.textContent = 'Sending request...';
+            resultDiv.className = 'status';
+            
+            const name = document.getElementById('name').value;
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const date = document.getElementById('date').value;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/purchase`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, quantity, date })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    resultDiv.textContent = `Purchase job initiated! Job ID: ${data.jobId}`;
+                    resultDiv.className = 'status success';
+                    
+                    // Auto-fill the job ID in the status check section
+                    document.getElementById('jobId').value = data.jobId;
+                } else {
+                    resultDiv.textContent = `Error: ${data.error || 'Unknown error'}`;
+                    resultDiv.className = 'status error';
+                }
+            } catch (error) {
+                resultDiv.textContent = `Request error: ${error.message}`;
+                resultDiv.className = 'status error';
+            }
+        });
+        
+        // Check Job Status
+        document.getElementById('checkStatusButton').addEventListener('click', async () => {
+            const jobId = document.getElementById('jobId').value.trim();
+            const resultDiv = document.getElementById('statusResult');
+            
+            if (!jobId) {
+                resultDiv.textContent = 'Please enter a Job ID';
+                resultDiv.className = 'status error';
+                return;
+            }
+            
+            resultDiv.textContent = 'Checking...';
+            resultDiv.className = 'status';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/purchase/${jobId}`);
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    const job = data.job;
+                    let statusText = `Status: ${job.status}\n`;
+                    statusText += `Started: ${new Date(job.startTime).toLocaleString()}\n`;
+                    
+                    if (job.completionTime) {
+                        statusText += `Completed: ${new Date(job.completionTime).toLocaleString()}\n`;
+                    }
+                    
+                    if (job.logs && job.logs.length > 0) {
+                        statusText += `\nLatest logs:\n- ${job.logs.join('\n- ')}`;
+                    }
+                    
+                    if (job.error) {
+                        statusText += `\n\nError: ${job.error}`;
+                    }
+                    
+                    resultDiv.textContent = statusText;
+                    resultDiv.className = job.status === 'failed' ? 'status error' : 'status success';
+                } else {
+                    resultDiv.textContent = `Error: ${data.error || 'Unknown error'}`;
+                    resultDiv.className = 'status error';
+                }
+            } catch (error) {
+                resultDiv.textContent = `Request error: ${error.message}`;
+                resultDiv.className = 'status error';
+            }
+        });
+        
+        // List All Jobs
+        document.getElementById('listJobsButton').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('listResult');
+            const jobsListPre = document.getElementById('jobsList');
+            
+            resultDiv.textContent = 'Fetching job list...';
+            resultDiv.className = 'status';
+            jobsListPre.textContent = '';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/purchases`);
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    resultDiv.textContent = `Found ${data.count} jobs`;
+                    resultDiv.className = 'status success';
+                    
+                    if (data.count > 0) {
+                        jobsListPre.textContent = JSON.stringify(data.jobs, null, 2);
+                    } else {
+                        jobsListPre.textContent = 'No jobs found';
+                    }
+                } else {
+                    resultDiv.textContent = `Error: ${data.error || 'Unknown error'}`;
+                    resultDiv.className = 'status error';
+                    jobsListPre.textContent = '';
+                }
+            } catch (error) {
+                resultDiv.textContent = `Request error: ${error.message}`;
+                resultDiv.className = 'status error';
+                jobsListPre.textContent = '';
+            }
+        });
+    </script>
+</body>
+</html> 

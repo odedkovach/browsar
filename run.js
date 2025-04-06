@@ -5,9 +5,9 @@ const { purchaceTikcet } = require('./index3');
 (async () => {
     try {
         await purchaceTikcet({
-            name: 'Universal Express Pass 4: 4D & Choice',
-            quantity: 2,
-            date: '2025-5-31'
+            name: 'Universal Express Pass 7: Mine Cart & Selection',
+            quantity: 4,
+            date: '2025-5-24'
         });
     } catch (error) {
         console.error('Error running purchaceTikcet:', error);

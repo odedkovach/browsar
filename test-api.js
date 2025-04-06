@@ -2,7 +2,7 @@
 const axios = require('axios');
 
 // API configuration
-const API_URL = 'http://localhost:3000';
+const API_URL = 'http://localhost:3001';
 
 // Test data
 const testTicket = {

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>USJ Ticket Purchaser API Client</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    h1, h2, h3 {
+      color: #0055aa;
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    
+    button {
+      background-color: #0055aa;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    button:hover {
+      background-color: #003d7a;
+    }
+    
+    .result {
+      background-color: #f8f9fa;
+      border-left: 4px solid #0055aa;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 0 4px 4px 0;
+      overflow-x: auto;
+    }
+    
+    .error {
+      border-left-color: #dc3545;
+      background-color: #fff8f8;
+    }
+    
+    .success {
+      border-left-color: #28a745;
+      background-color: #f8fff8;
+    }
+    
+    .job-list {
+      list-style-type: none;
+      padding: 0;
+    }
+    
+    .job-item {
+      background-color: white;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      border-left: 4px solid #0055aa;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .job-item:hover {
+      transform: translateX(5px);
+    }
+    
+    .job-item.failed {
+      border-left-color: #dc3545;
+    }
+    
+    .job-item.completed {
+      border-left-color: #28a745;
+    }
+    
+    .job-item.running {
+      border-left-color: #ffc107;
+    }
+    
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+    }
+    
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-bottom: none;
+      margin-right: 5px;
+      border-radius: 4px 4px 0 0;
+      background-color: #f8f9fa;
+    }
+    
+    .tab.active {
+      background-color: white;
+      border-color: #ddd;
+      border-bottom: 1px solid white;
+      margin-bottom: -1px;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    #jobDetails {
+      display: none;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+    }
+    
+    .badge.queued { background-color: #6c757d; }
+    .badge.running { background-color: #ffc107; color: #212529; }
+    .badge.completed { background-color: #28a745; }
+    .badge.failed { background-color: #dc3545; }
+    
+    .refresh-btn {
+      background-color: #6c757d;
+      margin-left: 10px;
+    }
+    
+    .loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0,0,0,0.1);
+      border-radius: 50%;
+      border-top-color: #0055aa;
+      animation: spin 1s ease-in-out infinite;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    #statusAutoRefresh {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>USJ Ticket Purchaser API Client</h1>
+  
+  <div class="tabs">
+    <div class="tab active" data-tab="purchase">Purchase Ticket</div>
+    <div class="tab" data-tab="jobs">Job Management</div>
+  </div>
+  
+  <div id="purchaseTab" class="tab-content active">
+    <div class="card">
+      <h2>Create New Ticket Purchase</h2>
+      <form id="purchaseForm">
+        <div class="form-group">
+          <label for="productName">Product Name:</label>
+          <input type="text" id="productName" required 
+                 placeholder="e.g., Universal Express Pass 4: Fun Variety">
+        </div>
+        
+        <div class="form-group">
+          <label for="quantity">Quantity:</label>
+          <input type="number" id="quantity" min="1" max="10" value="1" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="date">Date (YYYY-MM-DD):</label>
+          <input type="text" id="date" required placeholder="e.g., 2025-5-31" 
+                 pattern="\d{4}-\d{1,2}-\d{1,2}">
+        </div>
+        
+        <button type="submit">Start Purchase</button>
+      </form>
+      
+      <div id="purchaseResult" class="result" style="display: none;">
+        <h3>Result:</h3>
+        <pre id="purchaseResultText"></pre>
+      </div>
+    </div>
+  </div>
+  
+  <div id="jobsTab" class="tab-content">
+    <div class="card">
+      <h2>
+        Job Management
+        <button id="refreshJobsBtn" class="refresh-btn">Refresh</button>
+        <span id="jobsLoader" class="loader" style="display: none;"></span>
+      </h2>
+      
+      <div id="jobListContainer">
+        <p>Loading jobs...</p>
+      </div>
+    </div>
+    
+    <div id="jobDetails" class="card">
+      <h2>
+        Job Details 
+        <span id="jobId"></span>
+        <span id="statusBadge" class="badge"></span>
+        <button id="refreshStatusBtn" class="refresh-btn">Refresh</button>
+        <input type="checkbox" id="statusAutoRefresh">
+        <label for="statusAutoRefresh">Auto-refresh</label>
+        <span id="statusLoader" class="loader" style="display: none;"></span>
+      </h2>
+      
+      <div id="statusResult" class="result">
+        <h3>Status:</h3>
+        <pre id="statusResultText"></pre>
+      </div>
+      
+      <button id="deleteJobBtn" style="margin-top: 20px;">Delete Job</button>
+    </div>
+  </div>
+  
+  <script>
+    const API_URL = 'http://localhost:3001/api';
+    
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        this.classList.add('active');
+        document.getElementById(`${this.dataset.tab}Tab`).classList.add('active');
+      });
+    });
+    
+    // Purchase form submission
+    document.getElementById('purchaseForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const productName = document.getElementById('productName').value;
+      const quantity = parseInt(document.getElementById('quantity').value);
+      const date = document.getElementById('date').value;
+      
+      const purchaseResult = document.getElementById('purchaseResult');
+      const purchaseResultText = document.getElementById('purchaseResultText');
+      
+      purchaseResult.style.display = 'block';
+      purchaseResult.className = 'result';
+      purchaseResultText.textContent = 'Sending request...';
+      
+      try {
+        const response = await fetch(`${API_URL}/purchase`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: productName, quantity, date })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          purchaseResult.classList.add('success');
+          purchaseResultText.textContent = JSON.stringify(data, null, 2);
+          
+          // Automatically switch to jobs tab and load the job status
+          document.querySelector('.tab[data-tab="jobs"]').click();
+          loadJobList();
+          setTimeout(() => showJobDetails(data.jobId), 500);
+        } else {
+          purchaseResult.classList.add('error');
+          purchaseResultText.textContent = JSON.stringify(data, null, 2);
+        }
+      } catch (error) {
+        purchaseResult.classList.add('error');
+        purchaseResultText.textContent = `Error: ${error.message}`;
+      }
+    });
+    
+    // Load job list
+    async function loadJobList() {
+      const jobListContainer = document.getElementById('jobListContainer');
+      const jobsLoader = document.getElementById('jobsLoader');
+      
+      jobsLoader.style.display = 'inline-block';
+      
+      try {
+        const response = await fetch(`${API_URL}/purchases`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          if (data.jobs.length === 0) {
+            jobListContainer.innerHTML = '<p>No jobs found.</p>';
+          } else {
+            let html = '<ul class="job-list">';
+            
+            data.jobs.forEach(job => {
+              const created = new Date(job.createdAt).toLocaleString();
+              html += `
+                <li class="job-item ${job.status}" data-id="${job.id}">
+                  <strong>Job ID:</strong> ${job.id} 
+                  <span class="badge ${job.status}">${job.status}</span><br>
+                  <strong>Product:</strong> ${job.params.name}<br>
+                  <strong>Created:</strong> ${created}<br>
+                  <strong>Quantity:</strong> ${job.params.quantity} | 
+                  <strong>Date:</strong> ${job.params.date}
+                </li>
+              `;
+            });
+            
+            html += '</ul>';
+            jobListContainer.innerHTML = html;
+            
+            // Add click event to job items
+            document.querySelectorAll('.job-item').forEach(item => {
+              item.addEventListener('click', function() {
+                showJobDetails(this.dataset.id);
+              });
+            });
+          }
+        } else {
+          jobListContainer.innerHTML = `<p>Error loading jobs: ${data.error}</p>`;
+        }
+      } catch (error) {
+        jobListContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+      } finally {
+        jobsLoader.style.display = 'none';
+      }
+    }
+    
+    // Show job details
+    async function showJobDetails(jobId) {
+      document.getElementById('jobDetails').style.display = 'block';
+      document.getElementById('jobId').textContent = jobId;
+      await loadJobStatus(jobId);
+      
+      // Set up auto-refresh if checked
+      setupAutoRefresh(jobId);
+    }
+    
+    // Load job status
+    async function loadJobStatus(jobId) {
+      const statusResult = document.getElementById('statusResult');
+      const statusResultText = document.getElementById('statusResultText');
+      const statusBadge = document.getElementById('statusBadge');
+      const statusLoader = document.getElementById('statusLoader');
+      
+      statusLoader.style.display = 'inline-block';
+      
+      try {
+        const response = await fetch(`${API_URL}/purchase/${jobId}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          statusResult.className = 'result';
+          if (data.job.status === 'failed') {
+            statusResult.classList.add('error');
+          } else if (data.job.status === 'completed') {
+            statusResult.classList.add('success');
+          }
+          
+          statusBadge.textContent = data.job.status;
+          statusBadge.className = `badge ${data.job.status}`;
+          
+          statusResultText.textContent = JSON.stringify(data.job, null, 2);
+        } else {
+          statusResult.classList.add('error');
+          statusResultText.textContent = JSON.stringify(data, null, 2);
+        }
+      } catch (error) {
+        statusResult.classList.add('error');
+        statusResultText.textContent = `Error: ${error.message}`;
+      } finally {
+        statusLoader.style.display = 'none';
+      }
+    }
+    
+    // Delete job
+    async function deleteJob(jobId) {
+      if (!confirm(`Are you sure you want to delete job ${jobId}?`)) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_URL}/purchase/${jobId}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          alert(`Job ${jobId} deleted successfully.`);
+          document.getElementById('jobDetails').style.display = 'none';
+          loadJobList();
+        } else {
+          const data = await response.json();
+          alert(`Error deleting job: ${data.error}`);
+        }
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      }
+    }
+    
+    // Setup auto-refresh
+    let autoRefreshInterval = null;
+    function setupAutoRefresh(jobId) {
+      clearInterval(autoRefreshInterval);
+      
+      const autoRefreshCheckbox = document.getElementById('statusAutoRefresh');
+      
+      if (autoRefreshCheckbox.checked) {
+        autoRefreshInterval = setInterval(() => {
+          loadJobStatus(jobId);
+        }, 5000); // Refresh every 5 seconds
+      }
+      
+      autoRefreshCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+          autoRefreshInterval = setInterval(() => {
+            loadJobStatus(jobId);
+          }, 5000);
+        } else {
+          clearInterval(autoRefreshInterval);
+        }
+      });
+    }
+    
+    // Event listeners
+    document.getElementById('refreshJobsBtn').addEventListener('click', loadJobList);
+    
+    document.getElementById('refreshStatusBtn').addEventListener('click', function() {
+      const jobId = document.getElementById('jobId').textContent;
+      loadJobStatus(jobId);
+    });
+    
+    document.getElementById('deleteJobBtn').addEventListener('click', function() {
+      const jobId = document.getElementById('jobId').textContent;
+      deleteJob(jobId);
+    });
+    
+    // Initialize
+    loadJobList();
+  </script>
+</body>
+</html> 

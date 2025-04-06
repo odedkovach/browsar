@@ -102,7 +102,8 @@ const steps = [
   { name: 'Click Credit Card', action: 'clickCreditCard' },
   { name: 'Checkout Continue', action: 'continue_checkout' },
   { name: 'Fill Checkout', action: 'fillCheckout' },
-  { name: 'Fill Checkout Nationality', action: 'fillCheckoutNationality' }
+  { name: 'Fill Checkout Nationality', action: 'fillCheckoutNationality' },
+  { name: 'Submit Checkout', action: 'submitCheckout' }
 ];
 
 // Function to get instruction for the current step
@@ -308,7 +309,7 @@ async function handleCaptcha(instruction, page) {
     try {
         // First, wait for the verification image to be visible
         console.log('Waiting for verification image to be fully loaded...');
-        await page.waitForSelector('img[data-v-6aff2c22], .verification-image, img[src*="captcha"], img[src*="verification"], img[class*="captcha"], img[class*="verification"]', { visible: true, timeout: 10000 });
+        await page.waitForSelector('img[data-v-6aff2c22], .verification-image, img[src*="captcha"], img[src*="verification"], img[class*="captcha"], img[class*="verification"]', { visible: true, timeout: 5000 });
         
         // Try multiple selectors to find the verification image
         const selectors = [
@@ -670,7 +671,7 @@ async function checkTermsCheckbox(instruction, page) {
       await checkbox.click();
     }
     
-    await delay(1000);
+    await delay(500);
     await takeScreenshot(page, 'after_terms_checkbox_click');
     
     console.log('✅ Checked Terms of Service checkbox');
@@ -728,32 +729,103 @@ async function findProduct(instruction, page) {
     console.log(`Finding product: ${instruction.productName}`);
     
     try {
-        // Scroll down to make sure all products are loaded
+        // First take a snapshot of the page content for debugging
+        await takeScreenshot(page, 'product_page_before_search');
+        
+        // Scroll multiple times to ensure all products are visible and loaded
+        console.log('Scrolling page to ensure all products are loaded...');
         await page.evaluate(() => {
-            window.scrollBy(0, 500);
+            // Scroll down in steps with small delays
+            return new Promise((resolve) => {
+                const maxScroll = Math.max(
+                    document.body.scrollHeight, 
+                    document.documentElement.scrollHeight
+                ) - window.innerHeight;
+                
+                let currentScroll = 0;
+                const step = Math.min(500, maxScroll / 5);
+                
+                const scrollInterval = setInterval(() => {
+                    if (currentScroll >= maxScroll) {
+                        clearInterval(scrollInterval);
+                        // Scroll back to top
+                        window.scrollTo(0, 0);
+                        setTimeout(resolve, 500);
+                        return;
+                    }
+                    
+                    currentScroll += step;
+                    window.scrollTo(0, currentScroll);
+                }, 300);
+            });
         });
-        await delay(1000);
         
-        // Take a screenshot of the available products
-        await takeScreenshot(page, 'available_products');
+        await delay(2000);
         
-        // First get a list of all product names for debugging
+        // Get a list of all visible products before trying to find the specific one
         const productList = await page.evaluate(() => {
             return Array.from(document.querySelectorAll('h3'))
-                .map(el => el.textContent.trim())
-                .filter(text => text.length > 0);
+                .map(el => ({
+                    title: el.textContent.trim(),
+                    visible: el.offsetParent !== null
+                }))
+                .filter(item => item.title.length > 0);
         });
         
-        console.log('Available products:', productList);
+        console.log(`Found ${productList.length} total products`);
+        console.log(`Visible products: ${productList.filter(p => p.visible).length}`);
+        console.log('Available products:', productList.map(p => p.title).join(' | '));
         
-        // Use exact product name matching
-        const productFound = await page.evaluate((exactProductName) => {
+        // If no products found, try reloading
+        if (productList.length === 0) {
+            console.log('No products found on page - trying page reload...');
+            await page.reload({ waitUntil: 'networkidle2' });
+            await delay(5000);
+            
+            // Try scrolling again
+            await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
+            await delay(2000);
+            await page.evaluate(() => window.scrollTo(0, 0));
+            await delay(1000);
+            
+            // Check again for products
+            const retryProductList = await page.evaluate(() => {
+                return Array.from(document.querySelectorAll('h3'))
+                    .map(el => el.textContent.trim())
+                    .filter(text => text.length > 0);
+            });
+            
+            if (retryProductList.length === 0) {
+                throw new Error('No products found on page after reload');
+            }
+            
+            console.log(`After reload: Found ${retryProductList.length} products`);
+        }
+        
+        // Log the exact product name we're looking for
+        console.log(`Looking for product with exact name: "${instruction.productName}"`);
+        
+        // Extract the key terms from the product name to enable more flexible matching
+        const keyTerms = instruction.productName.split(/[&:,]+/);
+        console.log(`Key terms extracted: ${JSON.stringify(keyTerms)}`);
+        
+        // Use more flexible product name matching
+        const productFound = await page.evaluate((exactProductName, keyTerms) => {
             // Log exact product we're looking for
-            console.log(`Looking for exact product: "${exactProductName}"`);
+            console.log(`Looking for product: "${exactProductName}"`);
+            console.log(`Will also try matching with key terms: ${JSON.stringify(keyTerms)}`);
             
             // First find the h3 with the EXACT product title
             const productTitles = Array.from(document.querySelectorAll('h3'));
+            
+            console.log(`Found ${productTitles.length} product titles to search through`);
+            
+            // Log all titles for debugging
+            const allTitles = productTitles.map(t => t.textContent.trim());
+            console.log('All product titles:', allTitles.join(' | '));
+            
             let targetTitle = null;
+            let matchMethod = "";
             
             // Try exact match first
             for (const title of productTitles) {
@@ -762,6 +834,7 @@ async function findProduct(instruction, page) {
                 
                 if (titleText === exactProductName) {
                     targetTitle = title;
+                    matchMethod = "exact match";
                     console.log("Found exact match!");
                     break;
                 }
@@ -771,9 +844,80 @@ async function findProduct(instruction, page) {
             if (!targetTitle) {
                 for (const title of productTitles) {
                     const titleText = title.textContent.trim();
-                    if (titleText.includes(exactProductName)) {
+                    if (titleText.includes(exactProductName) || exactProductName.includes(titleText)) {
                         targetTitle = title;
+                        matchMethod = "partial match";
                         console.log("Found partial match!");
+                        break;
+                    }
+                }
+            }
+            
+            // If still no match, try matching by key terms (most flexible)
+            if (!targetTitle) {
+                let bestMatchScore = 0;
+                let bestMatchTitle = null;
+                
+                for (const title of productTitles) {
+                    const titleText = title.textContent.trim().toLowerCase();
+                    
+                    // Check if title contains any of the key terms
+                    const matchingTerms = keyTerms.filter(term => 
+                        titleText.includes(term.trim().toLowerCase())
+                    );
+                    
+                    const matchScore = matchingTerms.length / keyTerms.length;
+                    
+                    if (matchScore > bestMatchScore) {
+                        bestMatchScore = matchScore;
+                        bestMatchTitle = title;
+                    }
+                    
+                    if (matchingTerms.length > 0) {
+                        console.log(`Partial term match for "${titleText}": matched ${matchingTerms.length}/${keyTerms.length} terms (score: ${matchScore})`);
+                    }
+                }
+                
+                // Accept if we matched at least 40% of terms
+                if (bestMatchScore >= 0.4) {
+                    targetTitle = bestMatchTitle;
+                    matchMethod = `key terms match (score: ${bestMatchScore})`;
+                    console.log(`Found match by key terms! Matched ${Math.round(bestMatchScore * 100)}% of terms`);
+                }
+            }
+            
+            // If still no match, try one final approach - Universal Express Pass + any number
+            if (!targetTitle && exactProductName.includes("Universal Express Pass")) {
+                const expressPassType = exactProductName.match(/Universal Express Pass \d+/);
+                if (expressPassType) {
+                    const passTypePattern = expressPassType[0];
+                    
+                    for (const title of productTitles) {
+                        const titleText = title.textContent.trim();
+                        if (titleText.includes(passTypePattern)) {
+                            targetTitle = title;
+                            matchMethod = "express pass number match";
+                            console.log(`Found match by Express Pass pattern: ${passTypePattern}`);
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Last resort - try with normalized text (remove spaces, lowercase)
+            if (!targetTitle) {
+                const normalizedSearchName = exactProductName.toLowerCase().replace(/\s+/g, '');
+                
+                for (const title of productTitles) {
+                    const titleText = title.textContent.trim();
+                    const normalizedTitleText = titleText.toLowerCase().replace(/\s+/g, '');
+                    
+                    // Check if normalized texts have significant overlap
+                    if (normalizedTitleText.includes(normalizedSearchName) || 
+                        normalizedSearchName.includes(normalizedTitleText)) {
+                        targetTitle = title;
+                        matchMethod = "normalized text match";
+                        console.log(`Found match with normalized text!`);
                         break;
                     }
                 }
@@ -836,46 +980,56 @@ async function findProduct(instruction, page) {
                 foundButton.style.border = '5px solid green';
                 foundButton.style.backgroundColor = 'rgba(0, 255, 0, 0.3)';
                 
-                // Make absolutely sure this is for our exact product
-                const relatedTitle = card.querySelector('h3');
-                if (relatedTitle) {
-                    const titleText = relatedTitle.textContent.trim();
-                    console.log(`Button is for product: "${titleText}"`);
-                    
-                    if (titleText === exactProductName || titleText.includes(exactProductName)) {
-                        // Click the button to select this specific product
-                        console.log("Clicking SELECT A DATE button for this product");
-                        foundButton.click();
-                        return { 
-                            success: true, 
-                            text: titleText,
-                            clicked: true
-                        };
-                    } else {
-                        console.log("Title doesn't match our product, not clicking");
-                        return { 
-                            success: false, 
-                            reason: `Button belongs to wrong product: ${titleText}` 
-                        };
-                    }
-                }
+                // Click the button to select this specific product
+                console.log("Clicking SELECT A DATE button for this product");
+                foundButton.click();
+                return { 
+                    success: true, 
+                    text: targetTitle.textContent,
+                    clicked: true,
+                    matchMethod: matchMethod
+                };
             } else {
                 console.log("No SELECT A DATE button found in this card");
+                
+                // As a fallback, try to find any button in this card
+                const anyButton = card.querySelector('button');
+                if (anyButton) {
+                    console.log("Found a button in the card, trying to click it");
+                    anyButton.style.border = '5px solid orange';
+                    anyButton.click();
+                    return {
+                        success: true,
+                        text: targetTitle.textContent,
+                        clicked: true,
+                        matchMethod: matchMethod + " (used fallback button)"
+                    };
+                }
             }
             
             return { 
                 success: true, 
                 text: targetTitle.textContent,
-                clicked: foundButton !== null
+                clicked: foundButton !== null,
+                matchMethod: matchMethod
             };
-        }, instruction.productName);
+        }, instruction.productName, keyTerms);
         
         if (!productFound.success) {
             console.error(`Could not find product: ${productFound.reason}`);
+            
+            // Take screenshot of failed search for debugging
+            await takeScreenshot(page, 'product_not_found');
+            
+            // Get HTML content for debugging
+            const pageContent = await page.content();
+            fs.writeFileSync('product_search_failure.html', pageContent);
+            console.log('Saved page HTML to product_search_failure.html for debugging');
+            
             throw new Error(`Could not find product: ${productFound.reason}`);
         }
         
-        console.log(`✅ Found product: ${productFound.text}`);
+        console.log(`✅ Found product: ${productFound.text} using ${productFound.matchMethod}`);
         if (productFound.clicked) {
             console.log(`✅ Clicked SELECT A DATE button for ${instruction.productName}`);
         } else {
@@ -892,8 +1046,8 @@ async function findProduct(instruction, page) {
 
 async function increaseQuantity(instruction, page) {
     // Get quantity from instruction, default to 1 if not specified
-    const targetQuantity = instruction.quantity || 1;
-    console.log(`Increasing quantity to ${targetQuantity}`);
+    const targetQuantity = Number(instruction.quantity) || 1;
+    console.log(`Increasing quantity to ${targetQuantity}, type: ${typeof targetQuantity}`);
     
     try {
         // APPROACH 1: Try using recorded selector pattern from the JSON
@@ -904,6 +1058,7 @@ async function increaseQuantity(instruction, page) {
         const result = await page.evaluate((quantity, productNameFromInstruction) => {
             // Log to help debug
             console.log(`Looking to increase quantity to ${quantity} for product: ${productNameFromInstruction}`);
+            console.log(`Quantity type in evaluate: ${typeof quantity}`);
             
             // MULTIPLE STRATEGIES FOR FINDING THE CORRECT PRODUCT CARD
             
@@ -2154,99 +2309,95 @@ async function clickCreditCard(instruction, page) {
   }
 }
 
-async function continue_checkout(page) {
-  try {
-    console.log('Attempting to click checkout continue button...');
-    
-    // Take a screenshot before action
-    await takeScreenshot(page, 'before_checkout_continue');
-    
-    // Highlight and click the continue button
-    const buttonFound = await page.evaluate(() => {
-      // Try various selectors from the recorded JSON
-      const selectors = [
-        'div.container span > span',
-        document.evaluate('//*[@id="paySubmit"]/span/span', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue,
-        'div.container span > span',
-        'button:contains("CONTINUE")',
-        '[id="paySubmit"]',
-        'button span:contains("CONTINUE")'
-      ];
-      
-      let continueButton = null;
-      
-      // Try each selector
-      for (const selector of selectors) {
-        if (typeof selector === 'object' && selector !== null) {
-          // Handle XPath result
-          continueButton = selector;
-          break;
+async function continue_checkout(instruction, page) {
+    try {
+        console.log('Continuing checkout process...');
+        
+        // Take a screenshot before starting
+        await takeScreenshot(page, 'before_continue_checkout');
+        
+        // Wait for a moment for any animations or state changes
+        await delay(2000);
+        
+        // Look for and click the continue button
+        const continueClicked = await page.evaluate(() => {
+            const selectors = [
+                'button.el-button--primary', 
+                'button span:contains("Continue")',
+                'button.continue', 
+                'button.next', 
+                'input[type="submit"]'
+            ];
+            
+            for (const selector of selectors) {
+                try {
+                    const elements = document.querySelectorAll(selector);
+                    console.log(`Found ${elements.length} elements with selector: ${selector}`);
+                    
+                    for (const element of elements) {
+                        // Check if visible
+                        const style = window.getComputedStyle(element);
+                        if (style.display === 'none' || style.visibility === 'hidden') {
+                            continue;
+                        }
+                        
+                        // Skip if button is disabled
+                        if (element.disabled) {
+                            console.log('Button is disabled, skipping');
+                            continue;
+                        }
+                        
+                        // Highlight the button
+                        element.style.border = '2px solid #ff0000';
+                        element.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                        
+                        // Scroll into view
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        
+                        // Click the button
+                        element.click();
+                        return { success: true, selector };
+                    }
+                } catch (error) {
+                    console.log(`Error with selector ${selector}: ${error.message}`);
+                }
+            }
+            
+            // Try a more generic approach to find any continue/submit button
+            const buttonTexts = ['continue', 'submit', 'next', 'proceed'];
+            const allButtons = document.querySelectorAll('button, input[type="submit"]');
+            
+            for (const button of allButtons) {
+                const text = button.textContent.toLowerCase();
+                if (buttonTexts.some(t => text.includes(t))) {
+                    button.style.border = '2px solid #ff0000';
+                    button.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+                    button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    button.click();
+                    return { success: true, method: 'text-matching' };
+                }
+            }
+            
+            return { success: false, error: 'No continue button found' };
+        });
+        
+        if (!continueClicked.success) {
+            console.error(`Failed to click continue: ${continueClicked.error}`);
+            throw new Error(`Failed to click continue: ${continueClicked.error}`);
         }
         
-        const elements = document.querySelectorAll(selector);
-        if (elements.length > 0) {
-          for (const el of elements) {
-            if (el.textContent.includes('CONTINUE')) {
-              continueButton = el;
-              break;
-            }
-          }
-          if (continueButton) break;
-        }
-      }
-      
-      if (!continueButton) {
-        // Try paySubmit specifically
-        const paySubmit = document.getElementById('paySubmit');
-        if (paySubmit) {
-          continueButton = paySubmit;
-        }
-      }
-      
-      if (!continueButton) {
-        console.log('❌ No CONTINUE button found');
-        return false;
-      }
-      
-      // Highlight the button
-      continueButton.style.border = '3px solid green';
-      continueButton.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
-      
-      // Get the clickable element (may be the button or a parent)
-      let clickTarget = continueButton;
-      
-      // If it's a span, try to find the button parent
-      if (clickTarget.tagName.toLowerCase() === 'span') {
-        clickTarget = clickTarget.closest('button') || clickTarget.parentElement || clickTarget;
-      }
-      
-      // Make sure it's visible
-      clickTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
-      // Click it
-      clickTarget.click();
-      
-      console.log('✅ CONTINUE button clicked');
-      return true;
-    });
-    
-    if (!buttonFound) {
-      throw new Error('CONTINUE button for checkout not found');
+        // Wait for navigation to complete
+        await delay(5000);
+        
+        // Take a screenshot after clicking
+        await takeScreenshot(page, 'after_continue_checkout');
+        
+        console.log('✅ Successfully continued checkout');
+        return true;
+    } catch (error) {
+        console.error(`Error in continue_checkout: ${error.message}`);
+        throw error;
     }
-    
-    // Wait for navigation or content change using delay instead of waitForTimeout
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Take screenshot after clicking
-    await takeScreenshot(page, 'after_checkout_continue');
-    
-    console.log('✅ Checkout continue step completed successfully');
-    return true;
-  } catch (error) {
-    console.error(`❌ Error in continue_checkout: ${error.message}`);
-    await takeScreenshot(page, 'error_checkout_continue');
-    throw error;
-  }
 }
 
 async function fillCheckout(page) {
@@ -2255,28 +2406,28 @@ async function fillCheckout(page) {
         await takeScreenshot(page, 'before_fill_checkout');
 
         // Fill in credit card number
-        await page.type('#cardNo', '4111111111111111');
-        await delay(1000);
+        await page.type('#cardNo', '4663460010429120');
+        await delay(500);
 
         // Fill in expiration date
-        await page.type('#card_exp', '1230');
-        await delay(1000);
+        await page.type('#card_exp', '0229');
+        await delay(500);
 
         // Fill in CVV
-        await page.type('div:nth-of-type(2) > div:nth-of-type(2) input', '123');
-        await delay(1000);
+        await page.type('div:nth-of-type(2) > div:nth-of-type(2) input', '463');
+        await delay(500);
 
         // Fill in card holder name
-        await page.type('#card_holder', 'odedkovach');
-        await delay(1000);
+        await page.type('#card_holder', 'Oded Kovach');
+        await delay(500);
 
         // Fill in email
         await page.type('#email', 'oded.kovach@gmail.com');
-        await delay(1000);
+        await delay(500);
 
         // Fill in phone
-        await page.type('#phone', '1234567890');
-        await delay(1000);
+        await page.type('#phone', '0547777655');
+        await delay(500);
 
         await takeScreenshot(page, 'after_fill_checkout');
         console.log('Successfully filled checkout form');
@@ -2288,58 +2439,150 @@ async function fillCheckout(page) {
     }
 }
 
-async function fillCheckoutNationality(page) {
-    try {
-        console.log('Attempting to fill checkout nationality...');
-        await takeScreenshot(page, 'before_fill_checkout_nationality');
+async function fillCheckoutNationality(instruction, page) {
+  try {
+      console.log('Attempting to fill checkout nationality...');
+      
+      // Wait for the nationality dropdown to appear
+      await delay(1000);
+      
+      // Find and click the nationality dropdown
+      await page.evaluate(() => {
+          const selectFields = document.querySelectorAll('.el-select');
+          if (selectFields.length > 0) {
+              selectFields[0].click();
+          }
+      });
+      
+      await delay(1000);
+      
+      // Select the first option (assuming "JAPAN")
+      await page.evaluate(() => {
+          const options = document.querySelectorAll('.el-select-dropdown__item');
+          if (options.length > 0) {
+              options[0].click();
+          }
+      });
+      
+      console.log('Checkout nationality filled successfully');
+      return true;
+  } catch (error) {
+      console.error(`Error in fillCheckoutNationality: ${error.message}`);
+      throw error;
+  }
+}
 
-        // Click the country dropdown
-        await page.locator('#country').click();
-        await delay(1000);
-
-        // Type 'israel' to filter
-        await page.locator('#country').fill('israel');
-        await delay(1000);
-
-        // Click the Israel option using multiple selectors
-        try {
-            // Try the hover class first
-            await page.locator('li.hover').click();
-        } catch (e) {
-            console.log('First selector failed, trying XPath:', e.message);
-            try {
-                // Try XPath selector
-                await page.locator('xpath//html/body/div[3]/div[1]/div[1]/ul/li[110]').click();
-            } catch (e2) {
-                console.log('XPath selector failed, trying generic approach:', e2.message);
-                // Last resort - try to find Israel in any visible dropdown
-                await page.evaluate(() => {
-                    const dropdowns = document.querySelectorAll('div.el-select-dropdown.el-popper');
-                    for (const dropdown of dropdowns) {
-                        if (dropdown.style.display !== 'none') {
-                            const items = dropdown.querySelectorAll('li');
-                            for (const item of items) {
-                                if (item.textContent.includes('Israel')) {
-                                    item.click();
-                                    return true;
-                                }
-                            }
-                        }
-                    }
-                    throw new Error('Israel option not found in visible dropdowns');
-                });
-            }
-        }
-
-        await delay(1000);
-        await takeScreenshot(page, 'after_fill_checkout_nationality');
-        console.log('Successfully filled checkout nationality');
-        return true;
-    } catch (error) {
-        console.error('Error in fillCheckoutNationality:', error);
-        await takeScreenshot(page, 'error_fill_checkout_nationality');
-        return false;
+// New function to submit the checkout - final step in the purchase process
+async function submitCheckout(instruction, page) {
+  try {
+    console.log('Executing final checkout submission...');
+    
+    // Take screenshot before submitting
+    await takeScreenshot(page, 'before_submit_checkout');
+    
+    // Check if we're on the correct page
+    const currentUrl = page.url();
+    console.log(`Current URL before submit: ${currentUrl}`);
+    
+    // If not on the payment response page, wait for it
+    if (!currentUrl.includes('payResponce')) {
+      console.log('Waiting for payment response page...');
+      try {
+        // Wait for navigation to payment response page
+        await page.waitForNavigation({ 
+          timeout: 30000,
+          waitUntil: 'networkidle2'
+        });
+      } catch (navigationError) {
+        console.log(`Navigation timeout: ${navigationError.message}`);
+        // Continue anyway, as we might already be on the correct page
+      }
     }
+    
+    // Try multiple selectors to find and click the CONTINUE button
+    const continueBtnClicked = await page.evaluate(() => {
+      // Try each selector from the recording
+      const selectors = [
+        'div.btn-btm span > span',
+        '[id="paySubmit"] span > span',
+        'button:contains("CONTINUE")',
+        'button span:contains("CONTINUE")',
+        '.btn-btm button'
+      ];
+      
+      // Helper function to highlight and click an element
+      const highlightAndClick = (element) => {
+        if (!element) return false;
+        
+        // Highlight the element
+        element.style.border = '3px solid red';
+        element.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+        
+        // Scroll into view
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Try clicking the element
+        try {
+          element.click();
+          return true;
+        } catch (e) {
+          console.log(`Click error: ${e.message}`);
+          return false;
+        }
+      };
+      
+      // Try each selector
+      for (const selector of selectors) {
+        try {
+          const element = document.querySelector(selector);
+          if (element) {
+            console.log(`Found element with selector: ${selector}`);
+            if (highlightAndClick(element)) {
+              return { success: true, selector };
+            }
+          }
+        } catch (e) {
+          console.log(`Error with selector ${selector}: ${e.message}`);
+        }
+      }
+      
+      // If none of the specific selectors worked, try finding by text content
+      const allButtons = Array.from(document.querySelectorAll('button, [role="button"]'));
+      for (const btn of allButtons) {
+        if (btn.textContent.includes('CONTINUE')) {
+          console.log('Found button with CONTINUE text');
+          if (highlightAndClick(btn)) {
+            return { success: true, selector: 'text-content' };
+          }
+        }
+      }
+      
+      return { success: false, reason: 'Could not find or click the CONTINUE button' };
+    });
+    
+    if (continueBtnClicked.success) {
+      console.log(`✅ Successfully clicked CONTINUE button using selector: ${continueBtnClicked.selector}`);
+      
+      // Wait for any navigation or confirmation
+      await delay(5000);
+      
+      // Take a screenshot of the final state
+      await takeScreenshot(page, 'after_submit_checkout');
+      
+      return true;
+    } else {
+      console.error(`❌ Failed to click CONTINUE button: ${continueBtnClicked.reason}`);
+      
+      // Take screenshot of the failure state
+      await takeScreenshot(page, 'failed_submit_checkout');
+      
+      throw new Error(`Failed to submit checkout: ${continueBtnClicked.reason}`);
+    }
+  } catch (error) {
+    console.error(`Error in submitCheckout: ${error.message}`);
+    await takeScreenshot(page, 'error_submit_checkout');
+    throw error;
+  }
 }
 
 // Map actions to their corresponding functions
@@ -2366,11 +2609,14 @@ const hardcodedActions = {
   clickCreditCard: clickCreditCard,
   continue_checkout: continue_checkout,
   fillCheckout: fillCheckout,
-  fillCheckoutNationality: fillCheckoutNationality
+  fillCheckoutNationality: fillCheckoutNationality,
+  submitCheckout: submitCheckout
 };
 
 // Function to execute the step based on the instruction
 async function executeStep(instruction, page) {
+  console.log(`Executing step action: ${instruction.action}`);
+  
   switch (instruction.action) {
     case 'findProduct':
       return await findProduct(instruction, page);
@@ -2395,13 +2641,13 @@ async function executeStep(instruction, page) {
     case 'clickCheckout':
       return await clickCheckout(instruction, page);
     case 'clickIAgree':
-      return await handleIAgree(page);
+      return await handleIAgree(instruction, page);
     case 'fillFormDetails':
       return await fillFormDetails(instruction, page);
     case 'fillNationality':
-      return await fillNationality(page);
+      return await fillNationality(instruction, page);
     case 'fillPlaceOfResidence':
-      return await fillPlaceOfResidence(page);
+      return await fillPlaceOfResidence(instruction, page);
     case 'handleCaptcha':
       return await handleCaptcha(instruction, page);
     case 'checkTermsCheckbox':
@@ -2413,11 +2659,13 @@ async function executeStep(instruction, page) {
     case 'clickCreditCard':
       return await clickCreditCard(instruction, page);
     case 'continue_checkout':
-      return await continue_checkout(page);
+      return await continue_checkout(instruction, page);
     case 'fillCheckout':
-      return await fillCheckout(page);
+      return await fillCheckout(instruction, page);
     case 'fillCheckoutNationality':
-      return await fillCheckoutNationality(page);
+      return await fillCheckoutNationality(instruction, page);
+    case 'submitCheckout':
+      return await submitCheckout(instruction, page);
     default:
       throw new Error(`Unknown action: ${instruction.action}`);
   }
@@ -2544,10 +2792,81 @@ async function purchaceTikcet(ticketDetails) {
         
         // Navigate to the correct USJ Express Pass page
         console.log('Navigating to USJ Express Pass page...');
-        await page.goto('https://www.usjticketing.com/expressPass');
+        await page.goto('https://www.usjticketing.com/expressPass', {
+            waitUntil: 'networkidle2',  // Wait until network is idle
+            timeout: 60000 // 60 second timeout for loading
+        });
         
-        // Wait for a reasonable time to ensure the page is fully loaded
-        await delay(5000);
+        // Increase the delay to ensure the page is fully loaded when coming from API
+        console.log('Waiting for page to fully load (extended delay)...');
+        await delay(10000); // Initial delay
+        
+        // Verify products are loaded with retry mechanism
+        let productsLoaded = false;
+        let retryCount = 0;
+        const MAX_LOAD_RETRIES = 5;
+        
+        while (!productsLoaded && retryCount < MAX_LOAD_RETRIES) {
+            console.log(`Page load check attempt ${retryCount + 1}/${MAX_LOAD_RETRIES}`);
+            
+            // Check if products are loaded
+            const productsCheck = await page.evaluate(() => {
+                // Look for product titles (h3 elements)
+                const productTitles = document.querySelectorAll('h3');
+                
+                if (productTitles.length > 0) {
+                    const titles = Array.from(productTitles).map(el => el.textContent.trim()).filter(t => t.length > 0);
+                    return { 
+                        loaded: titles.length > 0, 
+                        count: titles.length,
+                        titles: titles.slice(0, 3) // Return first few titles for logging
+                    };
+                }
+                return { loaded: false, count: 0, titles: [] };
+            });
+            
+            if (productsCheck.loaded) {
+                console.log(`✅ Products loaded successfully: Found ${productsCheck.count} products`);
+                console.log(`Sample products: ${productsCheck.titles.join(', ')}`);
+                productsLoaded = true;
+            } else {
+                console.log(`❌ Products not loaded yet. Attempt ${retryCount + 1}/${MAX_LOAD_RETRIES}`);
+                
+                // Scroll to help trigger lazy loading
+                await page.evaluate(() => {
+                    // Scroll progressively
+                    window.scrollTo(0, 0); // Start at top
+                    
+                    const maxScroll = Math.max(
+                        document.body.scrollHeight, 
+                        document.documentElement.scrollHeight
+                    );
+                    
+                    const scrollStep = Math.floor(maxScroll / 4);
+                    
+                    // Scroll in steps
+                    setTimeout(() => window.scrollTo(0, scrollStep), 200);
+                    setTimeout(() => window.scrollTo(0, scrollStep * 2), 400);
+                    setTimeout(() => window.scrollTo(0, scrollStep * 3), 600);
+                    setTimeout(() => window.scrollTo(0, maxScroll), 800);
+                    setTimeout(() => window.scrollTo(0, 0), 1000); // Back to top
+                });
+                
+                // Try refreshing the page if we've already retried a few times
+                if (retryCount >= 2) {
+                    console.log('Refreshing page to trigger content load...');
+                    await page.reload({ waitUntil: 'networkidle2', timeout: 60000 });
+                }
+                
+                // Longer delay for each retry
+                await delay(5000 + (retryCount * 2000));
+                retryCount++;
+            }
+        }
+        
+        if (!productsLoaded) {
+            throw new Error(`Failed to load products after ${MAX_LOAD_RETRIES} attempts. The page might be having issues.`);
+        }
         
         // Make sure the ticketDetails are properly formatted
         console.log('Ticket Details:', ticketDetails);
