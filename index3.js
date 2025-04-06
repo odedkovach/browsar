@@ -83,8 +83,8 @@ const steps = [
   { name: `Find ${productName} product`, action: 'findProduct', productName: productName },
   { name: 'Increase quantity ', action: 'increaseQuantity', quantity: 3 },
   { name: 'Click SELECT A DATE button', action: 'clickSelectDate' },
-  { name: 'Navigate to May 2025', action: 'clickNextMonth' },
-  { name: 'Select date 31', action: 'selectDate', day: 31 },
+  { name: 'Navigate to target month', action: 'clickNextMonth' }, // Will be updated with actual month in purchaseTicket
+  { name: 'Select date', action: 'selectDate', day: 31 }, // Will be updated by purchaseTicket
   { name: 'Click Next', action: 'clickNext' },
   { name: 'Select first radio button', action: 'selectFirstRadio' },
   { name: 'Click Add to Cart', action: 'clickAddToCart' },
@@ -1298,95 +1298,269 @@ async function clickSelectDate(instruction, page) {
 }
 
 async function clickNextMonth(instruction, page) {
-    console.log('Navigating from March 2025 to May 2025');
+    // Get month and year from ticketDetails parameter
+    const targetDate = instruction.date || '2025-5-31'; // Default to May 2025
+    const dateMatch = targetDate.match(/(\d{4})-(\d{1,2})-\d{1,2}/);
     
-    // First click to get to April
-    const firstClick = await page.evaluate(() => {
-        const arrows = Array.from(document.querySelectorAll('img.calendar_arrow'));
-        if (arrows.length < 2) return { success: false, reason: 'Could not find calendar arrows' };
-        
-        // Right arrow is the last one
-        const rightArrow = arrows[arrows.length - 1];
-        
-        // Highlight it
-        rightArrow.style.border = '3px solid green';
-        rightArrow.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
-        
-        // Click it once
-        rightArrow.click();
-        return { success: true };
-    });
-    
-    if (!firstClick.success) {
-        throw new Error('Failed to click next month arrow: ' + firstClick.reason);
+    if (!dateMatch) {
+        throw new Error(`Invalid date format: ${targetDate}. Expected YYYY-MM-DD`);
     }
     
-    console.log('✅ First click (March → April)');
-    await takeScreenshot(page, 'calendar_april_2025');
+    const targetYear = parseInt(dateMatch[1], 10);
+    const targetMonth = parseInt(dateMatch[2], 10);
     
-    // Wait 2 seconds before second click
-    await delay(1000);
+    console.log(`Navigating to month ${targetMonth}/${targetYear}`);
     
-    // Second click to get to May
-    const secondClick = await page.evaluate(() => {
-        const arrows = Array.from(document.querySelectorAll('img.calendar_arrow'));
-        if (arrows.length < 2) return { success: false, reason: 'Could not find calendar arrows' };
+    // Read the current month/year from the page
+    const currentMonthYear = await page.evaluate(() => {
+        const monthYearElement = document.querySelector('p.currentDate span.darkBlueFont, span[data-v-7bf9f1ce].mr15.darkBlueFont');
+        if (!monthYearElement) {
+            return null;
+        }
         
-        // Right arrow is the last one
-        const rightArrow = arrows[arrows.length - 1];
-        
-        // Highlight it
-        rightArrow.style.border = '3px solid green';
-        rightArrow.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
-        
-        // Click it once
-        rightArrow.click();
-        return { success: true };
+        const text = monthYearElement.textContent.trim();
+        console.log(`Current month year text: ${text}`);
+        return text;
     });
     
-    if (!secondClick.success) {
-        throw new Error('Failed to click next month arrow: ' + secondClick.reason);
+    if (!currentMonthYear) {
+        throw new Error('Could not find current month/year element on the page');
     }
     
-    console.log('✅ Second click (April → May)');
+    console.log(`Current calendar shows: ${currentMonthYear}`);
     
-    // Wait 2 seconds to let the calendar settle
-    await delay(500);
+    // Parse the current month and year
+    const months = {
+        'January': 1, 'February': 2, 'March': 3, 'April': 4, 'May': 5, 'June': 6,
+        'July': 7, 'August': 8, 'September': 9, 'October': 10, 'November': 11, 'December': 12
+    };
     
-    await takeScreenshot(page, 'calendar_may_2025');
-    console.log('✅ Successfully navigated to May 2025');
+    // Extract month and year using regex
+    const currentMatch = currentMonthYear.match(/(\w+)\s+(\d{4})/);
+    if (!currentMatch) {
+        throw new Error(`Could not parse month and year from: ${currentMonthYear}`);
+    }
+    
+    const currentMonthName = currentMatch[1];
+    const currentYear = parseInt(currentMatch[2], 10);
+    
+    // Find the current month number
+    let currentMonth = months[currentMonthName];
+    if (!currentMonth) {
+        throw new Error(`Unknown month name: ${currentMonthName}`);
+    }
+    
+    console.log(`Current month: ${currentMonth}/${currentYear}, Target month: ${targetMonth}/${targetYear}`);
+    
+    // Calculate how many clicks are needed
+    let clicksNeeded = 0;
+    
+    if (currentYear < targetYear) {
+        // Need to click forward to next year
+        clicksNeeded = (targetYear - currentYear) * 12 + (targetMonth - currentMonth);
+    } else if (currentYear === targetYear) {
+        // Same year, calculate month difference
+        if (currentMonth < targetMonth) {
+            clicksNeeded = targetMonth - currentMonth;
+        } else if (currentMonth > targetMonth) {
+            // We need to click backward - not implemented yet, assume we'll refresh and start over
+            throw new Error(`Current month ${currentMonth} is after target month ${targetMonth}. Please refresh and try again.`);
+        } else {
+            // Already at correct month
+            console.log('Already at the correct month, no navigation needed');
+            return true;
+        }
+    } else {
+        // Current year is after target year - not implemented yet
+        throw new Error(`Current year ${currentYear} is after target year ${targetYear}. Please refresh and try again.`);
+    }
+    
+    console.log(`Need to click ${clicksNeeded} times to reach target month`);
+    
+    // Perform the clicks
+    for (let i = 0; i < clicksNeeded; i++) {
+        console.log(`Click ${i+1}/${clicksNeeded} to navigate to next month`);
+        
+        const clicked = await page.evaluate(() => {
+            const arrows = Array.from(document.querySelectorAll('img.calendar_arrow'));
+            if (arrows.length < 2) return { success: false, reason: 'Could not find calendar arrows' };
+            
+            // Right arrow is the last one
+            const rightArrow = arrows[arrows.length - 1];
+            
+            // Highlight it
+            rightArrow.style.border = '3px solid green';
+            rightArrow.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
+            
+            // Click it
+            rightArrow.click();
+            return { success: true };
+        });
+        
+        if (!clicked.success) {
+            throw new Error(`Failed to click next month arrow: ${clicked.reason}`);
+        }
+        
+        // Wait between clicks
+        await delay(1000);
+        
+        // Take screenshot after each click
+        await takeScreenshot(page, `calendar_navigation_click_${i+1}`);
+    }
+    
+    // Take final screenshot
+    await takeScreenshot(page, 'calendar_navigation_complete');
+    console.log(`✅ Successfully navigated to ${targetMonth}/${targetYear}`);
     return true;
 }
 
 async function selectDate(instruction, page) {
     console.log(`Selecting date ${instruction.day}`);
     
+    // Take a screenshot of the calendar before selecting
+    await takeScreenshot(page, 'calendar_before_date_selection');
+    
     const dayClicked = await page.evaluate((day) => {
-        // Simple direct selector for the date cell
-        const dateCells = Array.from(document.querySelectorAll('div[data-v-7bf9f1ce].dateCell.font12'));
-        const targetCell = dateCells.find(cell => {
-            const dayText = cell.querySelector('p[data-v-7bf9f1ce][style="text-align: right;"]')?.textContent.trim();
-            return dayText === day.toString();
+        console.log(`Looking for day ${day} in the calendar`);
+        
+        // Try multiple selector strategies to find the date cell
+        
+        // Strategy 1: Look for date cells with explicit data attributes
+        const dateCells = Array.from(document.querySelectorAll('div[class*="dateCell"], div[class*="date-cell"], td[class*="available"]'));
+        console.log(`Found ${dateCells.length} date cells in total`);
+        
+        // Log all visible days for debugging
+        const visibleDays = dateCells.map(cell => {
+            const dayText = cell.textContent.trim();
+            const isDisabled = cell.classList.contains('disabled') || 
+                              cell.classList.contains('is-disabled') || 
+                              cell.getAttribute('disabled') === 'disabled';
+            return { day: dayText, disabled: isDisabled };
         });
+        console.log('Visible days in calendar:', JSON.stringify(visibleDays));
+        
+        // Helper function to highlight an element
+        const highlight = (el, color = 'green') => {
+            el.style.border = `3px solid ${color}`;
+            el.style.backgroundColor = color === 'red' ? 'rgba(255, 0, 0, 0.2)' : 'rgba(0, 255, 0, 0.2)';
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+        
+        // Try finding the day with exact text content match
+        let targetCell = null;
+        
+        // First try: Look for cells where the text content is exactly the day number
+        for (const cell of dateCells) {
+            const text = cell.textContent.trim();
+            if (text === day.toString()) {
+                console.log(`Found exact match for day ${day}`);
+                targetCell = cell;
+                break;
+            }
+        }
+        
+        // Second try: Look for cells that contain the day number
+        if (!targetCell) {
+            for (const cell of dateCells) {
+                // If the cell contains child elements, check their text content
+                const childrenWithText = Array.from(cell.querySelectorAll('*')).filter(el => 
+                    el.textContent.trim() === day.toString()
+                );
+                
+                if (childrenWithText.length > 0) {
+                    console.log(`Found day ${day} in child element`);
+                    targetCell = cell;
+                    // Highlight the specific child
+                    highlight(childrenWithText[0], 'blue');
+                    break;
+                }
+                
+                // Check if the day is part of text content with regex
+                const match = cell.textContent.match(new RegExp(`\\b${day}\\b`));
+                if (match) {
+                    console.log(`Found day ${day} using regex`);
+                    targetCell = cell;
+                    break;
+                }
+            }
+        }
+        
+        // Fallback strategy: Try numbered data attributes or direct position in the grid
+        if (!targetCell) {
+            console.log('Trying fallback strategies');
+            
+            // Look for specific data attributes
+            const specificDateCells = Array.from(document.querySelectorAll(`[data-date="${day}"], [data-day="${day}"]`));
+            if (specificDateCells.length > 0) {
+                targetCell = specificDateCells[0];
+                console.log('Found date with data attribute');
+            } else {
+                // Hard fallback: Just try to find something that represents the date
+                for (const cell of dateCells) {
+                    // Look for any digit that matches our day
+                    const digits = cell.textContent.match(/\d+/g);
+                    if (digits && digits.includes(day.toString())) {
+                        targetCell = cell;
+                        console.log('Found day using digit extraction');
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Last resort: Try XPath-style selector from the recording
+        if (!targetCell) {
+            try {
+                const xpathResult = document.evaluate(`//div[contains(@class, "dateCell") and contains(., "${day}")]`, 
+                    document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+                if (xpathResult.singleNodeValue) {
+                    targetCell = xpathResult.singleNodeValue;
+                    console.log('Found day using XPath approach');
+                }
+            } catch (e) {
+                console.log('XPath search failed:', e);
+            }
+        }
         
         if (!targetCell) {
-            return { success: false, reason: 'Date cell not found' };
+            // Log all cells and their content for debugging
+            console.log('Available cells:', dateCells.map(c => c.textContent.trim()).join(', '));
+            return { success: false, reason: `Date cell for day ${day} not found` };
+        }
+        
+        // Check if the cell is disabled
+        const isDisabled = targetCell.classList.contains('disabled') || 
+                         targetCell.classList.contains('is-disabled') || 
+                         targetCell.getAttribute('disabled') === 'disabled';
+        
+        if (isDisabled) {
+            console.log(`Day ${day} is disabled, cannot select`);
+            return { success: false, reason: `Day ${day} is disabled` };
         }
         
         // Highlight and click
-        targetCell.style.border = '3px solid green';
-        targetCell.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
+        highlight(targetCell, 'green');
+        
+        // Ensure the cell is in view
+        targetCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Wait a tiny bit before clicking (just in browser context)
+        setTimeout(() => {}, 300);
+        
+        // Click the cell
         targetCell.click();
         
-        return { success: true };
+        return { success: true, method: targetCell.tagName };
     }, instruction.day);
     
     if (!dayClicked.success) {
+        // Take a screenshot of the failed attempt for debugging
+        await takeScreenshot(page, `day_${instruction.day}_not_found`);
         throw new Error(`Could not click on date ${instruction.day}: ${dayClicked.reason}`);
     }
     
-    console.log(`✅ Clicked on date ${instruction.day}`);
-    await delay(500);
+    console.log(`✅ Clicked on date ${instruction.day} using method: ${dayClicked.method}`);
+    await delay(1000);
     
     // Take screenshot after clicking
     await takeScreenshot(page, 'after_date_cell_click');
@@ -2255,6 +2429,23 @@ async function purchaseTicket(page, ticketDetails) {
     productName = ticketDetails.name;
     console.log('Starting purchaseTicket with details:', ticketDetails);
 
+    // Extract the day from the date (assuming format YYYY-MM-DD or YYYY-M-DD)
+    let selectedDay = 31; // Default
+    let targetMonth = 5; // Default to May
+    let targetYear = 2025; // Default to 2025
+    
+    if (ticketDetails.date) {
+        const dateMatch = ticketDetails.date.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (dateMatch) {
+            targetYear = parseInt(dateMatch[1], 10);
+            targetMonth = parseInt(dateMatch[2], 10);
+            selectedDay = parseInt(dateMatch[3], 10);
+            console.log(`Parsed date: Year=${targetYear}, Month=${targetMonth}, Day=${selectedDay}`);
+        } else {
+            console.log(`Could not parse date ${ticketDetails.date}, using defaults`);
+        }
+    }
+
     // Update the product name in the findProduct step
     for (let i = 0; i < steps.length; i++) {
         if (steps[i].action === 'findProduct') {
@@ -2262,6 +2453,21 @@ async function purchaseTicket(page, ticketDetails) {
             steps[i].name = `Find ${ticketDetails.name} product`;
             steps[i].productName = ticketDetails.name;
         }
+        
+        // Update the clickNextMonth step with the target date
+        if (steps[i].action === 'clickNextMonth') {
+            console.log(`Found clickNextMonth step at index ${i}, updating with date ${ticketDetails.date}`);
+            steps[i].name = `Navigate to month ${targetMonth}/${targetYear}`;
+            steps[i].date = ticketDetails.date;
+        }
+        
+        // Update the selectDate step with the correct day
+        if (steps[i].action === 'selectDate') {
+            console.log(`Found selectDate step at index ${i}, updating day from ${steps[i].day} to ${selectedDay}`);
+            steps[i].name = `Select date ${selectedDay}`;
+            steps[i].day = selectedDay;
+        }
+        
         // Make sure all steps have the productName set
         steps[i].productName = ticketDetails.name;
     }
@@ -2325,6 +2531,8 @@ async function purchaseTicket(page, ticketDetails) {
 async function purchaceTikcet(ticketDetails) {
     try {
         console.log(`Starting purchaceTikcet with product name: ${ticketDetails.name}`);
+        console.log(`Quantity: ${ticketDetails.quantity}, Date: ${ticketDetails.date}`);
+        
         // Start a Puppeteer browser
         const browser = await puppeteer.launch({
             headless: false,
@@ -2347,10 +2555,11 @@ async function purchaceTikcet(ticketDetails) {
         // Call the main purchase function
         await purchaseTicket(page, ticketDetails);
         
-        console.log('Ticket purchase process initiated.');
+        console.log('Ticket purchase process completed successfully.');
         
         // Keep the browser open for verification
         // await browser.close();
+        return { success: true };
     } catch (error) {
         console.error('Error running purchaceTikcet:', error);
         throw error;
