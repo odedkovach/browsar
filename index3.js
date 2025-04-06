@@ -103,7 +103,8 @@ const steps = [
   { name: 'Checkout Continue', action: 'continue_checkout' },
   { name: 'Fill Checkout', action: 'fillCheckout' },
   { name: 'Fill Checkout Nationality', action: 'fillCheckoutNationality' },
-  { name: 'Submit Checkout', action: 'submitCheckout' }
+  { name: 'Submit Checkout', action: 'submitCheckout' },
+  { name: 'Click VISA Logo', action: 'clickVisaLogo' }
 ];
 
 // Function to get instruction for the current step
@@ -2309,95 +2310,99 @@ async function clickCreditCard(instruction, page) {
   }
 }
 
-async function continue_checkout(instruction, page) {
-    try {
-        console.log('Continuing checkout process...');
-        
-        // Take a screenshot before starting
-        await takeScreenshot(page, 'before_continue_checkout');
-        
-        // Wait for a moment for any animations or state changes
-        await delay(2000);
-        
-        // Look for and click the continue button
-        const continueClicked = await page.evaluate(() => {
-            const selectors = [
-                'button.el-button--primary', 
-                'button span:contains("Continue")',
-                'button.continue', 
-                'button.next', 
-                'input[type="submit"]'
-            ];
-            
-            for (const selector of selectors) {
-                try {
-                    const elements = document.querySelectorAll(selector);
-                    console.log(`Found ${elements.length} elements with selector: ${selector}`);
-                    
-                    for (const element of elements) {
-                        // Check if visible
-                        const style = window.getComputedStyle(element);
-                        if (style.display === 'none' || style.visibility === 'hidden') {
-                            continue;
-                        }
-                        
-                        // Skip if button is disabled
-                        if (element.disabled) {
-                            console.log('Button is disabled, skipping');
-                            continue;
-                        }
-                        
-                        // Highlight the button
-                        element.style.border = '2px solid #ff0000';
-                        element.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
-                        
-                        // Scroll into view
-                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        
-                        // Click the button
-                        element.click();
-                        return { success: true, selector };
-                    }
-                } catch (error) {
-                    console.log(`Error with selector ${selector}: ${error.message}`);
-                }
-            }
-            
-            // Try a more generic approach to find any continue/submit button
-            const buttonTexts = ['continue', 'submit', 'next', 'proceed'];
-            const allButtons = document.querySelectorAll('button, input[type="submit"]');
-            
-            for (const button of allButtons) {
-                const text = button.textContent.toLowerCase();
-                if (buttonTexts.some(t => text.includes(t))) {
-                    button.style.border = '2px solid #ff0000';
-                    button.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
-                    button.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    button.click();
-                    return { success: true, method: 'text-matching' };
-                }
-            }
-            
-            return { success: false, error: 'No continue button found' };
-        });
-        
-        if (!continueClicked.success) {
-            console.error(`Failed to click continue: ${continueClicked.error}`);
-            throw new Error(`Failed to click continue: ${continueClicked.error}`);
+async function continue_checkout(page) {
+  try {
+    console.log('Attempting to click checkout continue button...');
+    
+    // Take a screenshot before action
+    await takeScreenshot(page, 'before_checkout_continue');
+    
+    // Highlight and click the continue button
+    const buttonFound = await page.evaluate(() => {
+      // Try various selectors from the recorded JSON
+      const selectors = [
+        'div.container span > span',
+        document.evaluate('//*[@id="paySubmit"]/span/span', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue,
+        'div.container span > span',
+        'button:contains("CONTINUE")',
+        '[id="paySubmit"]',
+        'button span:contains("CONTINUE")'
+      ];
+      
+      let continueButton = null;
+      
+      // Try each selector
+      for (const selector of selectors) {
+        if (typeof selector === 'object' && selector !== null) {
+          // Handle XPath result
+          continueButton = selector;
+          break;
         }
         
-        // Wait for navigation to complete
-        await delay(5000);
-        
-        // Take a screenshot after clicking
-        await takeScreenshot(page, 'after_continue_checkout');
-        
-        console.log('✅ Successfully continued checkout');
-        return true;
-    } catch (error) {
-        console.error(`Error in continue_checkout: ${error.message}`);
-        throw error;
+        const elements = document.querySelectorAll(selector);
+        if (elements.length > 0) {
+          for (const el of elements) {
+            if (el.textContent.includes('CONTINUE')) {
+              continueButton = el;
+              break;
+            }
+          }
+          if (continueButton) break;
+        }
+      }
+      
+      if (!continueButton) {
+        // Try paySubmit specifically
+        const paySubmit = document.getElementById('paySubmit');
+        if (paySubmit) {
+          continueButton = paySubmit;
+        }
+      }
+      
+      if (!continueButton) {
+        console.log('❌ No CONTINUE button found');
+        return false;
+      }
+      
+      // Highlight the button
+      continueButton.style.border = '3px solid green';
+      continueButton.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
+      
+      // Get the clickable element (may be the button or a parent)
+      let clickTarget = continueButton;
+      
+      // If it's a span, try to find the button parent
+      if (clickTarget.tagName.toLowerCase() === 'span') {
+        clickTarget = clickTarget.closest('button') || clickTarget.parentElement || clickTarget;
+      }
+      
+      // Make sure it's visible
+      clickTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Click it
+      clickTarget.click();
+      
+      console.log('✅ CONTINUE button clicked');
+      return true;
+    });
+    
+    if (!buttonFound) {
+      throw new Error('CONTINUE button for checkout not found');
     }
+    
+    // Wait for navigation or content change using delay instead of waitForTimeout
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Take screenshot after clicking
+    await takeScreenshot(page, 'after_checkout_continue');
+    
+    console.log('✅ Checkout continue step completed successfully');
+    return true;
+  } catch (error) {
+    console.error(`❌ Error in continue_checkout: ${error.message}`);
+    await takeScreenshot(page, 'error_checkout_continue');
+    throw error;
+  }
 }
 
 async function fillCheckout(page) {
@@ -2439,154 +2444,324 @@ async function fillCheckout(page) {
     }
 }
 
-async function fillCheckoutNationality(instruction, page) {
-  try {
-      console.log('Attempting to fill checkout nationality...');
-      
-      // Wait for the nationality dropdown to appear
-      await delay(1000);
-      
-      // Find and click the nationality dropdown
-      await page.evaluate(() => {
-          const selectFields = document.querySelectorAll('.el-select');
-          if (selectFields.length > 0) {
-              selectFields[0].click();
-          }
-      });
-      
-      await delay(1000);
-      
-      // Select the first option (assuming "JAPAN")
-      await page.evaluate(() => {
-          const options = document.querySelectorAll('.el-select-dropdown__item');
-          if (options.length > 0) {
-              options[0].click();
-          }
-      });
-      
-      console.log('Checkout nationality filled successfully');
-      return true;
-  } catch (error) {
-      console.error(`Error in fillCheckoutNationality: ${error.message}`);
-      throw error;
-  }
+async function fillCheckoutNationality(page) {
+    try {
+        console.log('Attempting to fill checkout nationality...');
+        await takeScreenshot(page, 'before_fill_checkout_nationality');
+
+        // Click the country dropdown
+        await page.locator('#country').click();
+        await delay(1000);
+
+        // Type 'israel' to filter
+        await page.locator('#country').fill('israel');
+        await delay(1000);
+
+        // Click the Israel option using multiple selectors
+        try {
+            // Try the hover class first
+            await page.locator('li.hover').click();
+        } catch (e) {
+            console.log('First selector failed, trying XPath:', e.message);
+            try {
+                // Try XPath selector
+                await page.locator('xpath//html/body/div[3]/div[1]/div[1]/ul/li[110]').click();
+            } catch (e2) {
+                console.log('XPath selector failed, trying generic approach:', e2.message);
+                // Last resort - try to find Israel in any visible dropdown
+                await page.evaluate(() => {
+                    const dropdowns = document.querySelectorAll('div.el-select-dropdown.el-popper');
+                    for (const dropdown of dropdowns) {
+                        if (dropdown.style.display !== 'none') {
+                            const items = dropdown.querySelectorAll('li');
+                            for (const item of items) {
+                                if (item.textContent.includes('Israel')) {
+                                    item.click();
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    throw new Error('Israel option not found in visible dropdowns');
+                });
+            }
+        }
+
+        await delay(1000);
+        await takeScreenshot(page, 'after_fill_checkout_nationality');
+        console.log('Successfully filled checkout nationality');
+        return true;
+    } catch (error) {
+        console.error('Error in fillCheckoutNationality:', error);
+        await takeScreenshot(page, 'error_fill_checkout_nationality');
+        return false;
+    }
 }
 
-// New function to submit the checkout - final step in the purchase process
-async function submitCheckout(instruction, page) {
+async function submitCheckout(page) {
   try {
-    console.log('Executing final checkout submission...');
+    console.log('Submitting final checkout...');
     
-    // Take screenshot before submitting
+    // Take screenshot before action
     await takeScreenshot(page, 'before_submit_checkout');
     
-    // Check if we're on the correct page
+    // Check if we're on the payment response page
     const currentUrl = page.url();
-    console.log(`Current URL before submit: ${currentUrl}`);
+    console.log(`Current URL: ${currentUrl}`);
     
-    // If not on the payment response page, wait for it
     if (!currentUrl.includes('payResponce')) {
-      console.log('Waiting for payment response page...');
+      console.log('Not on payment response page yet. Waiting for navigation...');
       try {
-        // Wait for navigation to payment response page
+        // Wait for navigation to complete
         await page.waitForNavigation({ 
           timeout: 30000,
-          waitUntil: 'networkidle2'
+          waitUntil: 'networkidle2' 
         });
-      } catch (navigationError) {
-        console.log(`Navigation timeout: ${navigationError.message}`);
-        // Continue anyway, as we might already be on the correct page
+      } catch (error) {
+        console.log(`Navigation timeout: ${error.message}`);
+        // Continue as we might already be on the right page
       }
     }
     
-    // Try multiple selectors to find and click the CONTINUE button
-    const continueBtnClicked = await page.evaluate(() => {
-      // Try each selector from the recording
+    // Try to click the continue button using the selectors from the recording
+    console.log('Looking for CONTINUE button...');
+    
+    const buttonClicked = await page.evaluate(() => {
+      // Selectors from the recording
       const selectors = [
         'div.btn-btm span > span',
-        '[id="paySubmit"] span > span',
-        'button:contains("CONTINUE")',
-        'button span:contains("CONTINUE")',
-        '.btn-btm button'
+        document.evaluate('//*[@id="paySubmit"]/span/span', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue,
+        'div.btn-btm span > span',
+        'button:contains("CONTINUE")'
       ];
       
-      // Helper function to highlight and click an element
-      const highlightAndClick = (element) => {
-        if (!element) return false;
-        
-        // Highlight the element
-        element.style.border = '3px solid red';
-        element.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
-        
-        // Scroll into view
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        
-        // Try clicking the element
-        try {
-          element.click();
-          return true;
-        } catch (e) {
-          console.log(`Click error: ${e.message}`);
-          return false;
-        }
-      };
+      let continueButton = null;
+      let buttonContainer = null;
       
       // Try each selector
       for (const selector of selectors) {
+        if (typeof selector === 'object' && selector !== null) {
+          // Handle XPath result
+          continueButton = selector;
+          break;
+        }
+        
         try {
-          const element = document.querySelector(selector);
-          if (element) {
-            console.log(`Found element with selector: ${selector}`);
-            if (highlightAndClick(element)) {
-              return { success: true, selector };
+          const elements = document.querySelectorAll(selector);
+          if (elements.length > 0) {
+            for (const el of elements) {
+              if (el.textContent.includes('CONTINUE')) {
+                continueButton = el;
+                break;
+              }
             }
+            if (continueButton) break;
           }
         } catch (e) {
           console.log(`Error with selector ${selector}: ${e.message}`);
         }
       }
       
-      // If none of the specific selectors worked, try finding by text content
-      const allButtons = Array.from(document.querySelectorAll('button, [role="button"]'));
-      for (const btn of allButtons) {
-        if (btn.textContent.includes('CONTINUE')) {
-          console.log('Found button with CONTINUE text');
-          if (highlightAndClick(btn)) {
-            return { success: true, selector: 'text-content' };
+      // If still not found, try the paySubmit element directly
+      if (!continueButton) {
+        const paySubmit = document.getElementById('paySubmit');
+        if (paySubmit) {
+          continueButton = paySubmit;
+        }
+      }
+      
+      // If we found a span, get its button parent
+      if (continueButton && continueButton.tagName.toLowerCase() === 'span') {
+        buttonContainer = continueButton.closest('button') || continueButton.parentElement;
+      } else {
+        buttonContainer = continueButton;
+      }
+      
+      if (!buttonContainer) {
+        // Try one more approach - look for any button with CONTINUE text
+        const allButtons = document.querySelectorAll('button');
+        for (const btn of allButtons) {
+          if (btn.textContent.includes('CONTINUE')) {
+            buttonContainer = btn;
+            break;
           }
         }
       }
       
-      return { success: false, reason: 'Could not find or click the CONTINUE button' };
+      if (!buttonContainer) {
+        console.log('❌ No CONTINUE button found');
+        return { success: false, error: 'No CONTINUE button found' };
+      }
+      
+      // Highlight the button
+      buttonContainer.style.border = '3px solid red';
+      buttonContainer.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+      
+      // Scroll it into view
+      buttonContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Click the button
+      try {
+        buttonContainer.click();
+        console.log('✅ CONTINUE button clicked');
+        return { success: true };
+      } catch (e) {
+        console.log(`Error clicking button: ${e.message}`);
+        return { success: false, error: e.message };
+      }
     });
     
-    if (continueBtnClicked.success) {
-      console.log(`✅ Successfully clicked CONTINUE button using selector: ${continueBtnClicked.selector}`);
-      
-      // Wait for any navigation or confirmation
-      await delay(5000);
-      
-      // Take a screenshot of the final state
-      await takeScreenshot(page, 'after_submit_checkout');
-      
-      return true;
-    } else {
-      console.error(`❌ Failed to click CONTINUE button: ${continueBtnClicked.reason}`);
-      
-      // Take screenshot of the failure state
-      await takeScreenshot(page, 'failed_submit_checkout');
-      
-      throw new Error(`Failed to submit checkout: ${continueBtnClicked.reason}`);
+    if (!buttonClicked.success) {
+      throw new Error(`Failed to click CONTINUE button: ${buttonClicked.error}`);
     }
+    
+    // Wait for any navigation that might occur
+    await delay(5000);
+    
+    // Take screenshot after clicking
+    await takeScreenshot(page, 'after_submit_checkout');
+    
+    console.log('✅ Submit checkout completed successfully');
+    return true;
   } catch (error) {
-    console.error(`Error in submitCheckout: ${error.message}`);
+    console.error(`❌ Error in submitCheckout: ${error.message}`);
     await takeScreenshot(page, 'error_submit_checkout');
     throw error;
   }
 }
 
+async function clickVisaLogo(page) {
+  try {
+    console.log('Clicking VISA logo...');
+    
+    // Take screenshot before action
+    await takeScreenshot(page, 'before_click_visa_logo');
+    
+    // Try to find and click the VISA button based on the recording
+    const visaClicked = await page.evaluate(() => {
+      // Try multiple selectors for VISA button as per recording
+      const selectors = [
+        'button[value="VISA"]',
+        document.evaluate('//button[@value="VISA"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+      ];
+      
+      let visaButton = null;
+      
+      // Try each selector
+      for (const selector of selectors) {
+        if (typeof selector === 'object' && selector !== null) {
+          // Handle XPath result
+          visaButton = selector;
+          break;
+        }
+        
+        try {
+          const elements = document.querySelectorAll(selector);
+          if (elements.length > 0) {
+            visaButton = elements[0];
+            break;
+          }
+        } catch (e) {
+          console.log(`Error with selector ${selector}: ${e.message}`);
+        }
+      }
+      
+      // If not found with specific selectors, try text content
+      if (!visaButton) {
+        const allButtons = Array.from(document.querySelectorAll('button'));
+        for (const btn of allButtons) {
+          if (btn.textContent.trim().includes('VISA')) {
+            visaButton = btn;
+            break;
+          }
+        }
+      }
+      
+      if (!visaButton) {
+        // Try by image content
+        const visaImages = Array.from(document.querySelectorAll('img'))
+          .filter(img => img.src.toLowerCase().includes('visa') || 
+                        img.alt.toLowerCase().includes('visa'));
+                        
+        if (visaImages.length > 0) {
+          // Try to find the button containing the VISA image
+          const button = visaImages[0].closest('button');
+          if (button) {
+            visaButton = button;
+          } else {
+            // If no button, try clicking the image
+            visaImages[0].click();
+            return { success: true, method: 'image-click' };
+          }
+        }
+      }
+      
+      if (!visaButton) {
+        console.log('❌ VISA button not found');
+        return { success: false, error: 'VISA button not found' };
+      }
+      
+      // Highlight the button
+      visaButton.style.border = '3px solid red';
+      visaButton.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+      
+      // Scroll it into view
+      visaButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Click the button
+      try {
+        visaButton.click();
+        console.log('✅ VISA button clicked');
+        return { success: true };
+      } catch (e) {
+        console.log(`Error clicking VISA button: ${e.message}`);
+        return { success: false, error: e.message };
+      }
+    });
+    
+    if (!visaClicked || !visaClicked.success) {
+      // If JavaScript evaluation method failed, try direct Puppeteer methods
+      console.log('JavaScript approach failed, trying Puppeteer selectors');
+      
+      // Try different selectors with Puppeteer's API
+      try {
+        await page.click('button[value="VISA"]');
+        console.log('✅ Clicked VISA button with Puppeteer selector');
+      } catch (e1) {
+        try {
+          await page.click('text/VISA');
+          console.log('✅ Clicked VISA button with text selector');
+        } catch (e2) {
+          throw new Error(`Failed to click VISA button: ${e1.message}, ${e2.message}`);
+        }
+      }
+    }
+    
+    // Wait for navigation that might occur
+    try {
+      await page.waitForNavigation({ timeout: 10000 });
+      console.log('Navigation detected after clicking VISA');
+    } catch (navError) {
+      console.log('No navigation occurred or timeout reached');
+    }
+    
+    // Wait for any page updates
+    await delay(5000);
+    
+    // Take screenshot after clicking
+    await takeScreenshot(page, 'after_click_visa_logo');
+    
+    console.log('✅ Successfully clicked VISA logo');
+    return true;
+  } catch (error) {
+    console.error(`❌ Error in clickVisaLogo: ${error.message}`);
+    await takeScreenshot(page, 'error_click_visa_logo');
+    throw error;
+  }
+}
+
 // Map actions to their corresponding functions
-const hardcodedActions = {
+const actionFunctions = {
   findProduct: findProduct,
   increaseQuantity: increaseQuantity,
   clickSelectDate: clickSelectDate,
@@ -2610,13 +2785,12 @@ const hardcodedActions = {
   continue_checkout: continue_checkout,
   fillCheckout: fillCheckout,
   fillCheckoutNationality: fillCheckoutNationality,
-  submitCheckout: submitCheckout
+  submitCheckout: submitCheckout,
+  clickVisaLogo: clickVisaLogo
 };
 
 // Function to execute the step based on the instruction
 async function executeStep(instruction, page) {
-  console.log(`Executing step action: ${instruction.action}`);
-  
   switch (instruction.action) {
     case 'findProduct':
       return await findProduct(instruction, page);
@@ -2641,13 +2815,13 @@ async function executeStep(instruction, page) {
     case 'clickCheckout':
       return await clickCheckout(instruction, page);
     case 'clickIAgree':
-      return await handleIAgree(instruction, page);
+      return await handleIAgree(page);
     case 'fillFormDetails':
       return await fillFormDetails(instruction, page);
     case 'fillNationality':
-      return await fillNationality(instruction, page);
+      return await fillNationality(page);
     case 'fillPlaceOfResidence':
-      return await fillPlaceOfResidence(instruction, page);
+      return await fillPlaceOfResidence(page);
     case 'handleCaptcha':
       return await handleCaptcha(instruction, page);
     case 'checkTermsCheckbox':
@@ -2659,13 +2833,15 @@ async function executeStep(instruction, page) {
     case 'clickCreditCard':
       return await clickCreditCard(instruction, page);
     case 'continue_checkout':
-      return await continue_checkout(instruction, page);
+      return await continue_checkout(page);
     case 'fillCheckout':
-      return await fillCheckout(instruction, page);
+      return await fillCheckout(page);
     case 'fillCheckoutNationality':
-      return await fillCheckoutNationality(instruction, page);
+      return await fillCheckoutNationality(page);
     case 'submitCheckout':
-      return await submitCheckout(instruction, page);
+      return await submitCheckout(page);
+    case 'clickVisaLogo':
+      return await clickVisaLogo(page);
     default:
       throw new Error(`Unknown action: ${instruction.action}`);
   }
