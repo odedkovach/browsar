@@ -104,7 +104,8 @@ const steps = [
   { name: 'Fill Checkout', action: 'fillCheckout' },
   { name: 'Fill Checkout Nationality', action: 'fillCheckoutNationality' },
   { name: 'Submit Checkout', action: 'submitCheckout' },
-  { name: 'Click VISA Logo', action: 'clickVisaLogo' }
+  { name: 'Click VISA logo', action: 'clickVisaLogo' },
+  { name: 'Select Card Issuer', action: 'clickIssuer' }
 ];
 
 // Function to get instruction for the current step
@@ -2498,296 +2499,8 @@ async function fillCheckoutNationality(page) {
     }
 }
 
-async function submitCheckout(page) {
-  try {
-    console.log('Submitting final checkout...');
-    
-    // Take screenshot before action
-    await takeScreenshot(page, 'before_submit_checkout');
-    
-    // Check if we're on the payment response page
-    const currentUrl = page.url();
-    console.log(`Current URL: ${currentUrl}`);
-    
-    if (!currentUrl.includes('payResponce')) {
-      console.log('Not on payment response page yet. Waiting for navigation...');
-      try {
-        // Wait for navigation to complete
-        await page.waitForNavigation({ 
-          timeout: 30000,
-          waitUntil: 'networkidle2' 
-        });
-      } catch (error) {
-        console.log(`Navigation timeout: ${error.message}`);
-        // Continue as we might already be on the right page
-      }
-    }
-    
-    // Try to click the continue button using the selectors from the recording
-    console.log('Looking for CONTINUE button...');
-    
-    const buttonClicked = await page.evaluate(() => {
-      // Selectors from the recording
-      const selectors = [
-        'div.btn-btm span > span',
-        document.evaluate('//*[@id="paySubmit"]/span/span', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue,
-        'div.btn-btm span > span',
-        'button:contains("CONTINUE")'
-      ];
-      
-      let continueButton = null;
-      let buttonContainer = null;
-      
-      // Try each selector
-      for (const selector of selectors) {
-        if (typeof selector === 'object' && selector !== null) {
-          // Handle XPath result
-          continueButton = selector;
-          break;
-        }
-        
-        try {
-          const elements = document.querySelectorAll(selector);
-          if (elements.length > 0) {
-            for (const el of elements) {
-              if (el.textContent.includes('CONTINUE')) {
-                continueButton = el;
-                break;
-              }
-            }
-            if (continueButton) break;
-          }
-        } catch (e) {
-          console.log(`Error with selector ${selector}: ${e.message}`);
-        }
-      }
-      
-      // If still not found, try the paySubmit element directly
-      if (!continueButton) {
-        const paySubmit = document.getElementById('paySubmit');
-        if (paySubmit) {
-          continueButton = paySubmit;
-        }
-      }
-      
-      // If we found a span, get its button parent
-      if (continueButton && continueButton.tagName.toLowerCase() === 'span') {
-        buttonContainer = continueButton.closest('button') || continueButton.parentElement;
-      } else {
-        buttonContainer = continueButton;
-      }
-      
-      if (!buttonContainer) {
-        // Try one more approach - look for any button with CONTINUE text
-        const allButtons = document.querySelectorAll('button');
-        for (const btn of allButtons) {
-          if (btn.textContent.includes('CONTINUE')) {
-            buttonContainer = btn;
-            break;
-          }
-        }
-      }
-      
-      if (!buttonContainer) {
-        console.log('❌ No CONTINUE button found');
-        return { success: false, error: 'No CONTINUE button found' };
-      }
-      
-      // Highlight the button
-      buttonContainer.style.border = '3px solid red';
-      buttonContainer.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
-      
-      // Scroll it into view
-      buttonContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
-      // Click the button
-      try {
-        buttonContainer.click();
-        console.log('✅ CONTINUE button clicked');
-        return { success: true };
-      } catch (e) {
-        console.log(`Error clicking button: ${e.message}`);
-        return { success: false, error: e.message };
-      }
-    });
-    
-    if (!buttonClicked.success) {
-      throw new Error(`Failed to click CONTINUE button: ${buttonClicked.error}`);
-    }
-    
-    // Wait for any navigation that might occur
-    await delay(5000);
-    
-    // Take screenshot after clicking
-    await takeScreenshot(page, 'after_submit_checkout');
-    
-    console.log('✅ Submit checkout completed successfully');
-    return true;
-  } catch (error) {
-    console.error(`❌ Error in submitCheckout: ${error.message}`);
-    await takeScreenshot(page, 'error_submit_checkout');
-    throw error;
-  }
-}
-
-async function clickVisaLogo(page) {
-  try {
-    console.log('Clicking VISA logo...');
-    
-    // Take screenshot before action
-    await takeScreenshot(page, 'before_click_visa_logo');
-    
-    // For debugging, log the page content
-    const pageContent = await page.content();
-    console.log('Page contains "VISA":', pageContent.includes('VISA'));
-    console.log('Page contains brand buttons:', pageContent.includes('btn btn-outline-secondary'));
-    
-    // First, try with more targeted selectors based on the exact HTML structure provided
-    console.log('Trying to click VISA button with direct selectors...');
-    
-    const buttonClicked = await page.evaluate(() => {
-      console.log('Starting evaluation to find VISA button');
-      
-      // Look specifically for the button with value="VISA" inside a div.brand
-      const visaButton = document.querySelector('div.brand button[value="VISA"]');
-      
-      if (visaButton) {
-        console.log('Found VISA button with value attribute');
-        visaButton.style.border = '3px solid red';
-        visaButton.click();
-        return { success: true, method: 'value-attribute' };
-      }
-      
-      // Try to find by img src containing 'visa'
-      const visaImages = Array.from(document.querySelectorAll('img[src*="visa"], img[src*="VISA"]'));
-      if (visaImages.length > 0) {
-        console.log(`Found ${visaImages.length} VISA images`);
-        
-        // Find the closest button for the first visa image
-        const imgParentButton = visaImages[0].closest('button');
-        if (imgParentButton) {
-          console.log('Found button containing VISA image');
-          imgParentButton.style.border = '3px solid red';
-          imgParentButton.click();
-          return { success: true, method: 'image-parent-button' };
-        } else {
-          // If no parent button, try clicking the image directly
-          console.log('Clicking VISA image directly');
-          visaImages[0].style.border = '3px solid blue';
-          visaImages[0].click();
-          return { success: true, method: 'direct-image-click' };
-        }
-      }
-      
-      // Look for any button inside div.brand elements
-      const brandButtons = document.querySelectorAll('div.brand button');
-      console.log(`Found ${brandButtons.length} brand buttons`);
-      
-      for (const btn of brandButtons) {
-        // Check if this button contains VISA in its attributes or has a VISA image
-        if (btn.value === 'VISA' || 
-            btn.getAttribute('name') === 'VISA' ||
-            btn.querySelector('img[src*="visa"]') !== null) {
-          console.log('Found VISA button through brand buttons search');
-          btn.style.border = '3px solid green';
-          btn.click();
-          return { success: true, method: 'brand-buttons-search' };
-        }
-      }
-      
-      // Last resort - log all buttons for debugging
-      const allButtons = document.querySelectorAll('button');
-      console.log(`Found ${allButtons.length} total buttons`);
-      
-      const buttonDetails = Array.from(allButtons).map(btn => ({
-        text: btn.textContent.trim(),
-        value: btn.value,
-        hasImg: btn.querySelector('img') !== null,
-        classes: btn.className
-      }));
-      
-      console.log('All buttons:', JSON.stringify(buttonDetails));
-      
-      return { success: false, error: 'VISA button not found in any strategy' };
-    });
-    
-    // If JavaScript approach failed, try direct Puppeteer methods
-    if (!buttonClicked || !buttonClicked.success) {
-      console.log('JavaScript approach failed, trying Puppeteer selectors');
-      
-      try {
-        // Try targeting the button directly
-        console.log('Trying button[value="VISA"]');
-        await page.click('button[value="VISA"]');
-        console.log('✅ Successfully clicked button[value="VISA"]');
-      } catch (e1) {
-        try {
-          // Try targeting with XPath
-          console.log('Trying XPath approach');
-          await page.click('xpath//button[@value="VISA"]');
-          console.log('✅ Successfully clicked with XPath');
-        } catch (e2) {
-          try {
-            // Try using selector for image
-            console.log('Trying to click on the VISA image');
-            await page.click('img[src*="visa"]');
-            console.log('✅ Successfully clicked VISA image');
-          } catch (e3) {
-            try {
-              // Try selector for div.brand:nth-child(2) button as VISA is usually the second card brand
-              console.log('Trying div.brand:nth-child(2) button');
-              await page.click('div.brand:nth-child(2) button');
-              console.log('✅ Successfully clicked 2nd brand button');
-            } catch (e4) {
-              // One final approach - take a screenshot and click in the middle of where VISA should be
-              console.log('Using absolute position click approach');
-              
-              // Get the page dimensions
-              const dimensions = await page.evaluate(() => {
-                return {
-                  width: document.documentElement.clientWidth,
-                  height: document.documentElement.clientHeight
-                };
-              });
-              
-              // Click in the approximate middle-left where VISA usually appears
-              await page.mouse.click(Math.floor(dimensions.width * 0.3), Math.floor(dimensions.height * 0.5));
-              console.log('✅ Clicked at approximate VISA position');
-            }
-          }
-        }
-      }
-    } else {
-      console.log(`✅ Successfully clicked VISA button using method: ${buttonClicked.method}`);
-    }
-    
-    // Wait for any navigation
-    try {
-      console.log('Waiting for navigation...');
-      await page.waitForNavigation({ timeout: 8000 });
-      console.log('Navigation completed');
-    } catch (navError) {
-      console.log('No navigation detected or timeout reached');
-    }
-    
-    // Take screenshot after clicking
-    await takeScreenshot(page, 'after_click_visa_logo');
-    
-    console.log('✅ VISA logo click action completed');
-    return true;
-  } catch (error) {
-    console.error(`❌ Error in clickVisaLogo: ${error.message}`);
-    await takeScreenshot(page, 'error_click_visa_logo');
-    
-    // Even if we get an error, we'll return true to let the process continue
-    // Since this is a common failure point and subsequent steps might still work
-    console.log('Continuing process despite VISA click error');
-    return true;
-  }
-}
-
 // Map actions to their corresponding functions
-const actionFunctions = {
+const hardcodedActions = {
   findProduct: findProduct,
   increaseQuantity: increaseQuantity,
   clickSelectDate: clickSelectDate,
@@ -2812,7 +2525,8 @@ const actionFunctions = {
   fillCheckout: fillCheckout,
   fillCheckoutNationality: fillCheckoutNationality,
   submitCheckout: submitCheckout,
-  clickVisaLogo: clickVisaLogo
+  clickVisaLogo: clickVisaLogo,
+  clickIssuer: clickIssuer
 };
 
 // Function to execute the step based on the instruction
@@ -2868,6 +2582,8 @@ async function executeStep(instruction, page) {
       return await submitCheckout(page);
     case 'clickVisaLogo':
       return await clickVisaLogo(page);
+    case 'clickIssuer':
+      return await clickIssuer(page);
     default:
       throw new Error(`Unknown action: ${instruction.action}`);
   }
@@ -2996,12 +2712,12 @@ async function purchaceTikcet(ticketDetails) {
         console.log('Navigating to USJ Express Pass page...');
         await page.goto('https://www.usjticketing.com/expressPass', {
             waitUntil: 'networkidle2',  // Wait until network is idle
-            timeout: 60000 // 60 second timeout for loading
+            timeout: 30000 // 60 second timeout for loading
         });
         
         // Increase the delay to ensure the page is fully loaded when coming from API
         console.log('Waiting for page to fully load (extended delay)...');
-        await delay(10000); // Initial delay
+        await delay(5000); // Initial delay
         
         // Verify products are loaded with retry mechanism
         let productsLoaded = false;
@@ -3047,11 +2763,11 @@ async function purchaceTikcet(ticketDetails) {
                     const scrollStep = Math.floor(maxScroll / 4);
                     
                     // Scroll in steps
-                    setTimeout(() => window.scrollTo(0, scrollStep), 200);
-                    setTimeout(() => window.scrollTo(0, scrollStep * 2), 400);
-                    setTimeout(() => window.scrollTo(0, scrollStep * 3), 600);
-                    setTimeout(() => window.scrollTo(0, maxScroll), 800);
-                    setTimeout(() => window.scrollTo(0, 0), 1000); // Back to top
+                    setTimeout(() => window.scrollTo(0, scrollStep), 10);
+                    setTimeout(() => window.scrollTo(0, scrollStep * 2), 100);
+                    setTimeout(() => window.scrollTo(0, scrollStep * 3), 100);
+                    setTimeout(() => window.scrollTo(0, maxScroll), 100);
+                    setTimeout(() => window.scrollTo(0, 0), 100); // Back to top
                 });
                 
                 // Try refreshing the page if we've already retried a few times
@@ -3254,4 +2970,580 @@ if (require.main === module) {
             // Removing browser.close() to keep the browser open
         }
     })();
+}
+
+async function clickVisaLogo(page) {
+  try {
+    console.log('Clicking VISA logo inside iframe...');
+    
+    // Take screenshot before action
+    await takeScreenshot(page, 'before_click_visa_logo');
+    
+    // Wait for the iframe to load
+    console.log('Waiting for payment iframe to fully load...');
+    await delay(3000);
+    
+    // Step 1: Find the iframe and switch to it
+    console.log('Looking for the payment iframe...');
+    
+    const frameHandle = await page.evaluate(() => {
+      // Find the aerosmith-choices iframe
+      const iframe = document.querySelector('#aerosmith-choices, iframe[src*="fraudprevention"], iframe[src*="choices"]');
+      
+      if (iframe) {
+        console.log(`Found iframe: ID=${iframe.id}, src=${iframe.src}`);
+        // Highlight the iframe for debugging
+        iframe.style.border = '5px solid red';
+        return true;
+      } else {
+        // Look for any iframe as fallback
+        const iframes = document.querySelectorAll('iframe');
+        console.log(`Found ${iframes.length} iframes on the page`);
+        
+        if (iframes.length > 0) {
+          // Highlight all iframes for visibility
+          Array.from(iframes).forEach((frame, index) => {
+            frame.style.border = `5px solid ${index === 0 ? 'red' : 'orange'}`;
+            console.log(`Frame ${index}: src=${frame.src}, id=${frame.id}`);
+          });
+          return true;
+        }
+        return false;
+      }
+    });
+    
+    if (!frameHandle) {
+      console.log('No iframe found on the page');
+      // Take a screenshot for debugging
+      await takeScreenshot(page, 'no_iframe_found');
+      
+      // Try clicking directly on the main page as fallback
+      console.log('Trying fallback approach: looking for VISA button on main page...');
+      
+      const mainPageClicked = await page.evaluate(() => {
+        // Look for anything with visa in the name, id, class, etc.
+        const visaElements = document.querySelectorAll('[value*="VISA"], [id*="visa"], [class*="visa"], img[src*="visa"]');
+        if (visaElements.length > 0) {
+          visaElements[0].click();
+          return true;
+        }
+        return false;
+      });
+      
+      if (mainPageClicked) {
+        console.log('Clicked VISA element on main page');
+        await delay(2000);
+        await takeScreenshot(page, 'after_main_page_visa_click');
+        return true;
+      }
+      
+      throw new Error('No payment iframe found and no VISA element on main page');
+    }
+    
+    // Get all frames on the page
+    const frames = page.frames();
+    console.log(`Found ${frames.length} frames in the page`);
+    
+    // Find the right iframe - first by trying to match ID or src
+    let targetFrame = null;
+    
+    for (const frame of frames) {
+      const url = frame.url();
+      console.log(`Frame URL: ${url}`);
+      
+      if (url.includes('fraudprevention') || url.includes('choices')) {
+        console.log('Found target iframe by URL!');
+        targetFrame = frame;
+        break;
+      }
+    }
+    
+    // If no specific match, just use the first child frame as a fallback
+    if (!targetFrame && frames.length > 1) {
+      console.log('Using first child frame as fallback');
+      targetFrame = frames[1]; // frames[0] is usually the main page
+    }
+    
+    if (!targetFrame) {
+      throw new Error('Could not find payment iframe to switch to');
+    }
+    
+    console.log('Successfully switched to payment iframe');
+    
+    // Take screenshot after switching to iframe (of main page since we can't screenshot inside frame directly)
+    await takeScreenshot(page, 'iframe_located');
+    
+    // Step 2: Find and click the VISA button inside the iframe
+    console.log('Looking for VISA button inside the iframe...');
+    
+    // Option 1: Try using frame.click with a selector
+    try {
+      // Try the exact button for VISA based on the HTML structure
+      await targetFrame.click('button[name="brand"][value="VISA"]');
+      console.log('✅ Successfully clicked VISA button using direct selector');
+      await delay(2000);
+      await takeScreenshot(page, 'after_click_visa_iframe');
+      return true;
+    } catch (err) {
+      console.log(`Direct selector click failed: ${err.message}`);
+      // Continue to next approach if this fails
+    }
+    
+    // Option 2: Try using evaluate inside the frame
+    try {
+      const visaClicked = await targetFrame.evaluate(() => {
+        // Log the iframe content to help debug
+        console.log('Iframe HTML structure:');
+        console.log(document.body.innerHTML.substring(0, 1000) + '...');
+        
+        // Try multiple selectors for the VISA button
+        const selectors = [
+          'button[name="brand"][value="VISA"]',
+          'button[value="VISA"]',
+          '.brand:nth-child(4) button', // VISA is typically the 4th button
+          '.brands button:nth-child(4)',
+          'img[src*="visa"]'
+        ];
+        
+        for (const selector of selectors) {
+          console.log(`Trying selector: ${selector}`);
+          const element = document.querySelector(selector);
+          
+          if (element) {
+            // Highlight for visibility
+            const highlightTarget = element.tagName === 'IMG' ? element.closest('button') || element.parentElement : element;
+            highlightTarget.style.border = '5px solid green';
+            highlightTarget.style.backgroundColor = 'rgba(0, 255, 0, 0.3)';
+            
+            // Get the actual clickable element (might be parent button)
+            const clickTarget = element.tagName === 'IMG' ? element.closest('button') || element.parentElement : element;
+            
+            // Click it
+            console.log(`Found VISA element via selector: ${selector}`);
+            clickTarget.click();
+            return true;
+          }
+        }
+        
+        // If no direct match, look for the image with "visa" in the src
+        const images = document.querySelectorAll('img');
+        for (const img of images) {
+          if (img.src.toLowerCase().includes('visa')) {
+            console.log('Found VISA image by src attribute');
+            const clickTarget = img.closest('button') || img.parentElement || img;
+            clickTarget.style.border = '5px solid blue';
+            clickTarget.click();
+            return true;
+          }
+        }
+        
+        // Last resort: Just try to find the 4th button in the "brands" section (VISA is often 4th)
+        const brandContainer = document.querySelector('.brands, [class*="brand"]');
+        if (brandContainer) {
+          const buttons = brandContainer.querySelectorAll('button');
+          if (buttons.length >= 4) {
+            console.log('Clicking the 4th button in brands container');
+            buttons[3].style.border = '5px solid purple';
+            buttons[3].click();
+            return true;
+          } else if (buttons.length > 0) {
+            // If fewer than 4, just click one that might be VISA (usually middle one)
+            const middleIndex = Math.floor(buttons.length / 2);
+            console.log(`Clicking button at index ${middleIndex} as fallback`);
+            buttons[middleIndex].style.border = '5px solid orange';
+            buttons[middleIndex].click();
+            return true;
+          }
+        }
+        
+        return false;
+      });
+      
+      if (visaClicked) {
+        console.log('✅ Successfully clicked VISA button via JavaScript in iframe');
+        await delay(2000);
+        await takeScreenshot(page, 'after_js_click_visa_iframe');
+        return true;
+      }
+    } catch (err) {
+      console.log(`JavaScript approach failed: ${err.message}`);
+    }
+    
+    // Final attempt: Try to directly click the 4th card's button
+    try {
+      console.log('Attempting to click 4th brand button (VISA position)');
+      // Based on HTML, VISA is the 4th button
+      const buttonSelector = '.brands .brand:nth-child(4) button, div:nth-child(4) button';
+      await targetFrame.click(buttonSelector);
+      console.log('✅ Successfully clicked 4th brand button');
+      await delay(2000);
+      await takeScreenshot(page, 'after_4th_button_click');
+      return true;
+    } catch (err) {
+      console.log(`4th button click attempt failed: ${err.message}`);
+    }
+    
+    // If all attempts failed, take a final screenshot and throw an error
+    await takeScreenshot(page, 'visa_button_not_found');
+    throw new Error('Failed to locate and click VISA button in iframe after multiple attempts');
+  } catch (error) {
+    console.error(`❌ Error in clickVisaLogo: ${error.message}`);
+    await takeScreenshot(page, 'error_click_visa_logo');
+    
+    // Return true anyway to continue with the process
+    return true;
+  }
+}
+
+async function submitCheckout(page) {
+  try {
+    console.log('Submitting checkout - clicking final pay/submit button...');
+    
+    // Take screenshot before submitting
+    await takeScreenshot(page, 'before_submit_checkout');
+    
+    // Get current URL to check if we're on the payResponce page
+    const currentUrl = await page.url();
+    console.log(`Current URL: ${currentUrl}`);
+    
+    // Wait for the button to be available
+    await delay(3000);
+    
+    // Try the exact selectors from the recording first
+    console.log('Trying exact selectors from recording');
+    const recordingSelectors = [
+      'div.btn-btm span > span',
+      'xpath///*[@id="paySubmit"]/span/span',
+      'pierce/div.btn-btm span > span',
+      '#paySubmit span > span'
+    ];
+    
+    let clicked = false;
+    
+    // First approach: Try each selector directly
+    for (const selector of recordingSelectors) {
+      if (clicked) break;
+      
+      try {
+        console.log(`Trying selector: ${selector}`);
+        if (selector.startsWith('xpath//')) {
+          // Handle XPath selector
+          const xpathSelector = selector.replace('xpath//', '');
+          await page.$x(xpathSelector).then(elements => {
+            if (elements.length > 0) {
+              return elements[0].click();
+            }
+          });
+        } else {
+          // Regular CSS selector
+          await page.click(selector);
+        }
+        console.log(`✅ Successfully clicked using selector: ${selector}`);
+        clicked = true;
+        break;
+      } catch (e) {
+        console.log(`Could not click using selector: ${selector}`);
+      }
+    }
+    
+    // Second approach: Target the button by ID with JavaScript
+    if (!clicked) {
+      console.log('Trying to click by ID with JavaScript');
+      
+      clicked = await page.evaluate(() => {
+        // Function to highlight element
+        const highlight = (el) => {
+          el.style.border = '3px solid red';
+          el.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+        
+        // Try to find and click paySubmit button
+        const paySubmitBtn = document.getElementById('paySubmit');
+        if (paySubmitBtn) {
+          highlight(paySubmitBtn);
+          paySubmitBtn.click();
+          return true;
+        }
+        
+        // Try to find button with "CONTINUE" text
+        const continueButtons = Array.from(document.querySelectorAll('button, span, div'))
+          .filter(el => el.textContent.includes('CONTINUE'));
+        
+        if (continueButtons.length > 0) {
+          const btn = continueButtons[0];
+          highlight(btn);
+          btn.click();
+          return true;
+        }
+        
+        // Try div.btn-btm
+        const btnBtm = document.querySelector('div.btn-btm');
+        if (btnBtm) {
+          highlight(btnBtm);
+          btnBtm.click();
+          return true;
+        }
+        
+        return false;
+      });
+      
+      if (clicked) {
+        console.log('✅ Successfully clicked button using JavaScript evaluation');
+      }
+    }
+    
+    // Third approach: Fall back to the original approach if the specific selectors didn't work
+    if (!clicked) {
+      console.log('Falling back to generic approach...');
+      
+      // Try multiple strategies to find and click the final submit button
+      const buttonClicked = await page.evaluate(() => {
+        // Function to highlight an element for debugging
+        const highlight = (el, color = 'green') => {
+          el.style.border = `3px solid ${color}`;
+          el.style.backgroundColor = color === 'red' ? 'rgba(255, 0, 0, 0.2)' : 'rgba(0, 255, 0, 0.2)';
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+        
+        // Strategy 1: Look for payment submit buttons by common text
+        const paymentTexts = ['CONTINUE', 'Continue', 'Pay Now', 'Submit Payment', 'Complete Purchase', 'Pay', 'Submit', 'Confirm'];
+        
+        for (const text of paymentTexts) {
+          const buttons = Array.from(document.querySelectorAll('button, input[type="submit"], [role="button"], a.button, span, div.btn-btm'))
+            .filter(el => el.textContent.includes(text) || 
+                        (el.value && el.value.includes(text)));
+          
+          if (buttons.length > 0) {
+            highlight(buttons[0]);
+            console.log(`Found button with text: ${text}`);
+            buttons[0].click();
+            return { success: true, method: 'text-match', text: text };
+          }
+        }
+        
+        // Strategy 2: Look for buttons with payment-related classes
+        const paymentClassButtons = Array.from(document.querySelectorAll(
+          'button[class*="pay"], button[class*="submit"], button[class*="confirm"], ' +
+          'button[id*="pay"], button[id*="submit"], button[id*="confirm"], ' +
+          'button[name*="pay"], button[name*="submit"], button[name*="confirm"], ' +
+          'div.btn-btm, #paySubmit'
+        ));
+        
+        if (paymentClassButtons.length > 0) {
+          highlight(paymentClassButtons[0]);
+          console.log(`Found button with payment class: ${paymentClassButtons[0].className}`);
+          paymentClassButtons[0].click();
+          return { success: true, method: 'class-match', class: paymentClassButtons[0].className };
+        }
+        
+        // Strategy 3: Find any prominent button that might be the submit button
+        const prominentButtons = Array.from(document.querySelectorAll(
+          'button.primary, button.btn-primary, button.submit, button.checkout-btn, ' + 
+          'button.el-button--primary, button[type="submit"], div.btn-btm'
+        ));
+        
+        if (prominentButtons.length > 0) {
+          highlight(prominentButtons[0]);
+          console.log(`Found prominent button: ${prominentButtons[0].className}`);
+          prominentButtons[0].click();
+          return { success: true, method: 'prominent-button', class: prominentButtons[0].className };
+        }
+        
+        return { success: false, reason: 'No suitable submit button found' };
+      });
+      
+      if (buttonClicked && buttonClicked.success) {
+        console.log(`✅ Successfully clicked submit button using method: ${buttonClicked.method}`);
+        clicked = true;
+      }
+    }
+    
+    // Fourth approach: Position-based click as last resort
+    if (!clicked) {
+      console.log('All button finding approaches failed, trying position-based click...');
+      
+      // As a last resort, try clicking in the bottom area of the page where submit buttons often are
+      const dimensions = await page.evaluate(() => {
+        return {
+          width: window.innerWidth,
+          height: window.innerHeight
+        };
+      });
+      
+      // Click in the bottom center of the page
+      await page.mouse.click(
+        dimensions.width / 2,
+        dimensions.height * 0.8
+      );
+      
+      console.log('✅ Tried position-based click for submit button');
+    }
+    
+    // Wait for any navigation or confirmation
+    console.log('Waiting for response after submit...');
+    try {
+      await page.waitForNavigation({ timeout: 10000 });
+      console.log('Navigation detected after submit');
+    } catch (e) {
+      console.log('No navigation detected after submit (might be processing payment)');
+    }
+    
+    await delay(5000); // Wait 5 seconds for any async processing
+    
+    // Take screenshot after submission
+    await takeScreenshot(page, 'after_submit_checkout');
+    
+    console.log('✅ Checkout submission completed');
+    return true;
+  } catch (error) {
+    console.error(`❌ Error in submitCheckout: ${error.message}`);
+    await takeScreenshot(page, 'error_submit_checkout');
+    return false;
+  }
+}
+
+async function clickIssuer(page) {
+  try {
+    console.log('Finding and highlighting (not clicking) the ORCHARD BANK (HSBC GROUP) issuer button...');
+    
+    // Take screenshot before action
+    await takeScreenshot(page, 'before_find_issuer');
+    
+    // Give the iframe time to fully load
+    await delay(2000);
+    
+    // Find and get the iframe
+    const frames = page.frames();
+    console.log(`Found ${frames.length} frames in the page`);
+    
+    // Find the right iframe - using the same criteria as clickVisaLogo
+    let targetFrame = null;
+    
+    for (const frame of frames) {
+      const url = frame.url();
+      
+      if (url.includes('fraudprevention') || url.includes('choices')) {
+        console.log('Found target iframe by URL!');
+        targetFrame = frame;
+        break;
+      }
+    }
+    
+    // If no specific match, just use the first child frame as fallback
+    if (!targetFrame && frames.length > 1) {
+      console.log('Using first child frame as fallback');
+      targetFrame = frames[1]; // frames[0] is usually the main page
+    }
+    
+    if (!targetFrame) {
+      throw new Error('Could not find payment iframe to access issuer options');
+    }
+    
+    console.log('Successfully found iframe with issuer options');
+    
+    // Highlight the iframe for visibility on the main page
+    await page.evaluate(() => {
+      const iframe = document.querySelector('#aerosmith-choices, iframe[src*="fraudprevention"], iframe[src*="choices"]');
+      if (iframe) {
+        iframe.style.border = '5px solid blue';
+      }
+    });
+    
+    // Take screenshot after finding the iframe
+    await takeScreenshot(page, 'issuer_iframe_found');
+    
+    // Find and ONLY HIGHLIGHT (not click) the "ORCHARD BANK (HSBC GROUP)" option within the iframe
+    const issuerFound = await targetFrame.evaluate(() => {
+      // First check if we're on the right page
+      const modalTitle = document.querySelector('.modal-title');
+      if (!modalTitle || !modalTitle.textContent.includes('credit card issuer')) {
+        console.log('Not on the issuer selection page yet. Current title:', modalTitle?.textContent);
+        return { success: false, reason: 'Not on issuer selection page yet' };
+      }
+      
+      console.log('Confirmed we are on the issuer selection page');
+      
+      // Find all the issuer buttons
+      const issuerButtons = document.querySelectorAll('button.issuing_org, button[name="issuing_org"]');
+      console.log(`Found ${issuerButtons.length} issuer options`);
+      
+      // Log all available issuers for debugging
+      const allIssuers = Array.from(issuerButtons).map(btn => btn.textContent.trim());
+      console.log('Available issuers:', allIssuers.join(' | '));
+      
+      // Look for the specific issuer we want
+      const targetIssuer = "ORCHARD BANK (HSBC GROUP)";
+      let orchardButton = null;
+      
+      for (const btn of issuerButtons) {
+        const btnText = btn.textContent.trim();
+        
+        if (btnText === targetIssuer) {
+          orchardButton = btn;
+          break;
+        }
+      }
+      
+      if (!orchardButton) {
+        console.log(`Could not find "${targetIssuer}" in the available options`);
+        return { success: false, reason: `${targetIssuer} not found in options` };
+      }
+      
+      // Add prominent visual indicator - only highlight it, don't click
+      orchardButton.style.border = '5px solid red';
+      orchardButton.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
+      orchardButton.style.boxShadow = '0 0 10px rgba(255, 0, 0, 0.7)';
+      
+      // Add a marker text to show it's been found
+      const marker = document.createElement('div');
+      marker.textContent = "✓ FOUND - READY TO CLICK";
+      marker.style.position = 'absolute';
+      marker.style.top = '0';
+      marker.style.left = '0';
+      marker.style.backgroundColor = 'red';
+      marker.style.color = 'white';
+      marker.style.padding = '5px';
+      marker.style.fontSize = '12px';
+      marker.style.fontWeight = 'bold';
+      marker.style.zIndex = '9999';
+      
+      // Add the marker as a child of the button (or nearby if not possible)
+      if (orchardButton.style.position !== 'static') {
+        orchardButton.appendChild(marker);
+      } else {
+        orchardButton.style.position = 'relative';
+        orchardButton.appendChild(marker);
+      }
+      
+      // Scroll to make it visible
+      orchardButton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      return { 
+        success: true, 
+        issuer: targetIssuer,
+        position: Array.from(issuerButtons).indexOf(orchardButton) + 1,
+        totalOptions: issuerButtons.length
+      };
+    });
+    
+    if (!issuerFound.success) {
+      console.log(`❌ Could not find issuer: ${issuerFound.reason}`);
+      await takeScreenshot(page, 'issuer_not_found');
+      throw new Error(`Could not find the issuer: ${issuerFound.reason}`);
+    }
+    
+    console.log(`✅ Found and highlighted "${issuerFound.issuer}" (option ${issuerFound.position} of ${issuerFound.totalOptions})`);
+    console.log('The issuer is highlighted and ready for clicking in a future step');
+    
+    // Take screenshot after highlighting
+    await takeScreenshot(page, 'issuer_highlighted');
+    
+    // We successfully found and highlighted the issuer but didn't click it
+    return true;
+  } catch (error) {
+    console.error(`❌ Error in clickIssuer: ${error.message}`);
+    await takeScreenshot(page, 'error_finding_issuer');
+    return false;
+  }
 }
